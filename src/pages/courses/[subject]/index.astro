@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import CourseItem from '../../../components/CourseItem.astro';
 import PageLayout from '../../../layouts/PageLayout.astro';
 import { courseUrl, getCourses, getSubjects, learningPath, type Subject } from '../../../lib/content';
+import { truncate } from '../../../lib/format';
 
 export async function getStaticPaths() {
   const subjects = await getSubjects();
@@ -22,7 +23,7 @@ const hasDependencies = courses.some((c) => (c.data.prerequisites?.length ?? 0) 
 
 <PageLayout
   title={subject.data.title}
-  description={`${subject.data.title} at WoSM Academy: ${subject.data.summary}`.slice(0, 155)}
+  description={truncate(`${subject.data.title} at WoSM Academy. ${subject.data.summary}`)}
   eyebrow="Subject"
   lead={subject.data.summary}
 >

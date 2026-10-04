@@ -3,7 +3,7 @@ import FormattedDate from '../components/FormattedDate.astro';
 import Giscus from '../components/Giscus.astro';
 import Txt from '../components/Txt.astro';
 import { site } from '../config/site';
-import { readingTime } from '../lib/format';
+import { readingTime, truncate } from '../lib/format';
 import { postUrl, type Post } from '../lib/content';
 import BaseLayout from './BaseLayout.astro';
 
@@ -27,7 +27,7 @@ const jsonLd = {
 };
 ---
 
-<BaseLayout title={title} description={summary} type="article" publishedTime={date} jsonLd={jsonLd}>
+<BaseLayout title={title} description={truncate(summary)} type="article" publishedTime={date} jsonLd={jsonLd}>
   <article class="container page post">
     <header class="page-header">
       <p class="eyebrow"><a href="/journal/">Journal</a></p>

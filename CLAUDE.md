@@ -19,13 +19,16 @@ Read these before writing code:
 
 - **Name:** Always "WoSM Academy" in running text. "Wisdom of Starving Minds" is spelled out in the hero, the About page, the footer and `<title>`/meta descriptions. Never "WoSM University".
 - **Language:** English only (British or American — pick one; default to **British** spelling: "catalogue", "licence" as a noun, "enrol").
-- **Stack:** [Astro](https://astro.build) (latest stable), static output, deployed by GitHub Actions to GitHub Pages. TypeScript for scripts. Plain CSS with custom properties (no Tailwind, no CSS-in-JS, no UI component libraries).
+- **Stack:** [Astro](https://astro.build) (latest stable — currently 7.x), static output, deployed by GitHub Actions to GitHub Pages. TypeScript for scripts. Plain CSS with custom properties (no Tailwind, no CSS-in-JS, no UI component libraries).
+  - Astro 7 notes: Markdown is rendered by Sätteri (custom hast plugins in `src/lib/markdown/plugins.mjs`); `compressHTML: true` is set so multi-line copy keeps its spaces (v7's default JSX whitespace rules would glue words to links); stylesheets are inlined (`build.inlineStylesheets: 'always'`).
 - **Content as data:** Courses, subjects, people, vacancies and journal posts are Astro content collections (Markdown + frontmatter, schemas in `src/content.config.ts`). Adding a course or a vacancy must never require touching a layout or component.
-- **Subjects at launch:** Computer Science, Mathematics. More will be added.
-- **Courses at launch:** 4 (see `docs/CONTENT.md`).
-- **Instructors at launch:** 1 (the founder). The People section must scale to many.
+- **Subjects at launch:** Computer Science, Mathematics. More will be added. Mathematics has no courses yet (its page says so).
+- **Courses at launch:** 3, all Computer Science: CS101-F26 Introduction to Informatics, CS102-F26 Introduction to Digital Design and Computer Architecture, CS103-F26 Discrete Structures (see `docs/CONTENT.md`).
+- **Instructors at launch:** 1 — Ali Khudiyev, Founder & Director. The People section must scale to many.
 - **Admission:** free, open, self-enrolment on Moodle with email confirmation. No application for students.
-- **Teacher recruitment:** volunteers apply by email with CV and/or motivation letter. No file uploads through the site.
+- **Teacher recruitment:** volunteers apply by email (teach@wosm.academy) with CV and/or motivation letter. No file uploads through the site.
+- **Contact:** general enquiries hello@wosm.academy. Moodle signup: https://moodle.wosm.academy/login/signup.php.
+- **Licences:** website code MIT; course materials and website content CC BY-SA 4.0.
 - **Community:** Discord.
 - **Comments/reactions:** giscus (GitHub Discussions), on Journal posts only.
 - **Analytics:** none at launch. If added later, it must be cookieless and privacy-respecting (e.g. GoatCounter) and the Privacy page must be updated.
@@ -49,6 +52,7 @@ Read these before writing code:
 ├── CLAUDE.md
 ├── TODO.md                      # open questions & placeholders for the owner
 ├── docs/                        # these spec files
+├── scripts/build-brand-assets.mjs  # `npm run brand`: favicon, touch icon, OG image, logo SVGs
 ├── public/
 │   ├── CNAME                    # contains: wosm.academy
 │   ├── favicon.svg
@@ -62,9 +66,10 @@ Read these before writing code:
 │   │   ├── people/              # one .md per person
 │   │   ├── vacancies/           # one .md per open role
 │   │   └── journal/             # posts
-│   ├── components/              # Header, Footer, ThemeToggle, CourseCard, ...
+│   ├── config/                  # site.ts (links, emails), giscus.ts, brand.ts (logo variant)
+│   ├── components/              # Header, Footer, ThemeToggle, CourseItem, Todo, ...
 │   ├── layouts/                 # BaseLayout, PageLayout, PostLayout
-│   ├── lib/simulation/          # life.ts + engine (see SIMULATION.md)
+│   ├── lib/                     # content.ts (queries, URLs), format.ts, vocab.ts, markdown/, simulation/
 │   ├── assets/brand/            # logo SVGs
 │   ├── styles/                  # tokens.css, base.css, components.css
 │   └── pages/                   # routes (see CONTENT.md sitemap)
@@ -84,6 +89,11 @@ Work in this order and stop for review after each milestone:
 6. **Simulation** — per `docs/SIMULATION.md`.
 7. **Polish & checks** — RSS, sitemap, meta/OG tags, giscus on posts, accessibility pass, Lighthouse, link check, `TODO.md` up to date.
 
+## Status
+
+All seven milestones were built in one pass (owner's choice) and committed locally; nothing has been pushed.
+Open items for the owner are in `TODO.md`, including the logo choice on the temporary `/brand-preview/` page.
+
 ## Conventions
 
 - Commit messages: imperative, short (`Add course collection schema`).
@@ -91,4 +101,6 @@ Work in this order and stop for review after each milestone:
 - Every page sets a unique `<title>` (`Page — WoSM Academy`) and meta description.
 - External links (Moodle, Discord, GitHub) get `rel="noopener"` and a small ↗ indicator; they do not open in new tabs unless it's the Moodle button (owner's preference: open Moodle in the same tab — change only if asked).
 - Dates: ISO in frontmatter, displayed as `5 October 2026`.
+- Missing facts: use the `<Todo>` component in `.astro` files, or write `TODO(owner): …` in Markdown (highlighted automatically); omit unknown optional frontmatter fields (pages show a placeholder). List every one in `TODO.md`.
+- Check before committing: `npm run check && npm run build && npm run linkcheck`.
 - Keep this file and `docs/*` updated when decisions change.

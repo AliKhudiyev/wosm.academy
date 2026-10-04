@@ -36,6 +36,12 @@ wosm.academy
 
 Add a separate check job (or step) for pull requests: `astro check`, build, and a link checker on `dist/` (e.g. `lychee` or `linkinator`), failing on broken internal links.
 
+**As implemented:** one workflow, two jobs. `build` runs on every push and pull request: `npm ci` → `npm run check`
+(astro check) → `npm run build` → `npm run linkcheck` (linkinator, internal links and `#fragments`, external links
+skipped). On `main` and manual runs it uploads `dist/` with `actions/upload-pages-artifact@v5`; `deploy` then publishes
+with `actions/deploy-pages@v5` (`pages: write`, `id-token: write`, concurrency group `pages`). This replaces
+`withastro/action` so a failed check can never deploy. Node 24 in CI; `engines` requires ≥ 22.12.
+
 ## 4. DNS (at the domain registrar / DNS provider)
 
 Keep the existing `moodle` record pointing at the VPS. Add:
@@ -74,8 +80,8 @@ Email records (MX, SPF, DKIM, DMARC) for `hello@`/`teach@` addresses are indepen
 ## 7. Placeholders the owner must provide
 
 Track these in `TODO.md`:
-- GitHub username/organisation and repo name
+- ~~GitHub username/organisation and repo name~~ — `AliKhudiyev/wosm.academy` (from the git remote)
 - Discord invite URL
-- Contact email addresses (`hello@`, `teach@`) — and that email hosting exists for them
-- Moodle course URLs and signup URL
+- Contact email addresses `hello@`, `teach@` are confirmed — check that email hosting exists for them
+- Moodle course URLs (signup URL confirmed: `/login/signup.php`)
 - giscus IDs

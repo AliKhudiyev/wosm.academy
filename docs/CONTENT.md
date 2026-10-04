@@ -13,7 +13,7 @@ All placeholder values are marked `TODO(owner)`. Never replace a placeholder wit
 /courses/<subject>/<slug>/   Course page
 /join/                    Admission: how to join as a student
 /teach/                   Teach with us: vacancies and how to apply
-/teach/<slug>/            Individual vacancy (only if body is long; otherwise anchors on /teach/)
+/teach/#<vacancy-id>      Vacancies are listed on /teach/ with anchors (no separate pages yet)
 /about/                   Manifesto, mission, people, how we work, transparency
 /journal/                 News, announcements, essays
 /journal/<slug>/          Post (with giscus reactions/comments)
@@ -63,28 +63,29 @@ code: CS101                     # suggested codes below; owner may change
 subject: computer-science       # reference to subjects
 level: introductory             # introductory | intermediate | advanced
 summary: One sentence for lists.
-status: open                    # open | upcoming | archived
-format: self-paced              # self-paced | cohort
+status?: open                   # open | upcoming | archived — omit until confirmed (shows [tbc], no enrol button)
+format?: self-paced             # self-paced | cohort — omit until confirmed (shows TODO)
 durationWeeks?: 12
 effortHoursPerWeek?: 4–6
 startDate?: 2026-11-01          # only for cohort courses
-prerequisites?: []              # references to other courses
+prerequisites?: []              # references to other courses; omit = unknown (TODO), [] = none
 recommended?: []                # softer than prerequisites
 instructors: [founder]          # references to people
-moodleUrl: https://moodle.wosm.academy/course/view.php?id=TODO
+moodleUrl?: https://moodle.wosm.academy/course/view.php?id=…   # omit until known
 order: 1
 ```
 Body (Markdown): **About this course**, **What you will learn** (bulleted outcomes), **Syllabus** (table: week/unit → topics), **How it's assessed**, **Materials & licence**.
 
 ### `people`
 ```yaml
-name: TODO(owner)
-slug: founder
-role: Founder & Director        # owner said "CEO"; confirm preferred title
+name: Ali Khudiyev
+slug: ali-khudiyev              # from filename; used as the #anchor on /about/
+role: Founder & Director
 credentials:
   - PhD in Artificial Intelligence, University of Strasbourg (2025)
-photo?: ./founder.jpg
-teaches: [cs101, cs102, cs201, math101]   # or derive from courses
+photo?: ./ali-khudiyev.jpg
+photoAlt?: …
+# courses taught are derived from the courses' `instructors` field (no `teaches` field)
 links?: { website?, github?, scholar?, orcid?, linkedin? }
 order: 1
 ```
@@ -95,7 +96,7 @@ Body: short biography (TODO(owner)).
 title: Volunteer instructor — Mathematics
 area: mathematics               # subject slug or "any"
 status: open                    # open | filled | closed
-commitment: e.g. "~4–6 hours per week for one term"
+commitment?: e.g. "~4–6 hours per week for one term"
 posted: 2026-10-05
 summary: One sentence.
 ```
@@ -123,25 +124,26 @@ draft?: false
 
 ### Courses
 
-Codes and prerequisite links below are **suggestions** — list them in `TODO.md` for the owner to confirm.
+Confirmed by the owner (5 October 2026): three courses, all in Computer Science. The `-F26` suffix marks the term.
 
-| Code | Title | Subject | Level | Suggested prerequisites |
+| Code | Title | Subject | Level | File |
 |---|---|---|---|---|
-| CS101 | Introduction to Informatics | CS | introductory | none |
-| CS102 | Introduction to Digital Design and Computer Architecture | CS | introductory | none (CS101 recommended) |
-| CS201 | Data Structures and Algorithms | CS | intermediate | CS101; MATH101 recommended |
-| MATH101 | Discrete Structures | Math | introductory | none |
+| CS101-F26 | Introduction to Informatics | CS | introductory | `cs101-f26.md` |
+| CS102-F26 | Introduction to Digital Design and Computer Architecture | CS | introductory | `cs102-f26.md` |
+| CS103-F26 | Discrete Structures | CS | introductory | `cs103-f26.md` |
+
+The earlier draft (CS201 Data Structures and Algorithms; MATH101 Discrete Structures under Mathematics) is superseded.
+Mathematics therefore has no courses at launch; its subject page says so and links to /teach/.
 
 Draft one-line summaries (owner to confirm):
-- **CS101** — What computation is, how information is represented, and how to think and write like a programmer.
-- **CS102** — From logic gates to a working processor: how digital circuits are designed and how computers are built.
-- **CS201** — How to organise data and design algorithms that are correct and efficient, and how to prove it.
-- **MATH101** — The mathematics of computer science: logic, proofs, sets, relations, functions, combinatorics and graphs.
+- **CS101-F26** — What computation is, how information is represented, and how to think and write like a programmer.
+- **CS102-F26** — From logic gates to a working processor: how digital circuits are designed and how computers are built.
+- **CS103-F26** — The mathematics of computer science: logic, proofs, sets, relations, functions, combinatorics and graphs.
 
-Syllabus, duration, effort, format, status and Moodle URL: `TODO(owner)` for every course.
+Prerequisites, syllabus, duration, effort, format, status and Moodle URL: `TODO(owner)` for every course.
 
 ### People
-One entry: the founder. Name, bio, photo, links: `TODO(owner)`. Known: PhD in Artificial Intelligence, University of Strasbourg, 2025; Founder; instructor for all launch courses.
+One entry: **Ali Khudiyev**, Founder & Director. Known: PhD in Artificial Intelligence, University of Strasbourg, 2025; instructor for all launch courses. Bio, photo, links: `TODO(owner)`.
 
 ### Vacancies
 One standing entry: **Volunteer instructor (any area)** — open application, status open. Optionally one per subject.
@@ -185,7 +187,7 @@ The full manifesto on `/about/` may expand each point. TODO(owner): approve or r
 
 ### Courses `/courses/`
 - H1 "Courses", short intro.
-- Filter bar (progressive enhancement): Subject (All / CS / Math), Level, Status. Without JS: show all, grouped by subject.
+- Filter bar (progressive enhancement): Subject, Level, Status. Without JS: show all, grouped by subject. A filter is only rendered when it has at least two values among the courses, so at launch (three introductory CS courses with unconfirmed status) no filter bar appears; it appears by itself as courses are added. Filters are reflected in the URL (`?subject=…&level=…&status=…`).
 - Course items per `DESIGN.md` → Components.
 - Note at bottom: "More subjects and courses are on the way. Want to teach one? → /teach/"
 
@@ -221,7 +223,7 @@ Subject title + body + its courses + a suggested learning path (simple ordered l
 - **Who we're looking for** — deep knowledge of the subject (formal qualification welcome but not required — TODO(owner): confirm), clear communication, reliability.
 - **What you get** — TODO(owner): e.g. instructor profile on the site, credit on course materials, teaching experience, a reference letter. Do not invent; offer this list to the owner as options.
 - **How to apply** (callout):
-  - Email `TODO(owner)@wosm.academy` (suggest `teach@wosm.academy`) with subject `Teaching application — <area> — <your name>`.
+  - Email `teach@wosm.academy` with subject `Teaching application — <area> — <your name>`.
   - Attach a CV and/or motivation letter (PDF). Say which area/course you'd like to teach and a rough outline if you have one.
   - Provide a `mailto:` link with subject and body template pre-filled (URL-encoded); body template contains headings only — no personal data in URLs.
 - **What happens next** — numbered process:
@@ -248,7 +250,7 @@ Sections with anchor links at top:
 Reverse-chronological list: date (mono), title, summary. Post pages: title, date, reading time, body, tags, giscus at the bottom (lazy-loaded, theme synced with site theme: use giscus light/dark themes or a custom CSS URL matching tokens). RSS link.
 
 ### Contact `/contact/`
-- General enquiries: `TODO(owner)` (suggest `hello@wosm.academy`)
+- General enquiries: `hello@wosm.academy`
 - Teaching applications: link to /teach/
 - Community & quick questions: Discord invite `TODO(owner)`
 - Website issues: GitHub repo issues link
@@ -269,7 +271,7 @@ Use `<details>` accordions. Seed questions (answers TODO(owner) where unknown):
 
 ### Code of Conduct, Licence, Privacy
 - **Code of Conduct:** adapt the Contributor Covenant (credit it) to a learning community: respect, academic integrity, no harassment, how to report (email), enforcement.
-- **Licence:** website code licence (suggest MIT) and course/website content licence (suggest CC BY-SA 4.0) — TODO(owner) confirm both.
+- **Licence:** website code MIT; course and website content CC BY-SA 4.0 (both confirmed by the owner).
 - **Privacy:** what the website collects (nothing; no cookies, no analytics), what giscus does on Journal pages (GitHub sign-in to comment), what Moodle collects (link to Moodle's own privacy policy page), how teaching applications by email are handled.
 
 ### 404

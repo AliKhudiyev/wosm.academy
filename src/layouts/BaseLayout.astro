@@ -1,6 +1,7 @@
 ---
 import '@fontsource-variable/source-serif-4/opsz.css';
-import '@fontsource-variable/source-serif-4/opsz-italic.css';
+// Italic is only used in running text, so the smaller weight-axis build is enough.
+import '@fontsource-variable/source-serif-4/wght-italic.css';
 import '@fontsource-variable/jetbrains-mono/wght.css';
 import serifLatin from '@fontsource-variable/source-serif-4/files/source-serif-4-latin-opsz-normal.woff2?url';
 import '../styles/tokens.css';
@@ -65,8 +66,7 @@ const imageUrl = new URL(image, Astro.site ?? site.url).href;
     </script>
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={canonical} />}
 
     <link rel="preload" href={serifLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

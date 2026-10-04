@@ -7,7 +7,7 @@ import Todo from '../../../components/Todo.astro';
 import Txt from '../../../components/Txt.astro';
 import { site } from '../../../config/site';
 import PageLayout from '../../../layouts/PageLayout.astro';
-import { capitalise } from '../../../lib/format';
+import { capitalise, truncate } from '../../../lib/format';
 import { courseUrl, getCourses, personUrl, type Course } from '../../../lib/content';
 
 export async function getStaticPaths() {
@@ -50,7 +50,7 @@ const jsonLd = {
 <PageLayout
   title={`${data.title} (${data.code})`}
   heading={data.title}
-  description={`${data.code}, free course at WoSM Academy. ${data.summary}`.slice(0, 155)}
+  description={truncate(`${data.code}, a free course at WoSM Academy. ${data.summary}`)}
   eyebrow={`${data.code} · ${subject.data.title} · ${capitalise(data.level)}`}
   jsonLd={jsonLd}
 >

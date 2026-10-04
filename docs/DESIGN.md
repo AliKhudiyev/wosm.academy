@@ -27,6 +27,19 @@ The site should feel like **a well-typeset university handbook that happens to h
 
 Define in `src/styles/tokens.css` as custom properties. Starting values below — **verify all text/background pairs meet WCAG AA** and adjust lightness if not.
 
+**As implemented (October 2026).** Every text pair was checked against `--bg`, `--surface`, and the worst case of a
+simulation cell drawn behind the text at full alpha. Three values were darkened/lightened slightly to keep ≥ 4.5:1 in
+that worst case:
+
+| Token | Spec | Implemented | Worst-case contrast |
+|---|---|---|---|
+| light `--text-muted` | `#6b665c` | `#666158` | 4.67 |
+| light `--accent` / `--subject-cs` | `#1f6f6b` | `#1d6864` | 4.96 |
+| dark `--text-muted` | `#9a968d` | `#a29e95` | 4.82 |
+
+Added tokens: `--accent-strong` (primary button hover), `--todo-bg` / `--todo-text` (owner placeholders),
+`--sim-alpha` (0.07 light, 0.09 dark; read by the simulation).
+
 ### Light theme ("paper")
 
 | Token | Value | Use |
@@ -70,6 +83,11 @@ New subjects get a new `--subject-*` token; the subject's frontmatter references
 ## 4. Typography
 
 Self-host via `@fontsource` (variable versions where available).
+
+As implemented: Source Serif 4 **regular uses the optical-size (`opsz`) build** (preloaded); **italic uses the smaller
+weight-axis build** (52 KB instead of 130 KB for Latin) because italics only occur in running text, where optical
+sizing makes no visible difference. This took Lighthouse mobile performance from 95 to 99. JetBrains Mono: weight-axis
+build.
 
 | Role | Font | Notes |
 |---|---|---|
@@ -128,6 +146,10 @@ Glider (phase used for the mark):
 6. **OG image** — 1200×630 PNG: paper background, faint Life pattern, stacked lockup, tagline.
 
 ### Process
+
+Status: three variations (A square/serif+mono, B rounded/two-line, C glider-as-“o”) are on `/brand-preview/`; **A is
+in use** until the owner chooses (`src/config/brand.ts`, then `npm run brand`, then delete the preview page). The
+favicon is pixel-snapped to a 16 px grid (4 px cells, 1 px gaps — 25%) so it stays crisp at 16 px.
 
 Produce **three variations** of the mark/wordmark pairing (e.g. glider cells square vs. slightly rounded; wordmark serif-only vs. serif + mono; mark left vs. mark replacing the `o`), render them side by side in both themes on a temporary `/brand-preview` page, and ask the owner to choose before finalising. Delete the preview page afterwards.
 

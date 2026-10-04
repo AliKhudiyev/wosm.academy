@@ -12,6 +12,8 @@ export default defineConfig({
   // Keep HTML whitespace semantics (v7 defaults to JSX rules, which would glue
   // words to inline links in multi-line copy).
   compressHTML: true,
+  // Inline the (small) stylesheet so first paint needs no extra request.
+  build: { inlineStylesheets: 'always' },
   integrations: [
     sitemap({
       // Temporary review pages never belong in the sitemap.

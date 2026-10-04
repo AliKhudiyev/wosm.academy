@@ -38,7 +38,13 @@ The simulation must never hurt readability, accessibility, battery life or page 
 - **Page hidden** (`visibilitychange`) → pause; resume on return.
 - **Pause control** in the footer: a small mono caption that doubles as a button, e.g.
   `bg: Conway's Game of Life · gen 4,812 · [pause]` → `[play]`.
-  Remember the choice in `localStorage` (try/catch). The generation counter updates at most once per second, and only while visible.
+  Remember the choice in `localStorage` (try/catch; key `wosm:sim-paused`). The generation counter updates at most once per second, and only while visible.
+  - Implementation note: because the visible label changes (`pause` ↔ `play`), the button does **not** use
+    `aria-pressed` — a toggle button must keep a constant label, and a constant accessible name that differs from the
+    visible word would fail WCAG 2.5.3 (Label in Name). The accessible name is the visible word plus
+    “background animation”, e.g. “pause background animation”.
+  - Under reduced motion the still frame is shown and the button reads `[play]`; pressing it is an explicit opt-in for
+    that page only.
 - Without JS, the canvas is simply absent (render it from the script, or hide it with a `no-js` class). The page background is the plain `--bg` colour.
 - Never block the main thread for more than a few ms per frame; profile on a mid-range phone (Chrome DevTools, 4× CPU throttle).
 
@@ -57,10 +63,16 @@ Load the script with `type="module"` at the end of the body; it must not delay f
 
 ## 6. Acceptance checks
 
+Checked on 5 October 2026 (headless Chrome + Node): a generation of the 240 × 140 grid takes ~0.4 ms on a laptop;
+reduced motion shows a still frame at generation 40; hiding the page stops the loop; pause persists across reloads;
+the theme toggle recolours cells immediately; no canvas without JS. The text-contrast check was done by calculation
+(worst case: a cell at full alpha behind text; see `DESIGN.md` §3). Still to do on real hardware: scrolling jank on a
+mid-range phone.
+
 - [ ] Text contrast in both themes is identical with the simulation on or off (measure).
 - [ ] No visible jank when scrolling on a mid-range phone.
 - [ ] Reduced motion shows a still frame.
 - [ ] Switching tabs pauses it (CPU drops to ~0).
-- [ ] Pause/play works with the keyboard and is announced properly (it's a `<button>` with `aria-pressed`).
+- [ ] Pause/play works with the keyboard and is announced properly (it's a `<button>` whose accessible name follows its visible label; see the note in §4).
 - [ ] Theme toggle recolours cells immediately.
 - [ ] Gliders are visible in the seed.

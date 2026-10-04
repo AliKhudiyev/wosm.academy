@@ -36,3 +36,10 @@ export function pageTitle(title?: string): string {
 export function capitalise(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/** Shorten text for a meta description (≤ max characters), cutting at a word boundary. */
+export function truncate(text: string, max = 155): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,;:.—–-]+$/, '')}…`;
+}

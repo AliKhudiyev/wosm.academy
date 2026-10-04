@@ -1,0 +1,223 @@
+---
+// Course catalogue. Without JS every course is listed, grouped by subject.
+// With JS a filter bar appears — but only for facets that actually have more
+// than one value, so it grows on its own as courses are added.
+import CourseItem from '../../components/CourseItem.astro';
+import PageLayout from '../../layouts/PageLayout.astro';
+import { capitalise } from '../../lib/format';
+import { getCourses, getSubjects, subjectUrl } from '../../lib/content';
+import { courseLevels, courseStatuses } from '../../lib/vocab';
+
+const [subjects, courses] = await Promise.all([getSubjects(), getCourses()]);
+
+const distinct = <T,>(values: T[]) => [...new Set(values)];
+const facets = [
+  {
+    name: 'subject',
+    label: 'Subject',
+    options: distinct(courses.map((c) => c.data.subject.id)).map((id) => ({
+      value: id,
+      label: subjects.find((s) => s.id === id)?.data.title ?? id,
+    })),
+  },
+  {
+    name: 'level',
+    label: 'Level',
+    options: courseLevels
+      .filter((level) => courses.some((c) => c.data.level === level))
+      .map((level) => ({ value: level, label: capitalise(level) })),
+  },
+  {
+    name: 'status',
+    label: 'Status',
+    options: [...courseStatuses, 'tbc' as const]
+      .filter((status) => courses.some((c) => (c.data.status ?? 'tbc') === status))
+      .map((status) => ({ value: status, label: status === 'tbc' ? 'To be confirmed' : capitalise(status) })),
+  },
+].filter((facet) => facet.options.length > 1);
+---
+
+<PageLayout
+  title="Courses"
+  description="All WoSM Academy courses: free, rigorous and open to everyone. Browse by subject, level and status."
+  lead="Every course is free and open to everyone. Choose one, then follow the steps on How to join."
+>
+  {
+    facets.length > 0 && (
+      <form class="filters js-only" data-filters aria-labelledby="filters-title" hidden>
+        <h2 id="filters-title" class="visually-hidden">
+          Filter courses
+        </h2>
+        {facets.map((facet) => (
+          <div class="filters__field">
+            <label for={`filter-${facet.name}`}>{facet.label}</label>
+            <select id={`filter-${facet.name}`} name={facet.name}>
+              <option value="">All</option>
+              {facet.options.map((option) => (
+                <option value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+        ))}
+        <p class="filters__count meta" role="status" data-filter-count></p>
+      </form>
+    )
+  }
+
+  {
+    subjects.map((subject) => {
+      const subjectCourses = courses.filter((c) => c.data.subject.id === subject.id);
+      return (
+        <section class="catalogue-group" aria-labelledby={`group-${subject.id}`} data-group>
+          <h2 id={`group-${subject.id}`}>
+            <a href={subjectUrl(subject)}>{subject.data.title}</a>
+          </h2>
+          {subjectCourses.length > 0 ? (
+            <ul class="course-list" role="list">
+              {subjectCourses.map((course) => (
+                <CourseItem course={course} subject={subject} />
+              ))}
+            </ul>
+          ) : (
+            <p class="catalogue-group__empty" data-empty-subject>
+              No courses in this subject yet.
+            </p>
+          )}
+        </section>
+      );
+    })
+  }
+
+  <p class="catalogue-note">
+    More subjects and courses are on the way. Want to teach one? <a href="/teach/">Teach with us →</a>
+  </p>
+</PageLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-filters]');
+
+  if (form) {
+    const items = [...document.querySelectorAll<HTMLElement>('[data-course]')];
+    const groups = [...document.querySelectorAll<HTMLElement>('[data-group]')];
+    const count = form.querySelector<HTMLElement>('[data-filter-count]');
+    const selects = [...form.querySelectorAll<HTMLSelectElement>('select')];
+    const params = new URLSearchParams(window.location.search);
+
+    // Restore filters from the URL (?subject=…&level=…&status=…).
+    for (const select of selects) {
+      const value = params.get(select.name);
+      if (value && [...select.options].some((o) => o.value === value)) select.value = value;
+    }
+
+    const apply = (updateUrl: boolean) => {
+      const active = selects.filter((s) => s.value);
+      let shown = 0;
+      for (const item of items) {
+        const match = active.every((s) => item.dataset[s.name] === s.value);
+        item.hidden = !match;
+        if (match) shown++;
+      }
+      for (const group of groups) {
+        const hasVisible = group.querySelector('[data-course]:not([hidden])');
+        group.hidden = active.length > 0 && !hasVisible;
+      }
+      if (count) {
+        count.textContent =
+          shown === items.length
+            ? `Showing all ${items.length} courses`
+            : `Showing ${shown} of ${items.length} courses`;
+      }
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        for (const s of selects) {
+          if (s.value) url.searchParams.set(s.name, s.value);
+          else url.searchParams.delete(s.name);
+        }
+        history.replaceState(null, '', url);
+      }
+    };
+
+    form.addEventListener('change', () => apply(true));
+    form.addEventListener('submit', (event) => event.preventDefault());
+    form.hidden = false;
+    apply(false);
+  }
+</script>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-s) var(--space-m);
+    padding-block: var(--space-s);
+    margin-bottom: var(--space-l);
+    border-block: 1px solid var(--rule);
+  }
+
+  .filters[hidden] {
+    display: none;
+  }
+
+  .filters__field {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .filters label {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .filters select {
+    min-height: 2.5rem;
+    min-width: 10rem;
+    padding: 0.35rem 0.6rem;
+    font: inherit;
+    font-size: var(--step--1);
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--text-muted);
+    border-radius: var(--radius);
+  }
+
+  .filters__count {
+    margin-left: auto;
+  }
+
+  .catalogue-group + .catalogue-group {
+    margin-top: var(--space-2xl);
+  }
+
+  .catalogue-group[hidden] {
+    display: none;
+  }
+
+  .catalogue-group h2 {
+    font-size: var(--step-2);
+    margin-bottom: var(--space-m);
+  }
+
+  .catalogue-group h2 a {
+    color: var(--text);
+    text-decoration-color: var(--rule);
+  }
+
+  .catalogue-group h2 a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .catalogue-group__empty {
+    color: var(--text-muted);
+  }
+
+  .catalogue-note {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+  }
+</style>

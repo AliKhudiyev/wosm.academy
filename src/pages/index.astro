@@ -1,7 +1,277 @@
 ---
+import FormattedDate from '../components/FormattedDate.astro';
+import Manifesto from '../components/Manifesto.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import Txt from '../components/Txt.astro';
+import { site } from '../config/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { courseUrl, getCourses, getPosts, getSubjects, postUrl, subjectUrl } from '../lib/content';
+
+const [subjects, courses, posts] = await Promise.all([getSubjects(), getCourses(), getPosts()]);
+const latestPosts = posts.slice(0, 3);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'EducationalOrganization',
+  name: site.name,
+  alternateName: site.longName,
+  url: `${site.url}/`,
+  logo: `${site.url}/apple-touch-icon.png`,
+  description: site.description,
+  email: site.email.general,
+  sameAs: [site.github.repo],
+};
 ---
 
-<BaseLayout description="Hello">
-  <div class="container page"><h1>Hello</h1></div>
+<BaseLayout description={site.description} jsonLd={jsonLd}>
+  <div class="container">
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">Wisdom of Starving Minds</p>
+      <h1 id="hero-title">Knowledge should not be rationed.</h1>
+      <p class="lead">
+        WoSM Academy offers free, rigorous courses in computer science and mathematics to anyone who wants to learn.
+      </p>
+      <div class="button-row">
+        <a class="button button--primary" href="/courses/">Browse courses</a>
+        <a class="button button--secondary" href="/join/">How to join</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="manifesto-title">
+      <div class="section__header">
+        <h2 id="manifesto-title">Manifesto</h2>
+      </div>
+      <Manifesto />
+      <p class="more"><a class="arrow-link" href="/about/#manifesto">Read the full manifesto →</a></p>
+    </section>
+
+    <section class="section" aria-labelledby="subjects-title">
+      <div class="section__header">
+        <h2 id="subjects-title">Subjects</h2>
+      </div>
+      <div class="subjects">
+        {
+          subjects.map((subject) => {
+            const subjectCourses = courses.filter((c) => c.data.subject.id === subject.id);
+            return (
+              <section class="subject" style={`--subject-color: var(${subject.data.colorToken})`} aria-labelledby={`subject-${subject.id}`}>
+                <h3 id={`subject-${subject.id}`}>
+                  <a href={subjectUrl(subject)}>{subject.data.title}</a>
+                </h3>
+                <p class="subject__summary"><Txt text={subject.data.summary} /></p>
+                {subjectCourses.length > 0 ? (
+                  <ul class="course-rows" role="list">
+                    {subjectCourses.map((course) => (
+                      <li>
+                        <span class="course-rows__code">{course.data.code}</span>
+                        <a href={courseUrl(course)}>{course.data.title}</a>
+                        <StatusBadge status={course.data.status} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="subject__empty">
+                    No courses yet. <a href="/teach/">Could you teach one?</a>
+                  </p>
+                )}
+              </section>
+            );
+          })
+        }
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="how-title">
+      <div class="section__header">
+        <h2 id="how-title">How it works</h2>
+      </div>
+      <ol class="steps">
+        <li>
+          <h3>Choose a course</h3>
+          <p>
+            Browse the <a href="/courses/">catalogue</a>. Each course page explains what it covers, what it expects of
+            you and how it is assessed.
+          </p>
+        </li>
+        <li>
+          <h3>Create a Moodle account and confirm your email</h3>
+          <p>
+            Our courses are taught on Moodle, at moodle.wosm.academy. Sign up, then follow the link in the
+            confirmation email we send you.
+          </p>
+        </li>
+        <li>
+          <h3>Enrol and start learning, with others on Discord</h3>
+          <p>
+            Open the course on Moodle and select <em>Enrol me</em>. Join our Discord to study alongside other students.
+          </p>
+        </li>
+      </ol>
+      <p class="more"><a class="arrow-link" href="/join/">Step-by-step guide to joining →</a></p>
+    </section>
+
+    <section class="section" aria-labelledby="promise-title">
+      <h2 id="promise-title" class="visually-hidden">What we promise and what we ask</h2>
+      <div class="columns">
+        <div>
+          <h3 class="column-title">What we promise</h3>
+          <ul class="dash-list">
+            <li>Free access, always.</li>
+            <li>No ads, no tracking.</li>
+            <li>Openly licensed materials.</li>
+            <li>Courses built and reviewed with care.</li>
+            <li>Honest feedback on your work.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="column-title">What we ask</h3>
+          <ul class="dash-list">
+            <li>Curiosity.</li>
+            <li>Honest effort and academic integrity.</li>
+            <li>Respect for others in the community.</li>
+            <li>Passing knowledge on when you can.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="teach-title">
+      <div class="section__header">
+        <h2 id="teach-title">Teach with us</h2>
+        <p>
+          WoSM Academy grows through volunteers who care about teaching. If you know a subject well and want to share
+          it, we would like to hear from you.
+        </p>
+      </div>
+      <p><a class="arrow-link" href="/teach/">Teaching at WoSM Academy →</a></p>
+    </section>
+
+    {
+      latestPosts.length > 0 && (
+        <section class="section" aria-labelledby="journal-title">
+          <div class="section__header">
+            <h2 id="journal-title">From the Journal</h2>
+          </div>
+          <ul class="post-list" role="list">
+            {latestPosts.map((post) => (
+              <li>
+                <FormattedDate date={post.data.date} class="meta" />
+                <h3>
+                  <a href={postUrl(post)}>{post.data.title}</a>
+                </h3>
+                <p>
+                  <Txt text={post.data.summary} />
+                </p>
+              </li>
+            ))}
+          </ul>
+          <p class="more">
+            <a class="arrow-link" href="/journal/">All posts →</a>
+          </p>
+        </section>
+      )
+    }
+  </div>
 </BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-2xl) var(--space-l);
+    max-width: 46rem;
+  }
+
+  .hero > * + * {
+    margin-top: var(--space-m);
+  }
+
+  .hero .eyebrow {
+    margin-bottom: calc(-1 * var(--space-2xs));
+  }
+
+  .hero h1 {
+    font-size: var(--step-4);
+    max-width: 16ch;
+  }
+
+  .hero .button-row {
+    margin-top: var(--space-l);
+  }
+
+  .subjects {
+    display: grid;
+    gap: var(--space-xl) var(--space-2xl);
+  }
+
+  @media (min-width: 48rem) {
+    .subjects {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .subject > * + * {
+    margin-top: var(--space-xs);
+  }
+
+  .subject h3 {
+    font-size: var(--step-2);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  /* Subject marker: one cell in the subject colour. */
+  .subject h3::before {
+    content: '';
+    width: 0.45em;
+    height: 0.45em;
+    background: var(--subject-color);
+    flex: none;
+  }
+
+  .subject h3 a {
+    color: var(--text);
+    text-decoration-color: var(--rule);
+  }
+
+  .subject h3 a:hover {
+    text-decoration-color: var(--subject-color);
+  }
+
+  .subject__summary {
+    color: var(--text-muted);
+  }
+
+  .subject .course-rows {
+    margin-top: var(--space-s);
+  }
+
+  .subject__empty {
+    padding-block: 0.6rem;
+    border-block: 1px solid var(--rule);
+    color: var(--text-muted);
+  }
+
+  .column-title {
+    font-size: var(--step-1);
+    margin-bottom: var(--space-s);
+  }
+
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: var(--measure);
+  }
+
+  .post-list li + li {
+    margin-top: var(--space-l);
+  }
+
+  .post-list h3 {
+    margin-top: var(--space-3xs);
+  }
+
+  .post-list p {
+    margin-top: var(--space-3xs);
+  }
+</style>

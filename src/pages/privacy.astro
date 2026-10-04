@@ -1,0 +1,86 @@
+---
+import ExternalLink from '../components/ExternalLink.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+---
+
+<PageLayout
+  title="Privacy"
+  description="This website sets no cookies and uses no analytics or tracking. What is stored on your device, and how Moodle, giscus and email work."
+  lead="This website sets no cookies and uses no analytics or tracking. This page explains the few places where data is involved."
+  prose
+>
+  <p class="meta">Last updated 5 October 2026.</p>
+
+  <h2 id="website">This website</h2>
+  <ul>
+    <li>No cookies, no analytics, no advertising, no tracking pixels.</li>
+    <li>Fonts and all other files are served from wosm.academy itself, so visiting a page sends no requests to other services. The one exception is comments on Journal posts, described below.</li>
+    <li>
+      Two small preferences are kept in your browser’s local storage, if you set them: your choice of light or dark
+      theme (<code>wosm:theme</code>) and whether the background animation is paused (<code>wosm:sim-paused</code>).
+      They never leave your device. Clearing your browser’s site data removes them.
+    </li>
+  </ul>
+
+  <h2 id="hosting">Hosting</h2>
+  <p>
+    The website is hosted on GitHub Pages. GitHub states that when a GitHub Pages site is visited, the visitor’s IP
+    address is logged and stored for security purposes. See <ExternalLink
+      href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection"
+      >GitHub Pages: data collection</ExternalLink
+    > and the <ExternalLink
+      href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
+      >GitHub General Privacy Statement</ExternalLink
+    >. We do not receive these logs.
+  </p>
+
+  <h2 id="journal-comments">Journal comments and reactions</h2>
+  <p>
+    Journal posts have comments and reactions provided by giscus, which stores them as GitHub Discussions. Nothing is
+    loaded from giscus until you scroll to the comments at the end of a post; then your browser connects to giscus.app
+    and GitHub. To comment or react you sign in with your GitHub account and authorise giscus, which keeps an encrypted
+    token in your browser’s local storage. Your comments are public on GitHub. See the <ExternalLink
+      href="https://github.com/giscus/giscus/blob/main/PRIVACY-POLICY.md">giscus privacy policy</ExternalLink
+    >.
+  </p>
+
+  <h2 id="moodle">Moodle (moodle.wosm.academy)</h2>
+  <p>
+    Courses are taught on our Moodle site, which is a separate service. When you create an account there, Moodle stores
+    the details you give it (such as your name and email address) and your activity in courses.
+    {
+      site.moodle.privacy ? (
+        <>
+          See <ExternalLink href={site.moodle.privacy}>Moodle’s privacy policy</ExternalLink>.
+        </>
+      ) : (
+        <Todo>link to the privacy policy page on moodle.wosm.academy</Todo>
+      )
+    }
+  </p>
+
+  <h2 id="email">Email and teaching applications</h2>
+  <p>
+    If you email us, we receive your address and your message and use them only to reply. If you apply to teach, we use
+    your CV and letter only to consider your application. <Todo
+      >how long applications are kept and when they are deleted</Todo
+    >
+  </p>
+
+  <h2 id="discord">Discord</h2>
+  <p>
+    Our community server runs on Discord, which has its own <ExternalLink href="https://discord.com/privacy"
+      >privacy policy</ExternalLink
+    >.
+  </p>
+
+  <h2 id="contact">Questions and your rights</h2>
+  <p>
+    For any question about your data, or to ask us to correct or delete data we hold about you, email <a
+      href={`mailto:${site.email.general}`}>{site.email.general}</a
+    >. <Todo>who is responsible for personal data (the data controller) and the applicable law</Todo>
+  </p>
+  <p>If we ever add analytics, it will be cookieless and privacy-respecting, and this page will say so first.</p>
+</PageLayout>

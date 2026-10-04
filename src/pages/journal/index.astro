@@ -1,0 +1,69 @@
+---
+import FormattedDate from '../../components/FormattedDate.astro';
+import Txt from '../../components/Txt.astro';
+import PageLayout from '../../layouts/PageLayout.astro';
+import { getPosts, postUrl } from '../../lib/content';
+
+const posts = await getPosts();
+---
+
+<PageLayout
+  title="Journal"
+  description="News, announcements and essays from WoSM Academy."
+  lead="News, announcements and the occasional essay from WoSM Academy."
+>
+  <p slot="header" class="meta"><a href="/rss.xml">Subscribe with RSS</a></p>
+
+  {
+    posts.length > 0 ? (
+      <ol class="journal-list" role="list" reversed>
+        {posts.map((post) => (
+          <li>
+            <FormattedDate date={post.data.date} class="meta" />
+            <h2>
+              <a href={postUrl(post)}>{post.data.title}</a>
+            </h2>
+            <p>
+              <Txt text={post.data.summary} />
+            </p>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p>No posts yet.</p>
+    )
+  }
+</PageLayout>
+
+<style>
+  .journal-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: var(--measure);
+    border-top: 1px solid var(--rule);
+  }
+
+  .journal-list li {
+    padding-block: var(--space-m);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .journal-list h2 {
+    font-size: var(--step-2);
+    margin-top: var(--space-3xs);
+  }
+
+  .journal-list h2 a {
+    color: var(--text);
+    text-decoration-color: var(--rule);
+  }
+
+  .journal-list h2 a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .journal-list p {
+    margin-top: var(--space-2xs);
+  }
+</style>

@@ -1,0 +1,37 @@
+---
+// One course in a list: eyebrow (code · level), title link, summary, meta row.
+// The subject colour is a 3 px left border; the whole item is clickable.
+import { capitalise } from '../lib/format';
+import { courseUrl, type Course, type Subject } from '../lib/content';
+import StatusBadge from './StatusBadge.astro';
+import Txt from './Txt.astro';
+
+interface Props {
+  course: Course;
+  subject: Subject;
+  headingLevel?: 2 | 3 | 4;
+}
+
+const { course, subject, headingLevel = 3 } = Astro.props;
+const { code, title, level, summary, durationWeeks, effortHoursPerWeek, format, status } = course.data;
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
+---
+
+<li
+  class="course-item"
+  style={`--subject-color: var(${subject.data.colorToken})`}
+  data-course
+  data-subject={subject.id}
+  data-level={level}
+  data-status={status ?? 'tbc'}
+>
+  <p class="eyebrow">{code} · {capitalise(level)}</p>
+  <Heading class="course-item__title"><a href={courseUrl(course)}>{title}</a></Heading>
+  <p class="course-item__summary"><Txt text={summary} /></p>
+  <p class="meta">
+    {format && <span>{capitalise(format)}</span>}
+    {durationWeeks && <span>{durationWeeks}&nbsp;weeks</span>}
+    {effortHoursPerWeek && <span>{effortHoursPerWeek}&nbsp;h/week</span>}
+    <span><StatusBadge status={status} /></span>
+  </p>
+</li>

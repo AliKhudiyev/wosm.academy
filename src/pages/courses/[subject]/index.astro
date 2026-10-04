@@ -1,0 +1,91 @@
+---
+import { render } from 'astro:content';
+import CourseItem from '../../../components/CourseItem.astro';
+import PageLayout from '../../../layouts/PageLayout.astro';
+import { courseUrl, getCourses, getSubjects, learningPath, type Subject } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const subjects = await getSubjects();
+  return subjects.map((subject) => ({ params: { subject: subject.id }, props: { subject } }));
+}
+
+interface Props {
+  subject: Subject;
+}
+
+const { subject } = Astro.props;
+const { Content } = await render(subject);
+const courses = (await getCourses()).filter((c) => c.data.subject.id === subject.id);
+const path = learningPath(courses);
+const hasDependencies = courses.some((c) => (c.data.prerequisites?.length ?? 0) + c.data.recommended.length > 0);
+---
+
+<PageLayout
+  title={subject.data.title}
+  description={`${subject.data.title} at WoSM Academy: ${subject.data.summary}`.slice(0, 155)}
+  eyebrow="Subject"
+  lead={subject.data.summary}
+>
+  <div class="prose subject-body" style={`--subject-color: var(${subject.data.colorToken})`}>
+    <Content />
+  </div>
+
+  <section class="section" aria-labelledby="subject-courses">
+    <h2 id="subject-courses">Courses</h2>
+    {
+      courses.length > 0 ? (
+        <ul class="course-list" role="list">
+          {courses.map((course) => (
+            <CourseItem course={course} subject={subject} />
+          ))}
+        </ul>
+      ) : (
+        <p>
+          No {subject.data.title.toLowerCase()} courses are offered yet. If you would like to teach one, see{' '}
+          <a href="/teach/">Teach with us</a>.
+        </p>
+      )
+    }
+  </section>
+
+  {
+    courses.length > 1 && (
+      <section class="section" aria-labelledby="learning-path">
+        <h2 id="learning-path">Suggested learning path</h2>
+        <p class="measure">
+          {hasDependencies
+            ? 'An order that takes each course after its prerequisites and recommended courses.'
+            : 'None of these courses depends on another, so you can start with any of them. In catalogue order:'}
+        </p>
+        <ol class="path">
+          {path.map((course) => (
+            <li>
+              <span class="meta">{course.data.code}</span> <a href={courseUrl(course)}>{course.data.title}</a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )
+  }
+</PageLayout>
+
+<style>
+  .section h2 {
+    margin-bottom: var(--space-m);
+  }
+
+  .path {
+    margin-top: var(--space-s);
+    padding-left: 1.6em;
+  }
+
+  .path li + li {
+    margin-top: 0.4em;
+  }
+
+  .path li::marker {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    color: var(--text-muted);
+  }
+</style>

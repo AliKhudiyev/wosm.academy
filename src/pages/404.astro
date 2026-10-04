@@ -1,0 +1,39 @@
+---
+import GliderMark from '../components/GliderMark.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Page not found" description="This page starved: it had no neighbours and didn’t survive the last generation." noindex>
+  <div class="container page not-found">
+    <GliderMark class="not-found__glider" />
+    <p class="eyebrow">Error 404 · generation ∞</p>
+    <h1>This page starved.</h1>
+    <p class="lead">It had no neighbours and didn’t survive the last generation.</p>
+    <p class="meta">Cause of death: underpopulation (fewer than two live neighbours).</p>
+    <div class="button-row">
+      <a class="button button--primary" href="/">Back to the home page</a>
+      <a class="button button--secondary" href="/courses/">Browse courses</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    max-width: 44rem;
+  }
+
+  .not-found > * + * {
+    margin-top: var(--space-m);
+  }
+
+  .not-found :global(.not-found__glider) {
+    width: 4.5rem;
+    height: 4.5rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-l);
+  }
+
+  .button-row {
+    margin-top: var(--space-l);
+  }
+</style>

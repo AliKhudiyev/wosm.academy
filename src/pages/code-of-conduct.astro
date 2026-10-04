@@ -1,0 +1,88 @@
+---
+import ExternalLink from '../components/ExternalLink.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+---
+
+<PageLayout
+  title="Code of Conduct"
+  description="The WoSM Academy Code of Conduct: respect, academic integrity, no harassment, how to report a problem and how we respond."
+  lead="WoSM Academy is a learning community. This code describes how we treat each other and what happens when someone does not."
+  prose
+>
+  <h2 id="pledge">Our pledge</h2>
+  <p>
+    Students, instructors and staff all pledge to make taking part in WoSM Academy free of harassment for everyone,
+    regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and
+    expression, level of experience, education, socio-economic status, nationality, personal appearance, race, caste,
+    colour, religion, or sexual identity and orientation.
+  </p>
+  <p>We act and interact in ways that contribute to an open, welcoming, diverse, inclusive and healthy community.</p>
+
+  <h2 id="standards">Our standards</h2>
+  <p>Behaviour that helps everyone learn includes:</p>
+  <ul>
+    <li>being patient and kind, especially with people who are new to a subject;</li>
+    <li>asking questions freely, and answering them without condescension;</li>
+    <li>giving and gracefully accepting constructive feedback;</li>
+    <li>taking responsibility for our mistakes, apologising to those affected and learning from them;</li>
+    <li>focusing on what is best for the community as a whole, not only for ourselves.</li>
+  </ul>
+  <p>Unacceptable behaviour includes:</p>
+  <ul>
+    <li>sexualised language or imagery, and sexual attention or advances of any kind;</li>
+    <li>trolling, insulting or derogatory comments, and personal or political attacks;</li>
+    <li>public or private harassment;</li>
+    <li>publishing others’ private information, such as a physical or email address, without their explicit permission;</li>
+    <li>other conduct that could reasonably be considered inappropriate in a place of learning.</li>
+  </ul>
+
+  <h2 id="integrity">Academic integrity</h2>
+  <p>Learning only works if the work is honest. At WoSM Academy:</p>
+  <ul>
+    <li>submit work that is your own, and say clearly where you had help or used other sources;</li>
+    <li>do not share solutions to assessed exercises unless the instructor says you may;</li>
+    <li>do not help others to misrepresent their work;</li>
+    <li>discussing ideas and helping each other understand is encouraged — doing someone else’s work for them is not.</li>
+  </ul>
+  <p>Instructors may set more specific rules for their course. Where they do, those rules apply.</p>
+
+  <h2 id="scope">Scope</h2>
+  <p>
+    This code applies in every space the Academy runs: Moodle, our Discord server, the website’s GitHub repository
+    and Discussions, email, and any event we organise. It also applies when someone is officially representing the
+    Academy elsewhere.
+  </p>
+
+  <h2 id="reporting">Reporting a problem</h2>
+  <p>
+    If you experience or witness unacceptable behaviour, email <a href={`mailto:${site.email.general}`}
+      >{site.email.general}</a
+    >. Include what happened, where and when, who was involved, and links or screenshots if you have them.
+  </p>
+  <p>
+    Every report is reviewed promptly and fairly. We respect the privacy and safety of the person who reports.
+  </p>
+
+  <h2 id="enforcement">Enforcement</h2>
+  <p>
+    Academy staff, led by the Director, are responsible for enforcing this code. They may remove, edit or reject
+    messages, contributions and course submissions that break it, and will explain their decisions when appropriate.
+    Depending on how serious and how repeated the behaviour is, they may respond with:
+  </p>
+  <ol>
+    <li><strong>Correction.</strong> A private, written explanation of what was wrong, and possibly a request for a public apology.</li>
+    <li><strong>Warning.</strong> A warning with consequences for continued behaviour, including no contact with the people involved for a period of time.</li>
+    <li><strong>Temporary suspension.</strong> A temporary ban from Academy spaces, including Moodle courses and Discord.</li>
+    <li><strong>Permanent ban.</strong> A permanent ban from all Academy spaces, for a pattern of violations or a single serious one, such as sustained harassment.</li>
+  </ol>
+
+  <h2 id="attribution">Attribution</h2>
+  <p>
+    This Code of Conduct is adapted from the <ExternalLink
+      href="https://www.contributor-covenant.org/version/2/1/code_of_conduct/">Contributor Covenant</ExternalLink
+    >, version 2.1, which is available under the <ExternalLink href="https://creativecommons.org/licenses/by/4.0/"
+      >CC BY 4.0</ExternalLink
+    > licence. We added the section on academic integrity and adapted the rest to a learning community.
+  </p>
+</PageLayout>

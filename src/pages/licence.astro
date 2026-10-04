@@ -1,0 +1,56 @@
+---
+import ExternalLink from '../components/ExternalLink.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+---
+
+<PageLayout
+  title="Licence"
+  description="WoSM Academy course materials and website content are licensed CC BY-SA 4.0; the website code is MIT-licensed."
+  lead="What you learn here is yours to keep and to pass on. These licences make that explicit."
+  prose
+>
+  <h2 id="content">Course materials and website content</h2>
+  <p>
+    Unless stated otherwise, WoSM Academy course materials and the text of this website are licensed under the
+    <ExternalLink href={site.licence.content.url}>Creative Commons Attribution-ShareAlike 4.0 International</ExternalLink>
+    licence ({site.licence.content.name}).
+  </p>
+  <p>You may share and adapt the material for any purpose, including commercially, as long as you:</p>
+  <ul>
+    <li><strong>give credit</strong> to WoSM Academy, link to the licence and say if you made changes;</li>
+    <li><strong>share alike</strong>: distribute your adaptations under the same licence.</li>
+  </ul>
+  <p>
+    A suitable credit is: “<em>Title of the course or page</em>, WoSM Academy, https://wosm.academy/…, licensed CC BY-SA
+    4.0.”
+  </p>
+  <p>
+    Some courses use third-party material under other licences. Where they do, the course says so, and that material
+    keeps its own licence.
+  </p>
+  <p><Todo>decide whether the WoSM Academy name and glider logo are covered by this licence or excluded</Todo></p>
+
+  <h2 id="code">Website code</h2>
+  <p>
+    The source code of this website is published on <ExternalLink href={site.github.repo}>GitHub</ExternalLink> under the
+    <ExternalLink href={site.licence.code.url}>MIT licence</ExternalLink>. See the <code>LICENSE</code> file in the repository
+    for the full text.
+  </p>
+
+  <h2 id="third-party">Third-party components</h2>
+  <ul>
+    <li>
+      The typefaces <em>Source Serif 4</em> (Adobe) and <em>JetBrains Mono</em> (JetBrains) are used under the
+      <ExternalLink href="https://openfontlicense.org/">SIL Open Font License 1.1</ExternalLink>.
+    </li>
+    <li>
+      The <a href="/code-of-conduct/">Code of Conduct</a> is adapted from the Contributor Covenant 2.1, licensed CC BY 4.0.
+    </li>
+    <li>
+      The background pattern is Conway’s Game of Life, a cellular automaton devised by the mathematician John Horton
+      Conway.
+    </li>
+  </ul>
+</PageLayout>

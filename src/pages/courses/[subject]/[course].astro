@@ -1,0 +1,177 @@
+---
+import { getEntries, getEntry, render } from 'astro:content';
+import ExternalLink from '../../../components/ExternalLink.astro';
+import FormattedDate from '../../../components/FormattedDate.astro';
+import StatusBadge from '../../../components/StatusBadge.astro';
+import Todo from '../../../components/Todo.astro';
+import Txt from '../../../components/Txt.astro';
+import { site } from '../../../config/site';
+import PageLayout from '../../../layouts/PageLayout.astro';
+import { capitalise } from '../../../lib/format';
+import { courseUrl, getCourses, personUrl, type Course } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const courses = await getCourses();
+  return courses.map((course) => ({
+    params: { subject: course.data.subject.id, course: course.id },
+    props: { course },
+  }));
+}
+
+interface Props {
+  course: Course;
+}
+
+const { course } = Astro.props;
+const data = course.data;
+const subject = await getEntry(data.subject);
+const instructors = await getEntries(data.instructors);
+const prerequisites = data.prerequisites ? await getEntries(data.prerequisites) : undefined;
+const recommended = await getEntries(data.recommended);
+const { Content } = await render(course);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: data.title,
+  courseCode: data.code,
+  description: data.summary,
+  url: new URL(courseUrl(course), site.url).href,
+  inLanguage: 'en',
+  isAccessibleForFree: true,
+  educationalLevel: data.level,
+  provider: { '@type': 'EducationalOrganization', name: site.name, url: `${site.url}/` },
+  ...(prerequisites?.length
+    ? { coursePrerequisites: prerequisites.map((p) => ({ '@type': 'Course', name: p.data.title, courseCode: p.data.code })) }
+    : {}),
+};
+---
+
+<PageLayout
+  title={`${data.title} (${data.code})`}
+  heading={data.title}
+  description={`${data.code}, free course at WoSM Academy. ${data.summary}`.slice(0, 155)}
+  eyebrow={`${data.code} · ${subject.data.title} · ${capitalise(data.level)}`}
+  jsonLd={jsonLd}
+>
+  <p slot="header" class="lead"><Txt text={data.summary} /></p>
+
+  <div slot="header" class="enrol">
+    {
+      data.status === 'open' &&
+        (data.moodleUrl ? (
+          <ExternalLink class="button button--primary" href={data.moodleUrl}>
+            Enrol on Moodle
+          </ExternalLink>
+        ) : (
+          <Todo>Moodle course URL (moodleUrl) for enrolment</Todo>
+        ))
+    }
+    {
+      data.status === 'upcoming' && (
+        <span class="button" aria-disabled="true">
+          Enrolment opens soon
+        </span>
+      )
+    }
+    {!data.status && <Todo>enrolment status and Moodle course URL</Todo>}
+  </div>
+
+  <dl class="facts" style={`--subject-color: var(${subject.data.colorToken})`}>
+    <dt>Format</dt>
+    <dd>{data.format ? capitalise(data.format) : <Todo>self-paced or cohort</Todo>}</dd>
+
+    <dt>Duration</dt>
+    <dd>{data.durationWeeks ? <>{data.durationWeeks}&nbsp;weeks</> : <Todo>number of weeks</Todo>}</dd>
+
+    <dt>Effort</dt>
+    <dd>{data.effortHoursPerWeek ? <>{data.effortHoursPerWeek}&nbsp;hours per week</> : <Todo>hours per week</Todo>}</dd>
+
+    <dt>Status</dt>
+    <dd><StatusBadge status={data.status} /></dd>
+
+    {
+      (data.format === 'cohort' || data.startDate) && (
+        <>
+          <dt>Start date</dt>
+          <dd>{data.startDate ? <FormattedDate date={data.startDate} /> : <Todo>start date</Todo>}</dd>
+        </>
+      )
+    }
+
+    <dt>Prerequisites</dt>
+    <dd>
+      {
+        prerequisites === undefined ? (
+          <Todo>prerequisites, or “none”</Todo>
+        ) : prerequisites.length === 0 ? (
+          'None'
+        ) : (
+          prerequisites.map((p, i) => (
+            <><a href={courseUrl(p)}>{p.data.code} {p.data.title}</a>{i < prerequisites.length - 1 ? ', ' : ''}</>
+          ))
+        )
+      }
+    </dd>
+
+    {
+      recommended.length > 0 && (
+        <>
+          <dt>Recommended</dt>
+          <dd>
+            {recommended.map((r, i) => (
+              <><a href={courseUrl(r)}>{r.data.code} {r.data.title}</a>{i < recommended.length - 1 ? ', ' : ''}</>
+            ))}
+          </dd>
+        </>
+      )
+    }
+
+    <dt>{instructors.length > 1 ? 'Instructors' : 'Instructor'}</dt>
+    <dd>
+      {
+        instructors.map((person, i) => (
+          <><a href={personUrl(person)}>{person.data.name}</a>{i < instructors.length - 1 ? ', ' : ''}</>
+        ))
+      }
+    </dd>
+
+    <dt>Language</dt>
+    <dd>English</dd>
+
+    <dt>Cost</dt>
+    <dd>Free</dd>
+  </dl>
+
+  <div class="prose course-body">
+    <Content />
+  </div>
+
+  <p class="course-note">
+    Free. No application needed. New to Moodle? See <a href="/join/">How to join</a>.
+  </p>
+</PageLayout>
+
+<style>
+  .enrol {
+    margin-top: var(--space-l);
+  }
+
+  .facts {
+    border-left: var(--border-subject) solid var(--subject-color);
+    padding-left: var(--space-s);
+    border-top: 0;
+  }
+
+  .course-body {
+    margin-top: var(--space-l);
+  }
+
+  .course-note {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--rule);
+    color: var(--text-muted);
+    max-width: var(--measure);
+  }
+</style>

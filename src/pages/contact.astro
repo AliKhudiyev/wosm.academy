@@ -1,0 +1,82 @@
+---
+import Callout from '../components/Callout.astro';
+import ExternalLink from '../components/ExternalLink.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+---
+
+<PageLayout
+  title="Contact"
+  description="How to reach WoSM Academy: email for general enquiries, Discord for the community, GitHub for website issues."
+  lead="Choose the channel that fits your question."
+>
+  <dl class="contact-list">
+    <div>
+      <dt>General enquiries</dt>
+      <dd>
+        <a href={`mailto:${site.email.general}`}>{site.email.general}</a>
+      </dd>
+    </div>
+    <div>
+      <dt>Teaching applications</dt>
+      <dd>See <a href="/teach/#apply">Teach with us</a> for how to apply.</dd>
+    </div>
+    <div>
+      <dt>Community and quick questions</dt>
+      <dd>
+        {site.discord ? <ExternalLink href={site.discord}>Our Discord server</ExternalLink> : <>Our Discord server <Todo>invite link</Todo></>}
+      </dd>
+    </div>
+    <div>
+      <dt>Problems with this website</dt>
+      <dd>
+        <ExternalLink href={site.github.issues}>Open an issue on GitHub</ExternalLink>
+      </dd>
+    </div>
+    <div>
+      <dt>Problems with your Moodle account</dt>
+      <dd>
+        <a href={`mailto:${site.email.general}`}>{site.email.general}</a>, with the email address you signed up with.
+      </dd>
+    </div>
+  </dl>
+
+  <Callout title="Note">
+    <p>
+      This is a static website, so there is no contact form. We aim to reply to email within <Todo>expected reply time</Todo>.
+    </p>
+  </Callout>
+</PageLayout>
+
+<style>
+  .contact-list {
+    max-width: var(--measure);
+    border-top: 1px solid var(--rule);
+    margin-bottom: var(--space-xl);
+  }
+
+  .contact-list > div {
+    display: grid;
+    gap: var(--space-3xs) var(--space-m);
+    padding-block: var(--space-s);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  @media (min-width: 40rem) {
+    .contact-list > div {
+      grid-template-columns: 16rem 1fr;
+    }
+  }
+
+  .contact-list dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--text-muted);
+    padding-top: 0.15em;
+  }
+
+  .contact-list dd {
+    margin: 0;
+  }
+</style>

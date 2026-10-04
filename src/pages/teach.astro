@@ -1,0 +1,194 @@
+---
+import { render } from 'astro:content';
+import Callout from '../components/Callout.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Todo from '../components/Todo.astro';
+import Txt from '../components/Txt.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+import { getOpenVacancies, getSubjects } from '../lib/content';
+
+const [vacancies, subjects] = await Promise.all([getOpenVacancies(), getSubjects()]);
+const rendered = await Promise.all(vacancies.map(async (v) => ({ vacancy: v, Content: (await render(v)).Content })));
+const areaName = (area: string) =>
+  area === 'any' ? 'Any area' : (subjects.find((s) => s.id === area)?.data.title ?? area);
+
+// Pre-filled email. Only a subject line and empty headings: never personal data in a URL.
+const mailSubject = 'Teaching application — <area> — <your name>';
+const mailBody = [
+  'Area or course I would like to teach:',
+  '',
+  '',
+  'Rough outline (optional):',
+  '',
+  '',
+  'Relevant background:',
+  '',
+  '',
+  'Attached: CV and/or motivation letter (PDF)',
+].join('\n');
+const mailto = `mailto:${site.email.teaching}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+---
+
+<PageLayout
+  title="Teach with us"
+  description="WoSM Academy grows through volunteer instructors. See open roles, what teaching involves and how to apply by email."
+  lead="WoSM Academy grows through volunteers who care about teaching. If you know a subject well and want to share it, we would like to hear from you."
+>
+  <section class="block" aria-labelledby="roles">
+    <h2 id="roles">Open roles</h2>
+    {
+      rendered.length > 0 ? (
+        <div class="roles">
+          {rendered.map(({ vacancy, Content }) => (
+            <article class="role" id={vacancy.id} aria-labelledby={`${vacancy.id}-title`}>
+              <h3 id={`${vacancy.id}-title`}>{vacancy.data.title}</h3>
+              <p class="meta role__meta">
+                <span>{areaName(vacancy.data.area)}</span>
+                <span>{vacancy.data.commitment ?? <Todo>time commitment</Todo>}</span>
+                <span>
+                  Posted <FormattedDate date={vacancy.data.posted} />
+                </span>
+                <span class="badge badge--open">[{vacancy.data.status}]</span>
+              </p>
+              <p>
+                <Txt text={vacancy.data.summary} />
+              </p>
+              <div class="prose">
+                <Content />
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p>There are no open roles at the moment. You are still welcome to write to us.</p>
+      )
+    }
+  </section>
+
+  <section class="block" aria-labelledby="involves">
+    <h2 id="involves">What the role involves</h2>
+    <ul class="dash-list measure">
+      <li>Designing and teaching your own course on Moodle: materials, exercises and assessments.</li>
+      <li>Answering students’ questions.</li>
+      <li>Keeping the course up to date.</li>
+    </ul>
+  </section>
+
+  <section class="block" aria-labelledby="looking-for">
+    <h2 id="looking-for">Who we’re looking for</h2>
+    <ul class="dash-list measure">
+      <li>
+        Deep knowledge of the subject you want to teach. A formal qualification is welcome but not required. <Todo
+          >confirm whether a qualification is required</Todo
+        >
+      </li>
+      <li>Clear communication.</li>
+      <li>Reliability: students depend on courses being finished and maintained.</li>
+    </ul>
+  </section>
+
+  <section class="block" aria-labelledby="you-get">
+    <h2 id="you-get">What you get</h2>
+    <p class="measure"><Todo>what instructors receive (options are listed in TODO.md)</Todo></p>
+  </section>
+
+  <Callout title="How to apply" level={2} id="apply" class="block">
+    <p>
+      Email <a href={`mailto:${site.email.teaching}`}>{site.email.teaching}</a> with the subject line
+      <code>Teaching application — &lt;area&gt; — &lt;your name&gt;</code>.
+    </p>
+    <ul class="dash-list">
+      <li>Attach a CV and/or a motivation letter, as PDF.</li>
+      <li>Say which area or course you would like to teach.</li>
+      <li>Include a rough outline of the course if you have one.</li>
+    </ul>
+    <p>
+      <a class="button button--primary" href={mailto}>Start an application email</a>
+    </p>
+    <p class="meta">
+      The button opens your email program with the subject and headings filled in. Please send applications by email
+      only, never through GitHub, Discord or any other public channel.
+    </p>
+  </Callout>
+
+  <section class="block" aria-labelledby="next">
+    <h2 id="next">What happens next</h2>
+    <ol class="steps">
+      <li>
+        <h3>We read every application</h3>
+        <p>We reply within <Todo>number of</Todo> days.</p>
+      </li>
+      <li>
+        <h3>A short conversation</h3>
+        <p>A video call about your area and your plans for the course.</p>
+      </li>
+      <li>
+        <h3>You build your course</h3>
+        <p>You receive course-creator access on Moodle and develop the course there.</p>
+      </li>
+      <li>
+        <h3>Quality review</h3>
+        <p>
+          The Academy reviews the course before publication: content accuracy, structure, accessibility and licence. The
+          Director carries out this review.
+        </p>
+      </li>
+      <li>
+        <h3>Publication</h3>
+        <p>Your course opens on Moodle and is listed on this website.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="block" aria-labelledby="licensing">
+    <h2 id="licensing">Licensing</h2>
+    <p class="measure">
+      Course materials are published under the Academy’s content licence, <a href="/licence/"
+        >{site.licence.content.name}</a
+      >. Please make sure you are able and willing to publish your materials under it before you apply.
+    </p>
+  </section>
+
+  <section class="block" aria-labelledby="your-data">
+    <h2 id="your-data">Your application data</h2>
+    <p class="measure">
+      We use your CV and letter only to consider your application. See <a href="/privacy/">Privacy</a>. <Todo
+        >how long applications are kept, and when they are deleted</Todo
+      >
+    </p>
+  </section>
+</PageLayout>
+
+<style>
+  .roles {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .role {
+    border-left: var(--border-subject) solid var(--accent);
+    padding-left: var(--space-s);
+    max-width: var(--measure);
+    scroll-margin-top: var(--space-l);
+  }
+
+  .role > * + * {
+    margin-top: var(--space-2xs);
+  }
+
+  .role h3 {
+    font-size: var(--step-1);
+  }
+
+  .role__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6em;
+  }
+
+  .role__meta > * + *::before {
+    content: '·';
+    margin-right: 0.6em;
+  }
+</style>

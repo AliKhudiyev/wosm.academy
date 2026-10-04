@@ -743,3 +743,22 @@
   color: var(--rule);
   object-fit: cover;
 }
+
+/* ---------- Content blocks on text pages ---------- */
+
+.block + .block {
+  margin-top: var(--space-2xl);
+}
+
+.block > * + * {
+  margin-top: var(--space-s);
+}
+
+.block > h2:not(.callout__title) {
+  font-size: var(--step-2);
+  margin-bottom: var(--space-m);
+}
+
+.more {
+  margin-top: var(--space-l);
+}

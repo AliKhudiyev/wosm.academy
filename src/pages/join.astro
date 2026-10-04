@@ -1,0 +1,141 @@
+---
+import Callout from '../components/Callout.astro';
+import ExternalLink from '../components/ExternalLink.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+---
+
+<PageLayout
+  title="How to join"
+  description="Joining WoSM Academy is free and open to everyone, with no application. Create a Moodle account, confirm your email and enrol."
+  lead="Joining is free and open to everyone. There is no application."
+>
+  <section class="block" aria-labelledby="who">
+    <h2 id="who">Who can join</h2>
+    <div class="flow">
+      <p>
+        Anyone who wants to learn, from any country and any background. <Todo
+          >minimum age, or a policy for students under 18</Todo
+        >
+      </p>
+      <p>What you need:</p>
+      <ul class="dash-list">
+        <li>an internet connection,</li>
+        <li>an email address,</li>
+        <li>and time to study.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="steps">
+    <h2 id="steps">Step by step</h2>
+    <ol class="steps">
+      <li>
+        <h3>Choose a course</h3>
+        <p>
+          Browse the <a href="/courses/">catalogue</a> and read the course page. It lists what the course covers, its
+          prerequisites, the expected effort and how it is assessed.
+        </p>
+      </li>
+      <li>
+        <h3>Create a Moodle account</h3>
+        <p>
+          Our courses are taught on Moodle, a widely used open-source learning platform. Sign up at <ExternalLink
+            href={site.moodle.signup}>moodle.wosm.academy</ExternalLink
+          >. Use an email address you check regularly.
+        </p>
+      </li>
+      <li>
+        <h3>Confirm your email</h3>
+        <p>
+          Moodle sends a confirmation link to the address you gave. Open it to activate your account. If the message
+          does not arrive within a few minutes, check your spam or junk folder.
+        </p>
+      </li>
+      <li>
+        <h3>Enrol on the course</h3>
+        <p>
+          Log in, open the course page on Moodle and select <em>Enrol me</em>. Each course page on this website links
+          to its Moodle course once enrolment is open.
+        </p>
+      </li>
+      <li>
+        <h3>Join the Discord</h3>
+        <p>
+          Meet other students, ask questions and study together on our Discord server.
+          {site.discord ? <ExternalLink href={site.discord}>Join the WoSM Academy Discord</ExternalLink> : <Todo>Discord invite link</Todo>}
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="block" aria-labelledby="expect-from-us">
+    <h2 id="expect-from-us">What to expect from us</h2>
+    <ul class="dash-list measure">
+      <li><strong>Free access, always.</strong> No fees, no paid tiers, no ads.</li>
+      <li>
+        <strong>Openly licensed materials.</strong> Course materials are published under <a href="/licence/"
+          >{site.licence.content.name}</a
+        >, so you can keep them, share them and build on them.
+      </li>
+      <li><strong>Exercises and honest feedback</strong> on your work, as described on each course page.</li>
+      <li><strong>Courses built and reviewed with care</strong> before they are published.</li>
+      <li>
+        <strong>Replies to your questions</strong> from course staff. <Todo>a realistic response time</Todo>
+      </li>
+    </ul>
+  </section>
+
+  <section class="block" aria-labelledby="expect-from-you">
+    <h2 id="expect-from-you">What we expect from you</h2>
+    <ul class="dash-list measure">
+      <li><strong>Academic integrity.</strong> Submit your own work, and say where you had help.</li>
+      <li><strong>Respect</strong> for other students and for staff, on Moodle and on Discord.</li>
+      <li>
+        <strong>Following the <a href="/code-of-conduct/">Code of Conduct</a></strong>, which applies to every
+        space the Academy runs.
+      </li>
+    </ul>
+  </section>
+
+  <Callout title="Trouble signing up?" level={2} class="block">
+    <p>
+      If the confirmation email never arrives or you cannot enrol, write to <a href={`mailto:${site.email.general}`}
+        >{site.email.general}</a
+      >. Tell us the email address you used and what you see. See <a href="/contact/">Contact</a> for other ways to reach
+      us.
+    </p>
+  </Callout>
+
+  <section class="block" aria-labelledby="questions">
+    <h2 id="questions">Common questions</h2>
+    <div class="accordion">
+      <details>
+        <summary>Is it really free?</summary>
+        <div class="answer"><p>Yes. Every course is free, and there are no paid tiers.</p></div>
+      </details>
+      <details>
+        <summary>Do I need any prior knowledge?</summary>
+        <div class="answer">
+          <p>It depends on the course. Each course page lists its prerequisites, if it has any.</p>
+        </div>
+      </details>
+      <details>
+        <summary>I didn’t receive the confirmation email.</summary>
+        <div class="answer">
+          <p>
+            Wait a few minutes, then check your spam or junk folder. Make sure you typed your address correctly. If it
+            still has not arrived, write to <a href={`mailto:${site.email.general}`}>{site.email.general}</a>.
+          </p>
+        </div>
+      </details>
+      <details>
+        <summary>In what language are courses taught?</summary>
+        <div class="answer"><p>English.</p></div>
+      </details>
+    </div>
+    <p class="more"><a class="arrow-link" href="/faq/">All frequently asked questions →</a></p>
+  </section>
+</PageLayout>
+

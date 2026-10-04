@@ -1,0 +1,114 @@
+---
+// A person on /about/#people: portrait, name, role, credentials, bio,
+// courses taught (derived from the courses collection) and links.
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import { courseUrl, type Course, type Person } from '../lib/content';
+import ExternalLink from './ExternalLink.astro';
+import PersonPlaceholder from './PersonPlaceholder.astro';
+import Todo from './Todo.astro';
+
+interface Props {
+  person: Person;
+  courses: Course[];
+}
+
+const { person, courses } = Astro.props;
+const { name, role, credentials, photo, photoAlt, links } = person.data;
+const { Content } = await render(person);
+const teaches = courses.filter((c) => c.data.instructors.some((ref) => ref.id === person.id));
+
+const linkLabels: Record<string, string> = {
+  website: 'Website',
+  github: 'GitHub',
+  scholar: 'Google Scholar',
+  orcid: 'ORCID',
+  linkedin: 'LinkedIn',
+};
+const personLinks = Object.entries(links).filter((entry): entry is [string, string] => Boolean(entry[1]));
+---
+
+<article class="person" id={person.id} aria-labelledby={`${person.id}-name`}>
+  {
+    photo ? (
+      <Image src={photo} alt={photoAlt ?? `Portrait of ${name}`} class="portrait" width={256} height={256} />
+    ) : (
+      <PersonPlaceholder />
+    )
+  }
+  <div class="person__body">
+    <h3 id={`${person.id}-name`}>{name}</h3>
+    <p class="eyebrow">{role}</p>
+    {
+      credentials.length > 0 && (
+        <ul class="person__credentials" role="list">
+          {credentials.map((credential) => (
+            <li>{credential}</li>
+          ))}
+        </ul>
+      )
+    }
+    <div class="person__bio prose">
+      <Content />
+    </div>
+    {
+      teaches.length > 0 && (
+        <p class="person__teaches">
+          <span class="meta">Teaches</span>{' '}
+          {teaches.map((course, i) => (
+            <><a href={courseUrl(course)}>{course.data.title}</a>{i < teaches.length - 1 ? ', ' : ''}</>
+          ))}
+        </p>
+      )
+    }
+    <p class="person__links meta">
+      {
+        personLinks.length > 0 ? (
+          personLinks.map(([key, url]) => <ExternalLink href={url}>{linkLabels[key] ?? key}</ExternalLink>)
+        ) : (
+          <Todo>links (website, GitHub, Scholar, ORCID, LinkedIn) and photo</Todo>
+        )
+      }
+    </p>
+  </div>
+</article>
+
+<style>
+  .person {
+    display: grid;
+    gap: var(--space-m);
+    align-items: start;
+    scroll-margin-top: var(--space-l);
+  }
+
+  @media (min-width: 36rem) {
+    .person {
+      grid-template-columns: auto 1fr;
+    }
+  }
+
+  .person__body > * + * {
+    margin-top: var(--space-2xs);
+  }
+
+  .person h3 {
+    font-size: var(--step-2);
+  }
+
+  .person__credentials {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    color: var(--text-muted);
+  }
+
+  .person__bio {
+    margin-top: var(--space-s);
+  }
+
+  .person__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+  }
+</style>

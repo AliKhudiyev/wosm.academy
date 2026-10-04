@@ -39,7 +39,8 @@ const courses = defineCollection({
     effortHoursPerWeek: z.string().optional(),
     /** Only for cohort courses. */
     startDate: z.coerce.date().optional(),
-    prerequisites: z.array(reference('courses')).default([]),
+    /** Omit while unknown (shown as TODO); use [] for "none". */
+    prerequisites: z.array(reference('courses')).optional(),
     recommended: z.array(reference('courses')).default([]),
     instructors: z.array(reference('people')).min(1),
     moodleUrl: z.url().optional(),

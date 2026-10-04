@@ -1,0 +1,107 @@
+---
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+---
+
+<PageLayout
+  title="Frequently asked questions"
+  description="Answers to common questions about WoSM Academy: cost, prerequisites, certificates, accreditation, time, enrolment and teaching."
+  lead="Short answers to common questions. If yours is not here, see Contact."
+>
+  <div class="accordion">
+    <details id="free">
+      <summary>Is it really free?</summary>
+      <div class="answer">
+        <p>Yes. Every course is free, and there are no paid tiers and no ads.</p>
+      </div>
+    </details>
+
+    <details id="prior-knowledge">
+      <summary>Do I need any prior knowledge?</summary>
+      <div class="answer">
+        <p>
+          It depends on the course. Each course page lists its prerequisites, if it has any. Introductory courses are a
+          good place to start.
+        </p>
+      </div>
+    </details>
+
+    <details id="certificate">
+      <summary>Do I get a certificate?</summary>
+      <div class="answer">
+        <p><Todo>whether completion certificates are issued, and on what conditions</Todo></p>
+      </div>
+    </details>
+
+    <details id="accreditation">
+      <summary>Is WoSM Academy accredited?</summary>
+      <div class="answer">
+        <p><Todo>an honest answer about accreditation</Todo></p>
+      </div>
+    </details>
+
+    <details id="time">
+      <summary>How much time do I need per week?</summary>
+      <div class="answer">
+        <p>Each course page gives an estimate of the weekly effort. Plan for it before you enrol.</p>
+      </div>
+    </details>
+
+    <details id="several-courses">
+      <summary>Can I take several courses at once?</summary>
+      <div class="answer">
+        <p><Todo>confirm whether there is a limit, and any advice on workload</Todo></p>
+      </div>
+    </details>
+
+    <details id="confirmation-email">
+      <summary>I didn’t receive the confirmation email.</summary>
+      <div class="answer">
+        <p>
+          Wait a few minutes, then check your spam or junk folder. Make sure you typed your address correctly when you
+          signed up. If it still has not arrived, write to <a href={`mailto:${site.email.general}`}
+            >{site.email.general}</a
+          > and tell us the address you used.
+        </p>
+      </div>
+    </details>
+
+    <details id="teach">
+      <summary>How can I teach at WoSM Academy?</summary>
+      <div class="answer">
+        <p>
+          Instructors are volunteers. Read <a href="/teach/">Teach with us</a> for what the role involves and how to apply
+          by email.
+        </p>
+      </div>
+    </details>
+
+    <details id="language">
+      <summary>In what language are courses taught?</summary>
+      <div class="answer">
+        <p>English.</p>
+      </div>
+    </details>
+
+    <details id="support">
+      <summary>How can I support the Academy?</summary>
+      <div class="answer">
+        <p>
+          <Todo>ways to support the Academy</Todo> You can also help by telling others about the Academy, or by
+          <a href="/teach/">teaching a course</a>.
+        </p>
+      </div>
+    </details>
+  </div>
+</PageLayout>
+
+<script>
+  // Open the question named in the URL fragment, e.g. /faq/#certificate.
+  const open = () => {
+    const target = window.location.hash && document.getElementById(window.location.hash.slice(1));
+    if (target instanceof HTMLDetailsElement) target.open = true;
+  };
+  open();
+  window.addEventListener('hashchange', open);
+</script>

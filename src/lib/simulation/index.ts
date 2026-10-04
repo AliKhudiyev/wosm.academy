@@ -26,6 +26,7 @@ export function init(): void {
   };
 
   // Start after the page has settled so the simulation never delays first paint.
-  if ('requestIdleCallback' in window) window.requestIdleCallback(start, { timeout: 2000 });
-  else window.setTimeout(start, 300);
+  // (Safari has no requestIdleCallback.)
+  if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(start, { timeout: 2000 });
+  else setTimeout(start, 300);
 }

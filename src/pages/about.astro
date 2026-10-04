@@ -1,0 +1,185 @@
+---
+import ExternalLink from '../components/ExternalLink.astro';
+import Logo from '../components/Logo.astro';
+import Manifesto from '../components/Manifesto.astro';
+import PersonEntry from '../components/PersonEntry.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+import PageLayout from '../layouts/PageLayout.astro';
+import { getCourses, getPeople } from '../lib/content';
+
+const [people, courses] = await Promise.all([getPeople(), getCourses()]);
+
+const sections = [
+  { id: 'manifesto', label: 'Manifesto' },
+  { id: 'mission', label: 'Our mission' },
+  { id: 'name', label: 'The name' },
+  { id: 'people', label: 'People' },
+  { id: 'how-we-work', label: 'How we work' },
+  { id: 'transparency', label: 'Transparency' },
+  { id: 'get-involved', label: 'Get involved' },
+];
+---
+
+<PageLayout
+  title="About"
+  heading="About WoSM Academy"
+  description="WoSM Academy (Wisdom of Starving Minds): our manifesto, mission, the people behind the Academy and how we work."
+  lead="WoSM Academy — Wisdom of Starving Minds — exists to democratise knowledge: free, open, rigorous courses for anyone, anywhere."
+>
+  <nav slot="header" class="toc" aria-label="On this page">
+    <ol>
+      {
+        sections.map((s) => (
+          <li>
+            <a href={`#${s.id}`}>{s.label}</a>
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+
+  <section class="block anchor" id="manifesto" aria-labelledby="manifesto-title">
+    <h2 id="manifesto-title">Manifesto</h2>
+    <Manifesto />
+    <p class="measure"><Todo>approve or rewrite the manifesto; expand each point here if you wish</Todo></p>
+  </section>
+
+  <section class="block anchor" id="mission" aria-labelledby="mission-title">
+    <h2 id="mission-title">Our mission</h2>
+    <div class="prose">
+      <p>
+        We want to democratise knowledge. Our courses are <strong>free</strong>, so cost is never the reason someone
+        cannot learn. They are <strong>open</strong>: anyone can join, and the materials are openly licensed. And they
+        are <strong>rigorous</strong>: we teach ideas properly, with the depth and care they deserve.
+      </p>
+      <p>
+        We start with computer science and mathematics. <Todo>why these subjects first</Todo>
+      </p>
+    </div>
+  </section>
+
+  <section class="block anchor" id="name" aria-labelledby="name-title">
+    <h2 id="name-title">The name</h2>
+    <div class="name-grid">
+      <div class="prose">
+        <p>
+          WoSM stands for <em>Wisdom of Starving Minds</em>. A starving mind is one that wants to learn and has nothing
+          to feed on.
+        </p>
+        <p>
+          The image comes from Conway’s Game of Life, the cellular automaton that runs quietly in the background of this
+          site. In Life, a cell with too few neighbours starves and disappears; a cell with enough neighbours survives.
+          Learning works the same way, so we learn in company.
+        </p>
+        <p>
+          Our logo is a <em>glider</em>, the best-known pattern in Life: five cells that keep moving forward together,
+          one step at a time.
+        </p>
+      </div>
+      <div class="name-logo" aria-hidden="true">
+        <Logo layout="stacked" />
+      </div>
+    </div>
+  </section>
+
+  <section class="block anchor" id="people" aria-labelledby="people-title">
+    <h2 id="people-title">People</h2>
+    <div class:list={['people', { 'people--grid': people.length > 3 }]}>
+      {people.map((person) => <PersonEntry person={person} courses={courses} />)}
+    </div>
+  </section>
+
+  <section class="block anchor" id="how-we-work" aria-labelledby="work-title">
+    <h2 id="work-title">How we work</h2>
+    <ul class="dash-list measure">
+      <li>
+        <strong>Courses are taught on Moodle</strong>, at <ExternalLink href={site.moodle.home}
+          >moodle.wosm.academy</ExternalLink
+        >. This website describes the courses; Moodle is where you study.
+      </li>
+      <li>
+        <strong>Instructors are volunteers</strong> who know their subject well and want to teach it. See <a
+          href="/teach/">Teach with us</a
+        >.
+      </li>
+      <li>
+        <strong>Every course is reviewed before it is published</strong>: content accuracy, structure, accessibility and
+        licence. The Director carries out the review.
+      </li>
+      <li>
+        <strong>Materials are openly licensed</strong> under <a href="/licence/">{site.licence.content.name}</a>. You can
+        keep them, share them and adapt them, with attribution.
+      </li>
+    </ul>
+  </section>
+
+  <section class="block anchor" id="transparency" aria-labelledby="transparency-title">
+    <h2 id="transparency-title">Transparency</h2>
+    <div class="prose">
+      <p>
+        WoSM Academy was founded by Ali Khudiyev, who directs it. <Todo
+          >how the Academy is funded and what it costs to run — or remove this section</Todo
+        >
+      </p>
+    </div>
+  </section>
+
+  <section class="block anchor" id="get-involved" aria-labelledby="involved-title">
+    <h2 id="involved-title">Get involved</h2>
+    <ul class="dash-list measure">
+      <li><a href="/join/">Join as a student</a> — free, no application.</li>
+      <li><a href="/teach/">Teach a course</a> — we welcome volunteer instructors.</li>
+      <li>
+        {site.discord ? <ExternalLink href={site.discord}>Join the Discord</ExternalLink> : <>Join the Discord <Todo>invite link</Todo></>} —
+        meet other students.
+      </li>
+      <li>
+        <ExternalLink href={site.github.repo}>Improve this website on GitHub</ExternalLink> — report problems or suggest changes.
+      </li>
+    </ul>
+  </section>
+</PageLayout>
+
+<style>
+  .anchor {
+    scroll-margin-top: var(--space-l);
+  }
+
+  .name-grid {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+  }
+
+  @media (min-width: 56rem) {
+    .name-grid {
+      grid-template-columns: minmax(0, var(--measure)) 1fr;
+    }
+
+    .name-logo {
+      justify-self: center;
+      padding-top: var(--space-s);
+    }
+  }
+
+  .name-logo {
+    font-size: 1.25rem;
+  }
+
+  .people {
+    display: grid;
+    gap: var(--space-xl);
+    max-width: var(--measure);
+  }
+
+  .people--grid {
+    max-width: none;
+  }
+
+  @media (min-width: 64rem) {
+    .people--grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

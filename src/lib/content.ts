@@ -57,7 +57,7 @@ export function learningPath(courses: Course[]): Course[] {
   const ids = new Set(courses.map((c) => c.id));
   const before = new Map<string, Set<string>>();
   for (const course of courses) {
-    const deps = [...course.data.prerequisites, ...course.data.recommended]
+    const deps = [...(course.data.prerequisites ?? []), ...course.data.recommended]
       .map((ref) => ref.id)
       .filter((id) => ids.has(id) && id !== course.id);
     before.set(course.id, new Set(deps));

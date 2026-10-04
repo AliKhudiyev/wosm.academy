@@ -1,0 +1,116 @@
+---
+// Comments and reactions on Journal posts via giscus (GitHub Discussions).
+// Nothing is requested from giscus.app until the reader scrolls near this
+// section. The giscus theme follows the site theme (themechange event).
+import ExternalLink from './ExternalLink.astro';
+import Todo from './Todo.astro';
+import { giscus, giscusEnabled } from '../config/giscus';
+---
+
+<section class="comments" aria-labelledby="comments-title">
+  <h2 id="comments-title">Comments and reactions</h2>
+  {
+    giscusEnabled ? (
+      <>
+        <p class="meta">
+          Comments are stored as <ExternalLink href={`https://github.com/${giscus.repo}/discussions`}>GitHub Discussions</ExternalLink> and
+          shown with giscus. They load from giscus.app when you reach this section; commenting needs a GitHub account.
+          See <a href="/privacy/">Privacy</a>.
+        </p>
+        <div
+          class="comments__frame"
+          data-giscus
+          data-repo={giscus.repo}
+          data-repo-id={giscus.repoId}
+          data-category={giscus.category}
+          data-category-id={giscus.categoryId}
+          data-mapping={giscus.mapping}
+          data-reactions-enabled={giscus.reactionsEnabled ? '1' : '0'}
+          data-lang={giscus.lang}
+          data-theme-light={giscus.themes.light}
+          data-theme-dark={giscus.themes.dark}
+        ></div>
+        <noscript>
+          <p>Comments need JavaScript.</p>
+        </noscript>
+      </>
+    ) : (
+      <p>
+        <Todo>enable giscus: add repoId and categoryId in src/config/giscus.ts</Todo>
+      </p>
+    )
+  }
+</section>
+
+<script>
+  const frame = document.querySelector<HTMLElement>('[data-giscus]');
+
+  if (frame) {
+    const root = document.documentElement;
+    const dark = window.matchMedia('(prefers-color-scheme: dark)');
+    const theme = () => {
+      const isDark = (root.dataset.theme ?? (dark.matches ? 'dark' : 'light')) === 'dark';
+      return (isDark ? frame.dataset.themeDark : frame.dataset.themeLight) ?? 'preferred_color_scheme';
+    };
+
+    const load = () => {
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      const attributes: Record<string, string | undefined> = {
+        'data-repo': frame.dataset.repo,
+        'data-repo-id': frame.dataset.repoId,
+        'data-category': frame.dataset.category,
+        'data-category-id': frame.dataset.categoryId,
+        'data-mapping': frame.dataset.mapping,
+        'data-strict': '1',
+        'data-reactions-enabled': frame.dataset.reactionsEnabled,
+        'data-emit-metadata': '0',
+        'data-input-position': 'bottom',
+        'data-lang': frame.dataset.lang,
+        'data-loading': 'lazy',
+        'data-theme': theme(),
+      };
+      for (const [name, value] of Object.entries(attributes)) if (value) script.setAttribute(name, value);
+      frame.append(script);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          observer.disconnect();
+          load();
+        }
+      },
+      { rootMargin: '600px 0px' },
+    );
+    observer.observe(frame);
+
+    document.addEventListener('themechange', () => {
+      const iframe = frame.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+      iframe?.contentWindow?.postMessage({ giscus: { setConfig: { theme: theme() } } }, 'https://giscus.app');
+    });
+  }
+</script>
+
+<style>
+  .comments {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--rule);
+    max-width: var(--measure);
+  }
+
+  .comments > * + * {
+    margin-top: var(--space-s);
+  }
+
+  .comments h2 {
+    font-size: var(--step-2);
+  }
+
+  .comments__frame {
+    min-height: 8rem;
+  }
+</style>

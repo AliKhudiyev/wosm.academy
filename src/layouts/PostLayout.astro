@@ -1,0 +1,82 @@
+---
+import FormattedDate from '../components/FormattedDate.astro';
+import Giscus from '../components/Giscus.astro';
+import Txt from '../components/Txt.astro';
+import { site } from '../config/site';
+import { readingTime } from '../lib/format';
+import { postUrl, type Post } from '../lib/content';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, date, summary, tags } = post.data;
+const minutes = readingTime(post.body);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  datePublished: date.toISOString(),
+  description: summary,
+  url: new URL(postUrl(post), site.url).href,
+  inLanguage: 'en',
+  publisher: { '@type': 'EducationalOrganization', name: site.name, url: `${site.url}/` },
+};
+---
+
+<BaseLayout title={title} description={summary} type="article" publishedTime={date} jsonLd={jsonLd}>
+  <article class="container page post">
+    <header class="page-header">
+      <p class="eyebrow"><a href="/journal/">Journal</a></p>
+      <h1>{title}</h1>
+      <p class="lead"><Txt text={summary} /></p>
+      <p class="meta post__meta">
+        <FormattedDate date={date} />
+        <span>{minutes}&nbsp;min read</span>
+        {post.data.draft && <span>[draft]</span>}
+      </p>
+    </header>
+    <div class="prose">
+      <slot />
+    </div>
+    {
+      tags.length > 0 && (
+        <p class="meta post__tags">
+          Tags:{' '}
+          {tags.map((tag) => (
+            <span class="tag">{tag}</span>
+          ))}
+        </p>
+      )
+    }
+    <Giscus />
+  </article>
+</BaseLayout>
+
+<style>
+  .eyebrow a {
+    color: inherit;
+  }
+
+  .post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6em;
+  }
+
+  .post__meta > :global(* + *)::before {
+    content: '·';
+    margin-right: 0.6em;
+  }
+
+  .post__tags {
+    margin-top: var(--space-xl);
+  }
+
+  .tag + .tag::before {
+    content: ', ';
+  }
+</style>

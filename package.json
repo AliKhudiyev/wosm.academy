@@ -13,7 +13,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "linkcheck": "linkinator dist --recurse --skip \"^https?://(?!localhost)\"",
+    "linkcheck": "linkinator dist --recurse --check-css --check-fragments --skip \"^https?://(?!(localhost|127\\.0\\.0\\.1)[:/])\" --skip \"^mailto:\"",
     "astro": "astro",
     "brand": "node scripts/build-brand-assets.mjs"
   },

@@ -10,6 +10,12 @@ The site is built by GitHub Actions and served by GitHub Pages at the apex domai
 
 - Public repository (e.g. `<owner>/wosm.academy`). GitHub Pages on a free account requires a public repo.
 - Default branch `main`. Pages source: **GitHub Actions** (Settings → Pages → Build and deployment → Source).
+  If the source is left on “Deploy from a branch”, GitHub also runs its own Jekyll build on every push
+  (“pages build and deployment”), which fails on the `.astro` frontmatter (`Invalid YAML front matter in
+  src/components/Footer.astro`). That failure is harmless but noisy; switching the source to GitHub Actions removes it.
+- With the GitHub Actions source, `public/CNAME` is **ignored**: the custom domain must be set in Settings → Pages.
+- Until the custom domain is set, the site is served under the owner's user-site domain at
+  `alikhudiyev.com/wosm.academy/`, where its root-relative links and assets do not resolve. This is expected.
 
 ## 2. Astro config
 
@@ -44,7 +50,11 @@ with `actions/deploy-pages@v5` (`pages: write`, `id-token: write`, concurrency g
 
 ## 4. DNS (at the domain registrar / DNS provider)
 
-Keep the existing `moodle` record pointing at the VPS. Add:
+Registrar/DNS: **Porkbun**. As of 5 October 2026 the apex resolves to Porkbun's parking addresses (207.207.210.229,
+207.207.210.107) and `www` is a CNAME to `pixie.porkbun.com` (Porkbun URL forwarding). Remove those records — and any
+URL-forwarding entry in Porkbun — before adding the ones below.
+
+Keep the existing `moodle` record (A → 62.171.139.18, the VPS). Add:
 
 | Type | Name | Value |
 |---|---|---|
@@ -56,7 +66,7 @@ Keep the existing `moodle` record pointing at the VPS. Add:
 | AAAA | `@` | `2606:50c0:8001::153` |
 | AAAA | `@` | `2606:50c0:8002::153` |
 | AAAA | `@` | `2606:50c0:8003::153` |
-| CNAME | `www` | `<github-username>.github.io` |
+| CNAME | `www` | `alikhudiyev.github.io` |
 
 Remove any old A/AAAA records on `@` that point elsewhere (e.g. to the VPS), or Pages will fail its DNS check.
 

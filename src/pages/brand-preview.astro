@@ -1,0 +1,167 @@
+---
+// TEMPORARY review page (docs/DESIGN.md §7): the three logo variations side by
+// side in both themes. After the owner chooses, set the variant in
+// src/config/brand.ts, run `npm run brand`, and delete this file.
+import GliderMark from '../components/GliderMark.astro';
+import Logo from '../components/Logo.astro';
+import PageLayout from '../layouts/PageLayout.astro';
+import type { LogoVariant } from '../config/brand';
+import { logoVariant } from '../config/brand';
+
+const variants: Array<{ id: LogoVariant; name: string; notes: string }> = [
+  {
+    id: 'a',
+    name: 'A — Square glider, serif + mono',
+    notes:
+      'Square cells. “WoSM” in Source Serif 4 semibold, “Academy” in JetBrains Mono on the same line. The plainest of the three.',
+  },
+  {
+    id: 'b',
+    name: 'B — Rounded glider, two-line label',
+    notes:
+      'Cells with a barely visible corner radius. “WoSM” above a small, widely tracked “ACADEMY”. More of an emblem; slightly taller header.',
+  },
+  {
+    id: 'c',
+    name: 'C — Glider as the “o”',
+    notes:
+      'The glider, sized to the x-height, stands in for the lowercase “o”. Most distinctive, but the name reads less directly; best used large.',
+  },
+];
+---
+
+<PageLayout
+  title="Brand preview"
+  description="Temporary page for choosing the WoSM Academy logo."
+  lead="Three variations of the mark and wordmark, each in both themes. This page is temporary and not linked from anywhere."
+  noindex
+  sim="none"
+>
+  <p slot="header" class="meta">
+    In use now: <strong>{logoVariant.toUpperCase()}</strong>. To choose, set <code>logoVariant</code> in
+    <code>src/config/brand.ts</code>, run <code>npm run brand</code>, then delete this page.
+  </p>
+
+  {
+    variants.map((variant) => (
+      <section class="variant" aria-labelledby={`variant-${variant.id}`}>
+        <h2 id={`variant-${variant.id}`}>{variant.name}</h2>
+        <p class="measure">{variant.notes}</p>
+        <div class="panels">
+          {(['theme-light', 'theme-dark'] as const).map((theme) => (
+            <div class:list={['panel', theme]}>
+              <p class="eyebrow">{theme === 'theme-light' ? 'Paper (light)' : 'Slate (dark)'}</p>
+              <div class="sample sample--header">
+                <span class="header-size">
+                  <Logo variant={variant.id} />
+                </span>
+                <span class="fake-nav" aria-hidden="true">
+                  Courses Join Teach About
+                </span>
+              </div>
+              <div class="sample large">
+                <Logo variant={variant.id} />
+              </div>
+              <div class="sample stacked">
+                <Logo variant={variant.id} layout="stacked" />
+              </div>
+              <div class="sample icons">
+                <GliderMark rounded={variant.id === 'b'} class="icon-16" label="Mark at 16 pixels" />
+                <GliderMark rounded={variant.id === 'b'} class="icon-32" label="Mark at 32 pixels" />
+                <GliderMark rounded={variant.id === 'b'} class="icon-64" label="Mark at 64 pixels" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    ))
+  }
+</PageLayout>
+
+<style>
+  .variant {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--rule);
+  }
+
+  .variant > * + * {
+    margin-top: var(--space-s);
+  }
+
+  .variant h2 {
+    font-size: var(--step-2);
+  }
+
+  .panels {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  @media (min-width: 64rem) {
+    .panels {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .panel {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: var(--space-m);
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .sample {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+  }
+
+  .sample--header {
+    justify-content: space-between;
+    padding-bottom: var(--space-s);
+    border-bottom: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+
+  .header-size {
+    font-size: 1.15rem;
+  }
+
+  .fake-nav {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--text-muted);
+    word-spacing: 0.6em;
+  }
+
+  .large {
+    font-size: 2rem;
+  }
+
+  .stacked {
+    font-size: 1.1rem;
+  }
+
+  .icons {
+    align-items: flex-end;
+  }
+
+  .icons :global(.icon-16) {
+    width: 16px;
+    height: 16px;
+  }
+
+  .icons :global(.icon-32) {
+    width: 32px;
+    height: 32px;
+  }
+
+  .icons :global(.icon-64) {
+    width: 64px;
+    height: 64px;
+  }
+</style>

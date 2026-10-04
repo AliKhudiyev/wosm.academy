@@ -1,0 +1,50 @@
+---
+// Light/dark toggle. The initial theme is applied by the inline script in
+// BaseLayout <head> (no flash); this button flips it, remembers the choice and
+// dispatches a `themechange` event on `document` for the simulation and giscus.
+---
+
+<button type="button" class="icon-button theme-toggle js-only" data-theme-toggle aria-pressed="false" title="Dark theme">
+  <span class="visually-hidden">Dark theme</span>
+  <svg class="icon icon--moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"></path>
+  </svg>
+  <svg class="icon icon--sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path>
+  </svg>
+</button>
+
+<script>
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+
+  const current = () => root.dataset.theme ?? (media.matches ? 'dark' : 'light');
+
+  const announce = () => {
+    const theme = current();
+    buttons.forEach((button) => button.setAttribute('aria-pressed', String(theme === 'dark')));
+    document.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+  };
+
+  buttons.forEach((button) =>
+    button.addEventListener('click', () => {
+      const theme = current() === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = theme;
+      try {
+        localStorage.setItem('wosm:theme', theme);
+      } catch {
+        /* storage unavailable: the choice lasts for this page only */
+      }
+      announce();
+    }),
+  );
+
+  // Following the system: react when it changes.
+  media.addEventListener('change', () => {
+    if (!root.dataset.theme) announce();
+  });
+
+  buttons.forEach((button) => button.setAttribute('aria-pressed', String(current() === 'dark')));
+</script>

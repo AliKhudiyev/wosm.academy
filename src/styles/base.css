@@ -1,0 +1,359 @@
+/* Base element styles: reset, typography, links, focus, prose. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* The page background lives on <html> only, so the fixed simulation canvas
+   (z-index: -1) can sit between the background and the content. */
+html {
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: var(--space-l);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-serif);
+  font-size: var(--step-0);
+  line-height: var(--leading);
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ---------- Headings and text ---------- */
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  text-wrap: balance;
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--step-4);
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: var(--step-3);
+}
+
+h3 {
+  font-size: var(--step-1);
+}
+
+h4 {
+  font-size: var(--step-0);
+}
+
+p,
+ul,
+ol,
+dl,
+blockquote,
+pre,
+table,
+figure {
+  margin: 0;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+small {
+  font-size: var(--step--1);
+}
+
+strong,
+b {
+  font-weight: 650;
+}
+
+abbr[title] {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--space-xl) 0;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+:not(pre) > code {
+  background: var(--surface);
+  padding: 0.1em 0.3em;
+  border-radius: var(--radius);
+}
+
+pre {
+  background: var(--surface);
+  padding: var(--space-s);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+/* ---------- Links ---------- */
+
+a {
+  color: var(--accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-thickness var(--transition), color var(--transition);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Small arrow for links that leave the site. Screen readers get the
+   visually hidden "(external site)" text instead. */
+.ext {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  margin-left: 0.15em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* ---------- Focus ---------- */
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---------- Utilities ---------- */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Elements that only make sense with JavaScript. The inline script in <head>
+   swaps the `no-js` class for `js` before first paint. */
+.no-js .js-only {
+  display: none !important;
+}
+
+.skip-link {
+  position: absolute;
+  top: var(--space-2xs);
+  left: var(--space-2xs);
+  z-index: 100;
+  padding: var(--space-2xs) var(--space-s);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  border-radius: var(--radius);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* Visible placeholder for information the owner still has to provide. */
+mark.todo,
+.todo {
+  background: var(--todo-bg);
+  color: var(--todo-text);
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  font-weight: 400;
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ---------- Layout primitives ---------- */
+
+.container {
+  width: 100%;
+  max-width: calc(var(--wide) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.measure {
+  max-width: var(--measure);
+}
+
+.flow > * + * {
+  margin-top: var(--flow-space, 1em);
+}
+
+/* ---------- Prose (Markdown bodies and long-form pages) ---------- */
+
+.prose {
+  max-width: var(--measure);
+}
+
+.prose > * + * {
+  margin-top: 1em;
+}
+
+.prose h2 {
+  font-size: var(--step-2);
+  margin-top: var(--space-xl);
+  padding-top: var(--space-m);
+  border-top: 1px solid var(--rule);
+}
+
+.prose h3 {
+  margin-top: var(--space-l);
+}
+
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+  margin-top: var(--space-xs);
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose li + li {
+  margin-top: 0.35em;
+}
+
+.prose li::marker {
+  color: var(--text-muted);
+}
+
+.prose ol > li::marker {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.prose blockquote {
+  border-left: var(--border-subject) solid var(--rule);
+  padding-left: var(--space-s);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.prose a[href^='http']:not([href*='//wosm.academy'])::after {
+  content: '\2197';
+  content: '\2197' / '';
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  margin-left: 0.15em;
+}
+
+.prose :is(h2, h3, h4)[id] {
+  scroll-margin-top: var(--space-l);
+}
+
+/* ---------- Tables (syllabi) ---------- */
+
+.table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+}
+
+caption {
+  text-align: left;
+  color: var(--text-muted);
+  padding-bottom: var(--space-2xs);
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.55em 0.75em 0.55em 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+th {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom-color: var(--text-muted);
+}
+
+/* ---------- Print ---------- */
+
+@media print {
+  #bg-sim,
+  .site-header .site-menu,
+  .menu-button,
+  .sim-caption {
+    display: none !important;
+  }
+}

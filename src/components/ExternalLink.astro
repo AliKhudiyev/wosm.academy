@@ -1,0 +1,11 @@
+---
+// A link that leaves wosm.academy: rel="noopener", a small ↗ and a hint for
+// screen readers. Opens in the same tab (owner's preference).
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'> & { href: string };
+
+const { href, ...rest } = Astro.props;
+---
+
+<a href={href} rel="noopener" {...rest}><slot /><span class="ext" aria-hidden="true">↗</span><span class="visually-hidden"> (external site)</span></a>

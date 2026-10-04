@@ -1,0 +1,20 @@
+---
+// Text-only course status in brackets: [open], [upcoming], [archived].
+// A course without a confirmed status shows [tbc].
+import type { CourseStatus } from '../lib/vocab';
+
+interface Props {
+  status?: CourseStatus;
+}
+
+const { status } = Astro.props;
+const label = status ?? 'tbc';
+const description: Record<string, string> = {
+  open: 'Status: open for enrolment',
+  upcoming: 'Status: upcoming, enrolment opens soon',
+  archived: 'Status: archived, no longer taught',
+  tbc: 'Status: to be confirmed',
+};
+---
+
+<span class:list={['badge', `badge--${label}`]} title={description[label]}><span class="visually-hidden">{description[label]}</span><span aria-hidden="true">[{label}]</span></span>

@@ -1,0 +1,22 @@
+---
+// Left border + surface background, for "Note" and "How to apply" boxes.
+interface Props {
+  title?: string;
+  /** Heading level for the title. */
+  level?: 2 | 3 | 4;
+  id?: string;
+  class?: string;
+}
+
+const { title, level = 3, id, class: className } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3' | 'h4';
+const headingId = title ? `${id ?? title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-title` : undefined;
+const Element = title ? 'section' : 'div';
+---
+
+<Element class:list={['callout', className]} id={id} aria-labelledby={headingId}>
+  {title && <Heading class="callout__title" id={headingId}>{title}</Heading>}
+  <div class="callout__body flow">
+    <slot />
+  </div>
+</Element>

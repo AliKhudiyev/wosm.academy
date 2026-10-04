@@ -1,0 +1,29 @@
+---
+// Standard page: header block (eyebrow, H1, lead) followed by the page body.
+// Set `prose` for long-form text pages (Markdown-like styling, ~68ch measure).
+import BaseLayout, { type Props as BaseProps } from './BaseLayout.astro';
+
+interface Props extends BaseProps {
+  /** H1 text; defaults to `title`. */
+  heading?: string;
+  eyebrow?: string;
+  lead?: string;
+  prose?: boolean;
+}
+
+const { heading, eyebrow, lead, prose = false, ...base } = Astro.props;
+---
+
+<BaseLayout {...base}>
+  <div class="container page">
+    <header class="page-header">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1>{heading ?? base.title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+      <slot name="header" />
+    </header>
+    <div class:list={['page-body', { prose }]}>
+      <slot />
+    </div>
+  </div>
+</BaseLayout>

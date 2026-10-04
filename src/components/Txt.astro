@@ -1,0 +1,21 @@
+---
+// Renders a plain string from frontmatter, highlighting any "TODO(owner)"
+// placeholder it contains (the Markdown equivalent is src/lib/markdown/plugins.mjs).
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const index = text.indexOf('TODO(owner)');
+---
+
+{
+  index === -1 ? (
+    text
+  ) : (
+    <>
+      {text.slice(0, index)}
+      <mark class="todo">{text.slice(index)}</mark>
+    </>
+  )
+}

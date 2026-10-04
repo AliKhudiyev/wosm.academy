@@ -1,0 +1,52 @@
+---
+import { site } from '../config/site';
+import ExternalLink from './ExternalLink.astro';
+import Logo from './Logo.astro';
+import Todo from './Todo.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <a class="site-footer__home" href="/" aria-label="WoSM Academy, home"><Logo /></a>
+        <p class="site-footer__longname">Wisdom of Starving Minds</p>
+        <p class="site-footer__mission">{site.mission}</p>
+      </div>
+
+      <nav aria-labelledby="footer-help">
+        <h2 class="eyebrow" id="footer-help">Help &amp; policies</h2>
+        <ul role="list" class="site-footer__links">
+          <li><a href="/faq/">FAQ</a></li>
+          <li><a href="/code-of-conduct/">Code of Conduct</a></li>
+          <li><a href="/licence/">Licence</a></li>
+          <li><a href="/privacy/">Privacy</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="footer-elsewhere">
+        <h2 class="eyebrow" id="footer-elsewhere">Elsewhere</h2>
+        <ul role="list" class="site-footer__links">
+          <li>
+            {site.discord ? <ExternalLink href={site.discord}>Discord</ExternalLink> : <>Discord <Todo>invite link</Todo></>}
+          </li>
+          <li><ExternalLink href={site.github.repo}>GitHub</ExternalLink></li>
+          <li><a href="/rss.xml">RSS</a></li>
+          <li><a href={`mailto:${site.email.general}`}>{site.email.general}</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p>
+        © {year} WoSM Academy. Content <a href="/licence/">{site.licence.content.name}</a>, code <a href="/licence/">{site.licence.code.name}</a>.
+      </p>
+      <p class="sim-caption js-only" data-sim-caption hidden>
+        <span aria-hidden="true">bg: Conway’s Game of Life · gen <span data-sim-gen>0</span> ·</span>
+        <button type="button" class="sim-caption__toggle" data-sim-toggle><span aria-hidden="true">[</span><span data-sim-action>pause</span><span class="visually-hidden"> background animation</span><span aria-hidden="true">]</span></button>
+      </p>
+    </div>
+  </div>
+</footer>

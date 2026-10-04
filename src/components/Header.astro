@@ -1,0 +1,78 @@
+---
+import { nav, site } from '../config/site';
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const path = Astro.url.pathname;
+const current = (href: string) => (path === href ? 'page' : path.startsWith(href) ? 'true' : undefined);
+---
+
+<header class="site-header" data-site-header>
+  <div class="container site-header__inner">
+    <a class="site-header__home" href="/" aria-label="WoSM Academy, home">
+      <Logo />
+    </a>
+
+    <button
+      type="button"
+      class="menu-button js-only"
+      aria-expanded="false"
+      aria-controls="site-menu"
+      data-menu-button
+    >
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path class="menu-button__open" d="M4 7h16M4 12h16M4 17h16"></path>
+        <path class="menu-button__close" d="M6 6l12 12M18 6L6 18"></path>
+      </svg>
+      <span>Menu</span>
+    </button>
+
+    <div class="site-menu" id="site-menu" data-menu>
+      <nav class="site-nav" aria-label="Main">
+        <ul role="list">
+          {
+            nav.map((item) => (
+              <li>
+                <a href={item.href} aria-current={current(item.href)}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <div class="site-menu__actions">
+        <ThemeToggle />
+        <a class="button button--secondary button--small" href={site.moodle.home} rel="noopener">Moodle<span class="ext" aria-hidden="true">↗</span><span class="visually-hidden"> (external site)</span></a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Collapse the navigation into a menu on narrow screens. Without JS the
+  // links are simply shown (see .no-js rules in components.css).
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  const button = header?.querySelector<HTMLButtonElement>('[data-menu-button]');
+
+  if (header && button) {
+    const setOpen = (open: boolean) => {
+      button.setAttribute('aria-expanded', String(open));
+      header.toggleAttribute('data-open', open);
+    };
+
+    button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+
+    header.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && header.hasAttribute('data-open')) {
+        setOpen(false);
+        button.focus();
+      }
+    });
+
+    // Close if the viewport grows past the breakpoint while open.
+    window.matchMedia('(min-width: 56.25rem)').addEventListener('change', (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>

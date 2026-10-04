@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wosm.academy/sitemap-index.xml

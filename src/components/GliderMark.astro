@@ -1,0 +1,48 @@
+---
+// The glider from Conway's Game of Life, in the phase used for the logo:
+//   . ■ .
+//   . . ■
+//   ■ ■ ■
+// Square cells with a gap of 15% of the cell size; single colour (currentColor).
+interface Props {
+  /** Slightly rounded cell corners (logo variation B). */
+  rounded?: boolean;
+  /** Accessible name. Without it the mark is decorative (aria-hidden). */
+  label?: string;
+  class?: string;
+}
+
+const { rounded = false, label, class: className } = Astro.props;
+
+const CELL = 10;
+const GAP = 1.5;
+const STEP = CELL + GAP;
+const SIZE = 3 * CELL + 2 * GAP;
+const cells: Array<[number, number]> = [
+  [1, 0],
+  [2, 1],
+  [0, 2],
+  [1, 2],
+  [2, 2],
+];
+---
+
+<svg
+  class:list={['glider-mark', className]}
+  viewBox={`0 0 ${SIZE} ${SIZE}`}
+  fill="currentColor"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  {cells.map(([x, y]) => <rect x={x * STEP} y={y * STEP} width={CELL} height={CELL} rx={rounded ? 1 : undefined} />)}
+</svg>
+
+<style>
+  .glider-mark {
+    width: 1em;
+    height: 1em;
+    flex: none;
+  }
+</style>

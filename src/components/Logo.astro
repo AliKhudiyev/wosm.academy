@@ -1,0 +1,135 @@
+---
+// WoSM Academy logo. Three variations exist while the owner chooses one
+// (see src/config/brand.ts and /brand-preview/):
+//   a — square glider left; "WoSM" serif + "Academy" mono on one line
+//   b — rounded glider left; "WoSM" over a small tracked "ACADEMY"
+//   c — the glider takes the place of the "o"; "Academy" mono after
+// The text is real HTML text in the site fonts; accessible name "WoSM Academy".
+import GliderMark from './GliderMark.astro';
+import { logoVariant, type LogoVariant } from '../config/brand';
+
+interface Props {
+  variant?: LogoVariant;
+  layout?: 'horizontal' | 'stacked';
+  class?: string;
+}
+
+const { variant = logoVariant, layout = 'horizontal', class: className } = Astro.props;
+---
+
+<span class:list={['logo', `logo--${variant}`, `logo--${layout}`, className]}>
+  {
+    variant === 'c' ? (
+      <>
+        <span class="logo__name" aria-hidden="true">
+          W<GliderMark class="logo__o" />SM
+        </span>
+        <span class="logo__academy" aria-hidden="true">Academy</span>
+        <span class="visually-hidden">WoSM Academy</span>
+      </>
+    ) : (
+      <>
+        <GliderMark class="logo__mark" rounded={variant === 'b'} />
+        <span class="logo__text">
+          <span class="logo__name">WoSM</span> <span class="logo__academy">Academy</span>
+        </span>
+      </>
+    )
+  }
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    color: var(--text);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .logo :global(.logo__mark) {
+    width: 1.05em;
+    height: 1.05em;
+  }
+
+  .logo__text {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+  }
+
+  .logo__name {
+    font-family: var(--font-serif);
+    font-weight: 620;
+    font-size: 1.25em;
+    letter-spacing: -0.005em;
+  }
+
+  .logo__academy {
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+    font-weight: 450;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+  }
+
+  /* b — two-line label */
+  .logo--b :global(.logo__mark) {
+    width: 1.7em;
+    height: 1.7em;
+  }
+
+  .logo--b .logo__text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.22em;
+  }
+
+  .logo--b .logo__academy {
+    font-size: 0.56em;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  /* c — glider in place of the "o" (sized to the x-height) */
+  .logo--c {
+    align-items: baseline;
+  }
+
+  .logo--c .logo__name {
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  .logo--c :global(.logo__o) {
+    width: 0.47em;
+    height: 0.47em;
+    margin: 0 0.06em 0 0.05em;
+    align-self: baseline;
+    position: relative;
+    top: 0.01em;
+  }
+
+  /* Stacked lockup: mark above the wordmark */
+  .logo--stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6em;
+  }
+
+  .logo--stacked :global(.logo__mark) {
+    width: 2.2em;
+    height: 2.2em;
+  }
+
+  .logo--stacked .logo__text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35em;
+  }
+
+  .logo--stacked .logo__name {
+    font-size: 2em;
+  }
+</style>

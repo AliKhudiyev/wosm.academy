@@ -1,0 +1,113 @@
+/*
+ * Design tokens — the only place colours, fonts and sizes are defined.
+ * See docs/DESIGN.md. Every text/background pair is checked for WCAG AA,
+ * including the worst case with a simulation cell drawn behind the text.
+ */
+
+/* ---------- Light theme ("paper") — the default ---------- */
+:root,
+.theme-light {
+  color-scheme: light;
+
+  --bg: #f2eee5;
+  --surface: #ebe6da;
+  --text: #2b2a27;
+  --text-muted: #666158;
+  --rule: #d6cfbf;
+  --accent: #1d6864;
+  --accent-strong: #17524f;
+  --accent-contrast: #f2eee5;
+  --todo-bg: #f6e3a8;
+  --todo-text: #4a3b06;
+
+  --subject-cs: #1d6864;
+  --subject-math: #9a4a2e;
+
+  --sim-cell: #2b2a27;
+  --sim-alpha: 0.07;
+}
+
+/* ---------- Dark theme ("slate") ---------- */
+/* Follow the system unless the visitor picked a theme with the toggle. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --bg: #1e2227;
+    --surface: #262b31;
+    --text: #d8d4cb;
+    --text-muted: #a29e95;
+    --rule: #363c44;
+    --accent: #6bb8b0;
+    --accent-strong: #8ccbc4;
+    --accent-contrast: #1e2227;
+    --todo-bg: #4a3e14;
+    --todo-text: #f3e2a6;
+
+    --subject-cs: #6bb8b0;
+    --subject-math: #d9896a;
+
+    --sim-cell: #d8d4cb;
+    --sim-alpha: 0.09;
+  }
+}
+
+:root[data-theme='dark'],
+.theme-dark {
+  color-scheme: dark;
+
+  --bg: #1e2227;
+  --surface: #262b31;
+  --text: #d8d4cb;
+  --text-muted: #a29e95;
+  --rule: #363c44;
+  --accent: #6bb8b0;
+  --accent-strong: #8ccbc4;
+  --accent-contrast: #1e2227;
+  --todo-bg: #4a3e14;
+  --todo-text: #f3e2a6;
+
+  --subject-cs: #6bb8b0;
+  --subject-math: #d9896a;
+
+  --sim-cell: #d8d4cb;
+  --sim-alpha: 0.09;
+}
+
+/* ---------- Type, space and layout (theme-independent) ---------- */
+:root {
+  --font-serif: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, Cambria, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  /* Fluid scale, ratio ≈ 1.25. Base 17 px on phones → 18 px on desktops. */
+  --step--2: clamp(0.75rem, 0.74rem + 0.05vw, 0.78rem);
+  --step--1: clamp(0.84rem, 0.82rem + 0.1vw, 0.9rem);
+  --step-0: clamp(1.0625rem, 1.04rem + 0.11vw, 1.125rem);
+  --step-1: clamp(1.25rem, 1.2rem + 0.25vw, 1.4rem);
+  --step-2: clamp(1.45rem, 1.35rem + 0.5vw, 1.75rem);
+  --step-3: clamp(1.7rem, 1.52rem + 0.9vw, 2.2rem);
+  --step-4: clamp(2rem, 1.7rem + 1.5vw, 2.75rem);
+
+  --leading: 1.6;
+  --leading-tight: 1.2;
+
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: clamp(3rem, 2.4rem + 3vw, 4.5rem);
+  --space-section: clamp(3rem, 2rem + 4vw, 5.5rem);
+
+  --measure: 68ch;
+  --wide: 72rem;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+
+  --radius: 4px;
+  --border-subject: 3px;
+  --focus-width: 2px;
+  --transition: 120ms ease-out;
+}

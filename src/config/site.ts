@@ -23,7 +23,7 @@ export const site = {
     teaching: 'teach@wosm.academy',
   },
 
-  discord: null as string | null,
+  discord: 'https://discord.gg/DEXyDWj9Qu',
 
   github: {
     repo: 'https://github.com/AliKhudiyev/wosm.academy',

@@ -2,7 +2,7 @@
 title: Volunteer instructor (any area)
 area: any
 status: open
-# commitment: "~4–6 hours per week for one term"   # TODO(owner): confirm, then uncomment
+commitment: "~4–6 hours per week for one semester"   # TODO(owner): confirm, then uncomment
 posted: 2026-10-05
 summary: "Design and teach a course in a subject you know well. Open application, any area."
 ---

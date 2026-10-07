@@ -16,12 +16,17 @@ There is a good set of values that comes with the culture of any functional scie
 
 ## How it works
 
-It is really simple: you join the academy with your email, and 
+It is really simple: you join the [academy's Moodle](https://moodle.wosm.academy) with your email, and enroll yourself in free and open courses. The course page on Moodle will contain all the supporting materials for you to learn the subject, as well as quizzes and exams for knowledge assessment. Upon the succesfful completion of a course, you will recieve a Moodle badge.
 
 ## What comes next
 
-TODO(owner)
+We expect facing with great challenges and difficulties during the initial time period of establishment of the WoSM Academy, since great rewards demand great difficulties to come before them.
 
 ## How to get involved
 
-TODO(owner)
+We are looking for people who would be willing to be part of our project. Especially, if you are a 
+
+- **Student or anyone willing to learn something new and technical,** we would be delighted to see you grow and improve with us;
+- **Teacher,** we would appriciate your knowledge and pedagogy to help others with your valuable insights;
+- **Investor or sponsor,** we would be willing to grow this project with your kind support.
+

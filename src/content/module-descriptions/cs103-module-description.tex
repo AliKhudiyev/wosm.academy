@@ -1,0 +1,189 @@
+% =============================================================
+%  Module Description — Discrete Structures (CS103-F26)
+%  Shown on https://wosm.academy as the course page for CS103-F26.
+%  Compile with: pdflatex cs103-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Discrete Structures}
+\newcommand{\ModuleCode}{CS103-F26}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 1}
+\newcommand{\Semester}{Fall 2026}
+\newcommand{\Credits}{TODO(owner)}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{TODO(owner)}
+\newcommand{\OfficeHours}{TODO(owner)}
+\newcommand{\Prerequisites}{None}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+The Discrete Structures is the first lecture on required modules of mathematics in
+the curriculum. It covers:
+\begin{itemize}
+  \item Basic concepts of logic and mathematics (in the first 4--5 weeks)
+  \item Cardinality and combinatorics, graph theory, number, group theory,
+        propositional and first-order logic (afterwards)
+\end{itemize}
+
+The course introduces fundamental concepts and key areas of discrete mathematics
+that are relevant to students of computer science.
+
+\section{Aims}
+\begin{itemize}
+  \item TODO(owner): aims of the module.
+\end{itemize}
+
+\section{Learning Outcomes}
+After completing this course, you will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Understand and apply the basic terminology and methods of discrete
+        mathematics, including logic, algebraic structures, and algorithmic
+        reasoning.
+  \item Solve combinatorial problems using appropriate mathematical approaches.
+  \item Model and solve problems using graph theory, and quantitatively evaluate
+        the efficiency of algorithms.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Logic: Propositions and Connectives \\
+2  & Logic: Quantifiers and Predicates \\
+3  & Set Theory: Basic Definitions \\
+4  & Set Theory: Venn diagrams, KV maps, Standard Identities \\
+5  & Natural numbers, Peano axioms, Axiom of Induction \\
+6  & Binary Relations \\
+7  & Endorelations, reflexive-transitive closure \\
+8  & Equivalence relations, partial orders \\
+9  & Partial orders: lattices and well-ordering \\
+10 & Functions \\
+11 & Cardinality \\
+12 & Combinatorics I \\
+13 & Combinatorics II: binomial/multinomial theorem, Stirling numbers \\
+14 & Graph Theory \\
+15 & Trees \\
+16 & Eulerian and Hamiltonian cycles \\
+17 & Planarity \\
+18 & Number theory \\
+19 & Groups I \\
+20 & Groups II: Cyclic groups \\
+21 & Groups III: Generated subgroups, Cayley graphs, homomorphisms \\
+22 & Propositional Logic I: Syntax and Semantics \\
+23 & Propositional Logic II: Validity and Semantics \\
+24 & Propositional Logic III: Normal Forms and Equisatisfiable CNF \\
+25 & Propositional Logic IV: SAT, DPLL, clause-set representation \\
+26 & Propositional Logic V: Resolution \\
+27 & First-order Logic \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & TODO(owner) \\
+Labs / Tutorials    & TODO(owner) \\
+Independent study   & TODO(owner) \\
+\midrule
+\textbf{Total}      & \textbf{TODO(owner)} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Your knowledge will be assessed throughout the course with quizzes and the final
+exam. The exam evaluates whether you can correctly use the mathematical terms and
+concepts introduced in the lectures, such as sets, relations, logic, graphs, and
+other mathematical objects. It also tests whether you can select and apply the
+right logical, combinatorial, graph-theoretical, or algebraic methods to solve
+specific problems.
+
+TODO(owner): weight of each assessment component and the learning outcomes it covers.
+
+\section{Reading List}
+\begin{itemize}
+  \item K.\ H.\ Rosen: \textit{Discrete Mathematics and Its Applications},
+        McGraw-Hill, 1995.
+  \item R.\ L.\ Graham, D.\ E.\ Knuth, O.\ Patashnik: \textit{Concrete Mathematics:
+        A Foundation for Computer Science}, Addison-Wesley, 1994.
+  \item D.\ Gries, F.\ B.\ Schneider: \textit{A Logical Approach to Discrete Math},
+        Springer, 1993.
+  \item D.\ L.\ Kreher, D.\ R.\ Stinson: \textit{Combinatorial Algorithms:
+        Generation, Enumeration, and Search}, CRC Press, 1999.
+  \item S.\ Pemmaraju, S.\ Skiena: \textit{Computational Discrete Mathematics:
+        Combinatorics and Graph Theory with Mathematica}, Cambridge University
+        Press, 2003.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} TODO(owner)
+  \item \textbf{Late submissions:} TODO(owner)
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

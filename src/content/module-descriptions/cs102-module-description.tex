@@ -1,0 +1,179 @@
+% =============================================================
+%  Module Description — Introduction to Digital Design and Computer Architecture (CS102-F26)
+%  Shown on https://wosm.academy as the course page for CS102-F26.
+%  Compile with: pdflatex cs102-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Introduction to Digital Design and Computer Architecture}
+\newcommand{\ModuleCode}{CS102-F26}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 1}
+\newcommand{\Semester}{Fall 2026}
+\newcommand{\Credits}{TODO(owner)}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{TODO(owner)}
+\newcommand{\OfficeHours}{TODO(owner)}
+\newcommand{\Prerequisites}{None}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+This course is for people who are curious about inner working principles of
+computers. You will learn about computer systems (e.g.\ basic architecture and
+organization, Von-Neumann-Computer, machine-instruction cycle, hardware-software
+interface), instruction set architecture (ISA), fundamental methods of circuit
+design, structural organization of processor using circuit elements, processor
+design variants and their implications, some advanced aspects of description and
+implementation and verification of digital circuits, and other things such as
+microprocessor architectures and systems, parallel and distributed systems, memory
+systems, and input/output (I/O) systems.
+
+\section{Aims}
+\begin{itemize}
+  \item TODO(owner): aims of the module.
+\end{itemize}
+
+\section{Learning Outcomes}
+After completing this course, you will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Understand computer systems and layered abstract machines.
+  \item Gain an introductory overview of computer architecture and fundamental
+        knowledge of low-level programming, digital circuits, and processor design.
+  \item Apply basic concepts of computer architecture and explain machine
+        instruction cycles based on the underlying hardware at the
+        register-transfer level.
+  \item Classify different types of computer architectures and understand the
+        basic principles of modern computer architecture.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Introduction \& Data Representation \\
+2  & Assembly Languages \\
+3  & Von Neumann Architecture \\
+4  & Other ISAs \\
+5  & System Architecture \\
+6  & Memory Management \& Cache \\
+7  & Boolean Algebra \\
+8  & Adders \\
+9  & Multiplication \\
+10 & Memory \\
+11 & Processor Architecture \\
+12 & Finite Automata \\
+13 & Multi-cycle Processor \\
+14 & Modern Systems \& Parallelism \\
+15 & The I/O System \\
+16 & Physical Layer Implementation \\
+17 & Pipelining \\
+18 & K-Maps \\
+19 & Binary Decision Diagrams \\
+20 & SAT \\
+21 & Physical Design \\
+22 & Review \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & TODO(owner) \\
+Labs / Tutorials    & TODO(owner) \\
+Independent study   & TODO(owner) \\
+\midrule
+\textbf{Total}      & \textbf{TODO(owner)} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Your understanding and knowledge of the concepts presented will be assessed
+through quizzes, projects, and challenges. Any permitted support materials will be
+provided during the examination; no additional aids or resources are allowed.
+
+TODO(owner): weight of each assessment component and the learning outcomes it covers.
+
+\section{Reading List}
+\begin{itemize}
+  \item David A.\ Patterson, John L.\ Hennessy. \textit{Computer Organization and
+        Design: The Hardware/Software Interface}.
+  \item Sarah L.\ Harris, David Harris. 2022. \textit{Digital Design and Computer
+        Architecture: RISC-V Edition}. Elsevier.
+  \item Andrew B.\ Kahng, Jens Lienig, Igor L.\ Markov, Jin Hu. 2022. \textit{VLSI
+        Physical Design: From Graph Partitioning to Timing Closure}. Springer
+        International Publishing.
+  \item \href{https://docs.riscv.org/reference/isa/_attachments/riscv-privileged.pdf}{RISC-V ISA}
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} TODO(owner)
+  \item \textbf{Late submissions:} TODO(owner)
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,160 @@
+% =============================================================
+%  Module Description — Introduction to Informatics (CS101-F26)
+%  Shown on https://wosm.academy as the course page for CS101-F26.
+%  Compile with: pdflatex cs101-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Introduction to Informatics}
+\newcommand{\ModuleCode}{CS101-F26}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 1}
+\newcommand{\Semester}{Fall 2026}
+\newcommand{\Credits}{TODO(owner)}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{TODO(owner)}
+\newcommand{\OfficeHours}{TODO(owner)}
+\newcommand{\Prerequisites}{None}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+Introduction to Informatics (ItI) is the first-semester lecture course introducing
+computer science and object-oriented programming. Each week the lecture introduces
+the concepts that are then supported with tests, quizzes, and other supplementary
+materials. The language of instruction and implementation is Java.
+
+\section{Aims}
+\begin{itemize}
+  \item TODO(owner): aims of the module.
+\end{itemize}
+
+\section{Learning Outcomes}
+After completing this course, you will:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Understand the essential concepts of computer science and be able to apply
+        them in a practical, scientifically grounded, and responsible way.
+  \item Learn key concepts such as algorithms, syntax and semantics, and how to
+        evaluate program efficiency in terms of memory use and runtime.
+  \item Solve well-defined algorithmic problems and develop basic concurrent and
+        distributed applications using Java or a similar object-oriented programming
+        language. This foundation will help you learn other imperative and
+        object-oriented programming languages independently.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Introduction \\
+2  & Control Structure \\
+3  & Data Types \\
+4  & Object Orientation I \\
+5  & Object Orientation II \\
+6  & Object Orientation III \\
+7  & Algorithms \\
+8  & Programming Languages \\
+9  & Graphical User Interfaces \\
+10 & Recursion \\
+11 & Syntax, Semantics, Verification \\
+12 & Beyond Programming \\
+13 & Course Review \& Exam \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & TODO(owner) \\
+Labs / Tutorials    & TODO(owner) \\
+Independent study   & TODO(owner) \\
+\midrule
+\textbf{Total}      & \textbf{TODO(owner)} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Your knowledge will be assessed throughout the course with quizzes, tutor and
+homework exercises, team project, and the final exam.
+
+TODO(owner): weight of each assessment component and the learning outcomes it covers.
+
+\section{Reading List}
+\begin{itemize}
+  \item Sedgewick, R.\ and Wayne, K.\ \textit{Computer Science: An Interdisciplinary
+        Approach} (2016) and \textit{Introduction to Programming in Java} (2017).
+        Companion material:
+        \href{https://introcs.cs.princeton.edu/java/home}{introcs.cs.princeton.edu}.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} TODO(owner)
+  \item \textbf{Late submissions:} TODO(owner)
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

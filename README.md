@@ -33,7 +33,9 @@ Content lives in Markdown files under `src/content/`. Adding one never requires 
 | a subject | `src/content/subjects/` (and a `--subject-…` colour token in `src/styles/tokens.css`) |
 | a person | `src/content/people/` |
 | a teaching vacancy | `src/content/vacancies/` |
-| a Journal post | `src/content/journal/` |
+| a Journal post | `src/content/journal/` (a folder with `index.md` if the post has images) |
+| a module description | `src/content/module-descriptions/` — copy `_template.tex`; `\ModuleCode` must equal the course's `code` |
+| a module to the programme plan | `src/content/programmes/foundation.md` |
 
 Field definitions are in `src/content.config.ts` and `docs/CONTENT.md`. Links and addresses (Discord, email, Moodle)
 are in `src/config/site.ts`. Anything still missing is shown on the site as a highlighted `TODO(owner): …` and listed

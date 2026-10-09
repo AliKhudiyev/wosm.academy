@@ -1,0 +1,317 @@
+---
+// Study programmes and their semester plans. Plans come from
+// src/content/programmes/*.md; credits and hours from each course's LaTeX
+// module description (src/content/module-descriptions/*.tex).
+import { getEntry, render } from 'astro:content';
+import Callout from '../components/Callout.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import Txt from '../components/Txt.astro';
+import PageLayout from '../layouts/PageLayout.astro';
+import { courseUrl, getModuleDescription, getProgrammes, getSubjects } from '../lib/content';
+import type { CourseStatus } from '../lib/vocab';
+
+const [programmes, subjects] = await Promise.all([getProgrammes(), getSubjects()]);
+const subjectColor = (id?: string) => {
+  const subject = subjects.find((s) => s.id === id);
+  return subject ? `--subject-color: var(${subject.data.colorToken})` : undefined;
+};
+
+type Row = {
+  title: string;
+  code?: string;
+  url?: string;
+  status?: CourseStatus;
+  offered: boolean;
+  style?: string;
+  credits?: string;
+  creditsValue?: number;
+  hours?: string;
+  hoursValue?: number;
+};
+
+const plans = await Promise.all(
+  programmes.map(async (programme) => {
+    const { Content } = await render(programme);
+    const semesters = await Promise.all(
+      programme.data.semesters.map(async (semester) => {
+        const rows: Row[] = await Promise.all(
+          semester.modules.map(async (module) => {
+            const course = module.course ? await getEntry(module.course) : undefined;
+            if (!course) return { title: module.title, offered: false, style: subjectColor(module.subject?.id) };
+            const description = (await getModuleDescription(course))?.data;
+            return {
+              title: module.title,
+              code: course.data.code,
+              url: courseUrl(course),
+              status: course.data.status,
+              offered: true,
+              style: subjectColor(course.data.subject.id),
+              credits: description?.creditsValue?.toString() ?? description?.credits,
+              creditsValue: description?.creditsValue,
+              hours: description?.hours?.totalValue?.toString() ?? description?.hours?.total,
+              hoursValue: description?.hours?.totalValue,
+            };
+          }),
+        );
+        const sum = (key: 'creditsValue' | 'hoursValue') =>
+          rows.every((r) => typeof r[key] === 'number') ? rows.reduce((t, r) => t + (r[key] ?? 0), 0) : undefined;
+        return { ...semester, rows, credits: sum('creditsValue'), hours: sum('hoursValue') };
+      }),
+    );
+    const core = semesters.filter((s) => !s.optional);
+    const total = (key: 'credits' | 'hours') =>
+      core.length > 0 && core.every((s) => typeof s[key] === 'number') ? core.reduce((t, s) => t + (s[key] ?? 0), 0) : undefined;
+    return {
+      programme,
+      Content,
+      semesters,
+      coreModules: core.reduce((n, s) => n + s.rows.length, 0),
+      totalCredits: total('credits'),
+      totalHours: total('hours'),
+    };
+  }),
+);
+---
+
+<PageLayout
+  title="Programme"
+  description="How WoSM Academy's modules fit together: the Foundation programme (5–6 semesters) and the planned Advanced programme (3–4 semesters)."
+  lead="How our modules fit together into a structured plan of study."
+>
+  <nav slot="header" class="toc" aria-label="On this page">
+    <ol>
+      {
+        programmes.map((p) => (
+          <li>
+            <a href={`#${p.id}`}>{p.data.title}</a>
+          </li>
+        ))
+      }
+      <li><a href="#credits">Credits and hours</a></li>
+    </ol>
+  </nav>
+
+  <Callout title="What is available now" level={2} class="block">
+    <p>
+      So far, only computer science materials are available. Modules shown with a link have a course page; the others
+      are not offered yet.
+    </p>
+  </Callout>
+
+  {
+    plans.map(({ programme, Content, semesters, coreModules, totalCredits, totalHours }) => (
+      <section class="block programme" id={programme.id} aria-labelledby={`${programme.id}-title`}>
+        <h2 id={`${programme.id}-title`}>{programme.data.title}</h2>
+        <p class="meta programme__meta">
+          <span>{programme.data.duration}</span>
+          {programme.data.status === 'planned' ? (
+            <span class="badge">[planned]</span>
+          ) : (
+            <span>{coreModules} core modules</span>
+          )}
+          {totalCredits !== undefined && <span>{totalCredits} credits</span>}
+          {totalHours !== undefined && <span>{totalHours}&nbsp;hours</span>}
+        </p>
+        <p class="programme__summary">
+          <Txt text={programme.data.summary} />
+        </p>
+        <div class="prose">
+          <Content />
+        </div>
+
+        {semesters.length > 0 && (
+          <div class="semesters">
+            {semesters.map((semester) => (
+              <section class="semester" aria-labelledby={`${programme.id}-${semester.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
+                <h3 id={`${programme.id}-${semester.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
+                  {semester.title}
+                  {semester.optional && <span class="semester__optional">optional</span>}
+                </h3>
+                <div class="table-wrap">
+                  <table class="plan">
+                    <thead>
+                      <tr>
+                        <th scope="col">Module</th>
+                        <th scope="col" class="num">Credits</th>
+                        <th scope="col" class="num">Hours</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {semester.rows.map((row) => (
+                        <tr style={row.style}>
+                          <th scope="row" class:list={['plan__module', { 'plan__module--marked': row.style }]}>
+                            {row.code && <span class="plan__code">{row.code}</span>}
+                            {row.url ? <a href={row.url}>{row.title}</a> : <span class="plan__title">{row.title}</span>}
+                            {row.offered ? <StatusBadge status={row.status} /> : <span class="badge">[planned]</span>}
+                          </th>
+                          <td class="num">
+                            {row.credits === undefined ? (
+                              <><span aria-hidden="true">—</span><span class="visually-hidden">not published yet</span></>
+                            ) : row.credits.includes('TODO(owner)') ? (
+                              <mark class="todo" title="TODO(owner): set \Credits in the module description">TODO<span class="visually-hidden">(owner): set \Credits in the module description</span></mark>
+                            ) : (
+                              row.credits
+                            )}
+                          </td>
+                          <td class="num">
+                            {row.hours === undefined ? (
+                              <><span aria-hidden="true">—</span><span class="visually-hidden">not published yet</span></>
+                            ) : row.hours.includes('TODO(owner)') ? (
+                              <mark class="todo" title="TODO(owner): fill in the hours table in the module description">TODO<span class="visually-hidden">(owner): fill in the hours table in the module description</span></mark>
+                            ) : (
+                              row.hours
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    {(semester.credits !== undefined || semester.hours !== undefined) && (
+                      <tfoot>
+                        <tr>
+                          <th scope="row">Semester total</th>
+                          <td class="num">{semester.credits ?? '—'}</td>
+                          <td class="num">{semester.hours ?? '—'}</td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </section>
+    ))
+  }
+
+  <section class="block" id="credits" aria-labelledby="credits-title">
+    <h2 id="credits-title">Credits and hours</h2>
+    <div class="prose">
+      <p>
+        Credits indicate the expected study workload of a module. They follow the ECTS convention, in which one credit
+        corresponds to 25–30 hours of study. They are not formally transferable credits.
+      </p>
+      <p>
+        Hours are the total study time given in each module description: lectures, exercises and independent study. A
+        dash (—) means the figure has not been published yet. Each course page has the full module description.
+      </p>
+    </div>
+  </section>
+</PageLayout>
+
+<style>
+  .programme {
+    scroll-margin-top: var(--space-l);
+  }
+
+  .programme__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6em;
+  }
+
+  .programme__meta > :global(* + *)::before {
+    content: '·';
+    margin-right: 0.6em;
+  }
+
+  .programme__summary {
+    font-size: var(--step-1);
+    line-height: 1.5;
+    max-width: 40em;
+  }
+
+  .semesters {
+    display: grid;
+    gap: var(--space-l) var(--space-xl);
+    margin-top: var(--space-l);
+  }
+
+  @media (min-width: 64rem) {
+    .semesters {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .semester h3 {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .semester__optional {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  .plan {
+    font-size: var(--step-0);
+  }
+
+  .plan th,
+  .plan td {
+    vertical-align: baseline;
+  }
+
+  .plan thead th:first-child {
+    width: 100%;
+  }
+
+  .plan tbody th {
+    font-family: var(--font-serif);
+    font-size: var(--step-0);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text);
+    border-bottom-color: var(--rule);
+  }
+
+  .plan__module--marked {
+    border-left: var(--border-subject) solid var(--subject-color);
+    padding-left: var(--space-xs);
+  }
+
+  .plan__code {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
+  .plan__title {
+    color: var(--text-muted);
+  }
+
+  .plan .badge {
+    margin-left: 0.4em;
+  }
+
+  .plan .num {
+    text-align: right;
+    white-space: nowrap;
+    padding-left: var(--space-s);
+    padding-right: 0;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+  }
+
+  .plan thead .num {
+    font-size: var(--step--2);
+  }
+
+  .plan tfoot th,
+  .plan tfoot td {
+    border-top: 1px solid var(--text-muted);
+    border-bottom: 0;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text);
+  }
+</style>

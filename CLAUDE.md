@@ -24,6 +24,8 @@ Read these before writing code:
 - **Content as data:** Courses, subjects, people, vacancies and journal posts are Astro content collections (Markdown + frontmatter, schemas in `src/content.config.ts`). Adding a course or a vacancy must never require touching a layout or component.
 - **Subjects at launch:** Computer Science, Mathematics. More will be added. Mathematics has no courses yet (its page says so).
 - **Courses at launch:** 3, all Computer Science: CS101-F26 Introduction to Informatics, CS102-F26 Introduction to Digital Design and Computer Architecture, CS103-F26 Discrete Structures (see `docs/CONTENT.md`).
+- **Programme:** `/programme/` presents a **Foundation programme** (5 core semesters × 3 modules, then optional research/project work as a thesis) and an **Advanced programme** (3–4 semesters, planned, not designed yet). Never call them BSc/MSc or imply a degree. Only computer science materials are available so far. Plans live in `src/content/programmes/*.md`.
+- **Module descriptions are LaTeX:** `src/content/module-descriptions/<code>-module-description.tex`, based on `_template.tex`, converted to HTML at build time (`src/lib/module-descriptions/`). A description whose `\ModuleCode` equals a course's `code` replaces that course page's body; credits and hours on `/programme/` come from it. Keep the files compilable with `pdflatex`. Module leader email and office hours are shown as written.
 - **Instructors at launch:** 1 — Ali Khudiyev, Founder & Director. The People section must scale to many.
 - **Admission:** free, open, self-enrolment on Moodle with email confirmation. No application for students.
 - **Teacher recruitment:** volunteers apply by email (teach@wosm.academy) with CV and/or motivation letter. No file uploads through the site.
@@ -65,11 +67,14 @@ Read these before writing code:
 │   │   ├── courses/             # one .md per course
 │   │   ├── people/              # one .md per person
 │   │   ├── vacancies/           # one .md per open role
-│   │   └── journal/             # posts
+│   │   ├── journal/             # posts
+│   │   ├── programmes/          # foundation.md, advanced.md (semester plans)
+│   │   └── module-descriptions/ # one .tex per course (+ _template.tex)
 │   ├── config/                  # site.ts (links, emails), giscus.ts, brand.ts (logo variant)
 │   ├── components/              # Header, Footer, ThemeToggle, CourseItem, Todo, ...
 │   ├── layouts/                 # BaseLayout, PageLayout, PostLayout
-│   ├── lib/                     # content.ts (queries, URLs), format.ts, vocab.ts, markdown/, simulation/
+│   ├── lib/                     # content.ts (queries, URLs), format.ts, vocab.ts, markdown/, simulation/,
+│   │                            # module-descriptions/ (LaTeX → HTML converter + content loader)
 │   ├── assets/brand/            # logo SVGs
 │   ├── styles/                  # tokens.css, base.css, components.css
 │   └── pages/                   # routes (see CONTENT.md sitemap)

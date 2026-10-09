@@ -8,6 +8,7 @@
 import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { moduleDescriptionLoader } from './lib/module-descriptions/loader';
 import { courseFormats, courseLevels, courseStatuses } from './lib/vocab';
 
 const markdown = (collection: string) => glob({ pattern: '**/*.md', base: `./src/content/${collection}` });
@@ -94,4 +95,62 @@ const journal = defineCollection({
   }),
 });
 
-export const collections = { subjects, courses, people, vacancies, journal };
+/**
+ * Module descriptions in LaTeX (src/content/module-descriptions/*.tex, see
+ * _template.tex). A description whose \ModuleCode equals a course's `code`
+ * becomes that course page's main content.
+ */
+const moduleDescriptions = defineCollection({
+  loader: moduleDescriptionLoader({ base: './src/content/module-descriptions' }),
+  schema: z.object({
+    title: z.string(),
+    code: z.string().min(1),
+    programme: z.string().optional(),
+    level: z.string().optional(),
+    semester: z.string().optional(),
+    credits: z.string().optional(),
+    creditsValue: z.number().optional(),
+    leader: z.string().optional(),
+    email: z.string().optional(),
+    officeHours: z.string().optional(),
+    prerequisites: z.string().optional(),
+    hours: z
+      .object({
+        rows: z.array(z.object({ activity: z.string(), hours: z.string() })),
+        total: z.string().optional(),
+        totalValue: z.number().optional(),
+      })
+      .optional(),
+  }),
+});
+
+/** Study programmes and their semester plans (src/content/programmes/*.md). */
+const programmes = defineCollection({
+  loader: markdown('programmes'),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    /** Free text, e.g. "5–6 semesters". */
+    duration: z.string(),
+    status: z.enum(['available', 'planned']),
+    order: z.number(),
+    semesters: z
+      .array(
+        z.object({
+          title: z.string(),
+          optional: z.boolean().default(false),
+          modules: z.array(
+            z.object({
+              title: z.string(),
+              /** Course id once the module is offered, e.g. cs101-f26. */
+              course: reference('courses').optional(),
+              subject: reference('subjects').optional(),
+            }),
+          ),
+        }),
+      )
+      .default([]),
+  }),
+});
+
+export const collections = { subjects, courses, people, vacancies, journal, moduleDescriptions, programmes };

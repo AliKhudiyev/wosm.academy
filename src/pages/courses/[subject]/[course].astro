@@ -8,7 +8,15 @@ import Txt from '../../../components/Txt.astro';
 import { site } from '../../../config/site';
 import PageLayout from '../../../layouts/PageLayout.astro';
 import { capitalise, truncate } from '../../../lib/format';
-import { courseUrl, getCourses, personUrl, type Course } from '../../../lib/content';
+import {
+  courseUrl,
+  getCourses,
+  getModuleDescription,
+  getPlacement,
+  personUrl,
+  programmeUrl,
+  type Course,
+} from '../../../lib/content';
 
 export async function getStaticPaths() {
   const courses = await getCourses();
@@ -28,7 +36,13 @@ const subject = await getEntry(data.subject);
 const instructors = await getEntries(data.instructors);
 const prerequisites = data.prerequisites ? await getEntries(data.prerequisites) : undefined;
 const recommended = await getEntries(data.recommended);
-const { Content } = await render(course);
+// A LaTeX module description, if there is one, replaces the Markdown body.
+const description = await getModuleDescription(course);
+const meta = description?.data;
+const placement = await getPlacement(course);
+const { Content } = await render(description ?? course);
+const leader = meta?.leader ? instructors.find((p) => meta.leader?.includes(p.data.name)) : undefined;
+const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -41,6 +55,7 @@ const jsonLd = {
   isAccessibleForFree: true,
   educationalLevel: data.level,
   provider: { '@type': 'EducationalOrganization', name: site.name, url: `${site.url}/` },
+  ...(meta?.creditsValue ? { numberOfCredits: meta.creditsValue } : {}),
   ...(prerequisites?.length
     ? { coursePrerequisites: prerequisites.map((p) => ({ '@type': 'Course', name: p.data.title, courseCode: p.data.code })) }
     : {}),
@@ -91,6 +106,50 @@ const jsonLd = {
     <dd><StatusBadge status={data.status} /></dd>
 
     {
+      (placement || meta?.programme) && (
+        <>
+          <dt>Programme</dt>
+          <dd>
+            {placement ? (
+              <a href={programmeUrl(placement.programme)}>
+                {placement.programme.data.title} · {placement.semester}
+              </a>
+            ) : (
+              <Txt text={[meta?.programme, meta?.level].filter(Boolean).join(' · ')} />
+            )}
+          </dd>
+        </>
+      )
+    }
+
+    {
+      meta?.semester && (
+        <>
+          <dt>Term</dt>
+          <dd><Txt text={meta.semester} /></dd>
+        </>
+      )
+    }
+
+    {
+      meta && (
+        <>
+          <dt>Credits</dt>
+          <dd>{meta.credits ? <Txt text={meta.credits} /> : <Todo>credits (\Credits in the module description)</Todo>}</dd>
+        </>
+      )
+    }
+
+    {
+      meta?.hours?.total && (
+        <>
+          <dt>Study hours</dt>
+          <dd><Txt text={meta.hours.total} /></dd>
+        </>
+      )
+    }
+
+    {
       (data.format === 'cohort' || data.startDate) && (
         <>
           <dt>Start date</dt>
@@ -127,14 +186,41 @@ const jsonLd = {
       )
     }
 
-    <dt>{instructors.length > 1 ? 'Instructors' : 'Instructor'}</dt>
-    <dd>
-      {
-        instructors.map((person, i) => (
-          <><a href={personUrl(person)}>{person.data.name}</a>{i < instructors.length - 1 ? ', ' : ''}</>
-        ))
-      }
-    </dd>
+    {
+      meta?.leader ? (
+        <>
+          <dt>Module leader</dt>
+          <dd>{leader ? <a href={personUrl(leader)}>{meta.leader}</a> : <Txt text={meta.leader} />}</dd>
+        </>
+      ) : (
+        <>
+          <dt>{instructors.length > 1 ? 'Instructors' : 'Instructor'}</dt>
+          <dd>
+            {instructors.map((person, i) => (
+              <><a href={personUrl(person)}>{person.data.name}</a>{i < instructors.length - 1 ? ', ' : ''}</>
+            ))}
+          </dd>
+        </>
+      )
+    }
+
+    {
+      meta?.email && (
+        <>
+          <dt>Email</dt>
+          <dd>{isEmail(meta.email) ? <a href={`mailto:${meta.email}`}>{meta.email}</a> : <Txt text={meta.email} />}</dd>
+        </>
+      )
+    }
+
+    {
+      meta?.officeHours && (
+        <>
+          <dt>Office hours</dt>
+          <dd><Txt text={meta.officeHours} /></dd>
+        </>
+      )
+    }
 
     <dt>Language</dt>
     <dd>English</dd>
@@ -143,7 +229,7 @@ const jsonLd = {
     <dd>Free</dd>
   </dl>
 
-  <div class="prose course-body">
+  <div class:list={['prose', 'course-body', { 'module-description': description }]}>
     <Content />
   </div>
 

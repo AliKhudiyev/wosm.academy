@@ -22,9 +22,34 @@ To find them all in the source: `grep -rn "TODO(owner)\|<Todo" src`.
 - [ ] `prerequisites` (`[]` means none) and `recommended`. Earlier suggestion from `docs/CONTENT.md`:
       CS102 recommends CS101; CS101 and CS103 have no prerequisites — **confirm or change**
 - [ ] Confirm the one-line `summary` (drafts from `docs/CONTENT.md`)
-- [ ] Body: About this course, What you will learn, Syllabus, How it’s assessed, textbooks / third-party materials
+- [ ] `durationWeeks: 12` and `effortHoursPerWeek: 4–6` are identical for all three courses — the same values as the
+      examples in the original file comments. Confirm they are real (CS102 has 22 syllabus units, CS103 has 27).
 - [ ] Note: the codes carry a term suffix (`-F26`), so URLs are `/courses/computer-science/cs101-f26/`. If a course
       will run again next term, decide whether to add a new file (e.g. `cs101-s27.md`) or rename.
+
+### Module descriptions (`src/content/module-descriptions/*.tex`) — CS101, CS102, CS103
+The course pages now show these LaTeX files (the Markdown course bodies were merged into them).
+- [ ] `\Credits` (e.g. `10 ECTS`; the number is used for semester totals on /programme/)
+- [ ] `\Email` and `\OfficeHours` (shown on the course page as written)
+- [ ] Hours table in *Teaching and Learning Methods* (Lectures, Labs / Tutorials, Independent study, **Total** — the
+      total appears on /programme/)
+- [ ] *Aims*; assessment weights; *Policies* → Attendance and Late submissions
+- [ ] `\Semester{Fall 2026}` was inferred from the `-F26` code suffix (as in your template, CS222-F26 = Fall 2026) — confirm
+- [ ] Obvious typos were fixed while merging — check you agree: “respondible”, “trasfer”, “relvant”, “sicnece”,
+      “grpah”, “Preidates”, “Propostional”, “Davind Harris”, “SPringer”, Gries & Schneider publisher “Spring” → Springer,
+      the RISC-V link `httsp://` → `https://`; CS101: “help them learn” → “help you learn”; Sedgewick & Wayne title
+      “Computer Science -- An Interdisciplinary Approach” → “Computer Science: An Interdisciplinary Approach”
+
+### Programme (`src/content/programmes/`, page `/programme/`)
+- [ ] **CS102 title**: the plan calls it “Digital Design and Computer Architecture I”, the course is still
+      “Introduction to Digital Design and Computer Architecture”. Rename the course (title in `cs102-f26.md` and
+      `\ModuleTitle` in the .tex) or the plan entry, so the two match.
+- [ ] Approve the programme copy: summaries, “later modules build on earlier ones”, and the credits note (“They are not
+      formally transferable credits.”)
+- [ ] Credits/hours for the thesis (after Semester 5)
+- [ ] Advanced programme (3–4 semesters): structure and modules when ready — set `status: available` and add semesters
+- [ ] When a new module is offered: add its course `.md`, its `…-module-description.tex`, and set `course:` on the
+      module in `src/content/programmes/foundation.md`
 
 ### Subjects (`src/content/subjects/`)
 - [ ] Confirm the draft summaries and body text for Computer Science and Mathematics

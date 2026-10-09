@@ -8,6 +8,8 @@ export type Course = CollectionEntry<'courses'>;
 export type Person = CollectionEntry<'people'>;
 export type Vacancy = CollectionEntry<'vacancies'>;
 export type Post = CollectionEntry<'journal'>;
+export type ModuleDescription = CollectionEntry<'moduleDescriptions'>;
+export type Programme = CollectionEntry<'programmes'>;
 
 const byOrder = (a: { data: { order: number } }, b: { data: { order: number } }) => a.data.order - b.data.order;
 
@@ -42,11 +44,39 @@ export async function getPosts(): Promise<Post[]> {
   );
 }
 
+export async function getProgrammes(): Promise<Programme[]> {
+  return (await getCollection('programmes')).sort(byOrder);
+}
+
+/** The LaTeX module description for a course (matched on its code), if one exists. */
+export async function getModuleDescription(course: Course): Promise<ModuleDescription | undefined> {
+  const descriptions = await getCollection('moduleDescriptions');
+  const matches = descriptions.filter((d) => d.data.code === course.data.code);
+  if (matches.length > 1) {
+    throw new Error(
+      `Several module descriptions have \\ModuleCode{${course.data.code}}: ${matches.map((m) => m.filePath).join(', ')}`,
+    );
+  }
+  return matches[0];
+}
+
+/** Where a course sits in a programme plan, e.g. Foundation programme · Semester 1. */
+export async function getPlacement(course: Course): Promise<{ programme: Programme; semester: string } | undefined> {
+  for (const programme of await getProgrammes()) {
+    for (const semester of programme.data.semesters) {
+      if (semester.modules.some((m) => m.course?.id === course.id)) return { programme, semester: semester.title };
+    }
+  }
+  return undefined;
+}
+
 export const courseUrl = (course: Course) => `/courses/${course.data.subject.id}/${course.id}/`;
 export const subjectUrl = (subject: Subject | string) =>
   `/courses/${typeof subject === 'string' ? subject : subject.id}/`;
 export const personUrl = (person: Person | string) => `/about/#${typeof person === 'string' ? person : person.id}`;
 export const postUrl = (post: Post) => `/journal/${post.id}/`;
+export const programmeUrl = (programme: Programme | string) =>
+  `/programme/#${typeof programme === 'string' ? programme : programme.id}`;
 
 /**
  * Suggested learning path: courses ordered so that every prerequisite (and,

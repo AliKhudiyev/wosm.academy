@@ -42,6 +42,9 @@ const facets = [
   description="All WoSM Academy courses: free, rigorous and open to everyone. Browse by subject, level and status."
   lead="Every course is free and open to everyone. Choose one, then follow the steps on How to join."
 >
+  <p slot="header" class="meta">
+    The <a href="/programme/">Programme</a> shows how the courses fit together, semester by semester.
+  </p>
   {
     facets.length > 0 && (
       <form class="filters js-only" data-filters aria-labelledby="filters-title" hidden>

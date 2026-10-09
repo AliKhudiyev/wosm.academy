@@ -1,0 +1,155 @@
+% =============================================================
+%  Module Description Template — WoSM Academy
+%  Copy this file to e.g. cs201-module-description.tex (no leading "_"),
+%  fill in the macros and sections, and commit it. The website turns it
+%  into the course page for the course whose `code` equals \ModuleCode.
+%  Files starting with "_" (like this one) are not shown on the website.
+%
+%  Compile with: pdflatex <file>.tex
+%  Write "TODO(owner): ..." where information is still missing; the website
+%  highlights it. Supported on the website: \section, \subsection,
+%  paragraphs, itemize/enumerate (incl. [label=LO\arabic*.]), description,
+%  tabular/tabularx with booktabs rules, \textbf, \textit, \emph, \texttt,
+%  \href, \url, accents, dashes, quotes and simple inline maths ($...$).
+%  Everything before the first \section is not shown on the website.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{TODO(owner): module title}
+\newcommand{\ModuleCode}{CS000-F26}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 1}
+\newcommand{\Semester}{Fall 2026}
+\newcommand{\Credits}{TODO(owner)}      % e.g. "10 ECTS" — the number is used for totals
+\newcommand{\ModuleLeader}{TODO(owner)}
+\newcommand{\Email}{TODO(owner)}
+\newcommand{\OfficeHours}{TODO(owner)}
+\newcommand{\Prerequisites}{None}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+TODO(owner): two or three short paragraphs.
+
+\section{Aims}
+\begin{itemize}
+  \item TODO(owner): aim.
+\end{itemize}
+
+\section{Learning Outcomes}
+On successful completion of this module, students will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item TODO(owner): learning outcome.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & TODO(owner) \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+TODO(owner): how the module is taught. Materials are provided on Moodle.
+
+% The website reads the "Total" row of the first table with an "Hours"
+% column and shows it in the Programme plan.
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & TODO(owner) \\
+Labs / Tutorials    & TODO(owner) \\
+Independent study   & TODO(owner) \\
+\midrule
+\textbf{Total}      & \textbf{TODO(owner)} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+TODO(owner)         & --   & --      & -- \\
+\midrule
+\textbf{Total}      & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item TODO(owner)
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item TODO(owner)
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} TODO(owner)
+  \item \textbf{Late submissions:} TODO(owner)
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

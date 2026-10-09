@@ -10,7 +10,8 @@ All placeholder values are marked `TODO(owner)`. Never replace a placeholder wit
 /                         Home
 /courses/                 Catalogue (all courses, filterable)
 /courses/<subject>/       Subject page (e.g. /courses/computer-science/)
-/courses/<subject>/<slug>/   Course page
+/courses/<subject>/<slug>/   Course page (body from the LaTeX module description, if any)
+/programme/               Foundation programme (semester plan) and Advanced programme (planned)
 /join/                    Admission: how to join as a student
 /teach/                   Teach with us: vacancies and how to apply
 /teach/#<vacancy-id>      Vacancies are listed on /teach/ with anchors (no separate pages yet)
@@ -27,7 +28,7 @@ All placeholder values are marked `TODO(owner)`. Never replace a placeholder wit
 /404                      "This page starved."
 ```
 
-**Header nav:** Courses · Join · Teach · About · Journal · Contact · [Moodle ↗]
+**Header nav:** Courses · Programme · Join · Teach · About · Journal · Contact · [Moodle ↗]
 **Footer:** FAQ · Code of Conduct · Licence · Privacy · Discord · GitHub · RSS
 
 ---
@@ -101,6 +102,33 @@ posted: 2026-10-05
 summary: One sentence.
 ```
 Body: what the role involves, who it suits, what we offer.
+
+### `moduleDescriptions` (LaTeX)
+One `.tex` file per module in `src/content/module-descriptions/`, copied from `_template.tex` (files starting with `_`
+are ignored). Metadata comes from the `\newcommand` macros: `\ModuleTitle`, `\ModuleCode` (must equal the course's
+`code`), `\Programme`, `\Level`, `\Semester`, `\Credits`, `\ModuleLeader`, `\Email`, `\OfficeHours`,
+`\Prerequisites`. Everything from the first `\section` on is converted to HTML and replaces the course page's
+Markdown body. The **Total** row of the first table with an *Hours* column is used on `/programme/`, as is the number
+in `\Credits`. Supported LaTeX: sections, paragraphs, itemize/enumerate (incl. `[label=LO\arabic*.]`), description,
+tabular/tabularx with booktabs rules, `\textbf`, `\textit`, `\emph`, `\texttt`, `\href`, `\url`, accents, dashes,
+quotes, simple inline maths. Anything else is rendered as text with a build warning.
+
+### `programmes`
+```yaml
+title: Foundation programme
+summary: One sentence.
+duration: "5–6 semesters"
+status: available               # available | planned
+order: 1
+semesters:
+  - title: Semester 1
+    optional?: false
+    modules:
+      - title: Introduction to Informatics
+        course?: cs101-f26      # links the module to its course page (and credits/hours)
+        subject?: mathematics   # colour marker for modules not offered yet
+```
+Body: a short introduction shown under the summary.
 
 ### `journal`
 ```yaml
@@ -245,6 +273,22 @@ Sections with anchor links at top:
 5. **How we work** — courses are taught on Moodle; volunteer instructors; quality review process; materials licence.
 6. **Transparency** — who runs the Academy, how it's funded and what it costs to run (TODO(owner): fill in or remove the section). Do not invent numbers.
 7. **Get involved** — links to Join, Teach, Discord.
+
+### Programme `/programme/`
+- H1 "Programme"; lead: how the modules fit together into a structured plan of study.
+- Callout: only computer science materials are available so far; modules without a link are not offered yet.
+- **Foundation programme** (`#foundation`): 5 core semesters of 3 modules (strongly recommended, in order), then optional
+  research/project work written up as a thesis. One table per semester: module (code, title, status), credits, hours;
+  semester totals when every figure is known.
+  - S1: Introduction to Informatics · Digital Design and Computer Architecture I · Discrete Structures
+  - S2: Data Structures and Algorithms I · Linear Algebra · Calculus I
+  - S3: Digital Design and Computer Architecture II · Data Structures and Algorithms II · Calculus II
+  - S4: Theory of Computation · Operating Systems · Probability Theory and Statistics
+  - S5: Networks · Databases · Software Engineering
+- **Advanced programme** (`#advanced`): 3–4 semesters, planned, not designed yet.
+- **Credits and hours** (`#credits`): credits indicate workload following the ECTS convention (1 credit ≈ 25–30 hours);
+  not formally transferable.
+- Naming: never "BSc"/"MSc", never imply a degree.
 
 ### Journal `/journal/`
 Reverse-chronological list: date (mono), title, summary. Post pages: title, date, reading time, body, tags, giscus at the bottom (lazy-loaded, theme synced with site theme: use giscus light/dark themes or a custom CSS URL matching tokens). RSS link.

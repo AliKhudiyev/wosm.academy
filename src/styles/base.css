@@ -357,3 +357,51 @@ th {
     display: none !important;
   }
 }
+
+/* ---------- Module descriptions (converted from LaTeX) ---------- */
+
+/* Lists with explicit labels, e.g. learning outcomes LO1., LO2. */
+.prose ol.labelled,
+.prose ul.labelled {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose .labelled > li {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0 var(--space-2xs);
+}
+
+.prose .item-label {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--accent);
+  padding-top: 0.15em;
+}
+
+/* Total rows that follow a \midrule */
+tr.rule-before > td {
+  border-top: 1px solid var(--text-muted);
+}
+
+.math {
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.math-display {
+  text-align: center;
+}
+
+.small-caps {
+  font-variant: small-caps;
+}
+
+.prose dl dt {
+  font-weight: 600;
+}
+
+.prose dl dd {
+  margin: 0 0 0.5em;
+}

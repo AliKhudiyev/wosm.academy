@@ -11,6 +11,7 @@ All placeholder values are marked `TODO(owner)`. Never replace a placeholder wit
 /courses/                 Catalogue (all courses, filterable)
 /courses/<subject>/       Subject page (e.g. /courses/computer-science/)
 /courses/<subject>/<slug>/   Course page (body from the LaTeX module description, if any)
+/module-descriptions/<name>.pdf   Compiled module description (PDF), linked from the course page
 /programme/               Foundation programme (semester plan) and Advanced programme (planned)
 /join/                    Admission: how to join as a student
 /teach/                   Teach with us: vacancies and how to apply
@@ -62,9 +63,10 @@ Body: 1–2 paragraphs describing the subject at WoSM.
 title: Introduction to Informatics
 code: CS101                     # suggested codes below; owner may change
 subject: computer-science       # reference to subjects
-level: introductory             # introductory | intermediate | advanced
+level?: introductory            # optional fallback; pages show the semester from the module description
 summary: One sentence for lists.
-status?: open                   # open | upcoming | archived — omit until confirmed (shows [tbc], no enrol button)
+status?: open                   # open | upcoming | planned | archived — omit until confirmed (shows [tbc])
+                                # planned = description published, not offered yet (no enrol button)
 format?: self-paced             # self-paced | cohort — omit until confirmed (shows TODO)
 durationWeeks?: 12
 effortHoursPerWeek?: 4–6
@@ -152,23 +154,28 @@ draft?: false
 
 ### Courses
 
-Confirmed by the owner (5 October 2026): three courses, all in Computer Science. The `-F26` suffix marks the term.
+One course per Foundation programme module that has a module description (October 2026):
 
-| Code | Title | Subject | Level | File |
+| Code | Title | Subject | Semester | Status |
 |---|---|---|---|---|
-| CS101-F26 | Introduction to Informatics | CS | introductory | `cs101-f26.md` |
-| CS102-F26 | Introduction to Digital Design and Computer Architecture | CS | introductory | `cs102-f26.md` |
-| CS103-F26 | Discrete Structures | CS | introductory | `cs103-f26.md` |
+| CS101-F26 | Introduction to Informatics | CS | 1 | open |
+| CS102-F26 | Digital Design and Computer Architecture I | CS | 1 | open |
+| M101-F26 | Discrete Structures | Math | 1 | open (replaced CS103-F26; old URL redirects) |
+| CS201 | Data Structures and Algorithms I | CS | 2 | planned |
+| M102-S27 | Calculus I | Math | 2 | planned |
+| M103-S27 | Linear Algebra | Math | 2 | planned |
+| CS302 | Data Structures and Algorithms II | CS | 3 | planned |
+| M201-F27 | Calculus II | Math | 3 | planned |
+| CS401 | Theory of Computation | CS | 4 | planned |
+| CS402 | Operating Systems | CS | 4 | planned |
+| M202-S28 | Probability Theory and Statistics | Math | 4 | planned |
+| CS501 | Networks | CS | 5 | planned |
+| CS502 | Databases | CS | 5 | planned |
+| CS503 | Software Engineering | CS | 5 | planned |
 
-The earlier draft (CS201 Data Structures and Algorithms; MATH101 Discrete Structures under Mathematics) is superseded.
-Mathematics therefore has no courses at launch; its subject page says so and links to /teach/.
-
-Draft one-line summaries (owner to confirm):
-- **CS101-F26** — What computation is, how information is represented, and how to think and write like a programmer.
-- **CS102-F26** — From logic gates to a working processor: how digital circuits are designed and how computers are built.
-- **CS103-F26** — The mathematics of computer science: logic, proofs, sets, relations, functions, combinatorics and graphs.
-
-Prerequisites, syllabus, duration, effort, format, status and Moodle URL: `TODO(owner)` for every course.
+Digital Design and Computer Architecture II (Semester 3) has no module description yet and is shown in the plan only.
+Course pages and lists show the semester (`\Level` in the module description) instead of a level; the catalogue
+filters by Subject, Semester and Status.
 
 ### People
 One entry: **Ali Khudiyev**, Founder & Director. Known: PhD in Artificial Intelligence, University of Strasbourg, 2025; instructor for all launch courses. Bio, photo, links: `TODO(owner)`.
@@ -276,7 +283,7 @@ Sections with anchor links at top:
 
 ### Programme `/programme/`
 - H1 "Programme"; lead: how the modules fit together into a structured plan of study.
-- Callout: only computer science materials are available so far; modules without a link are not offered yet.
+- Callout: lists the modules that are offered now (status open/upcoming, computed); the others are planned.
 - **Foundation programme** (`#foundation`): 5 core semesters of 3 modules (strongly recommended, in order), then optional
   research/project work written up as a thesis. One table per semester: module (code, title, status), credits, hours;
   semester totals when every figure is known.

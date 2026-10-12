@@ -666,7 +666,7 @@
 
 .facts {
   display: grid;
-  grid-template-columns: minmax(7rem, max-content) 1fr;
+  grid-template-columns: minmax(7rem, max-content) minmax(0, 1fr);
   gap: 0;
   max-width: var(--measure);
   border-top: 1px solid var(--rule);
@@ -685,6 +685,27 @@
   color: var(--text-muted);
   padding-right: var(--space-m);
   padding-top: 0.7rem;
+}
+
+/* Long values such as email addresses wrap instead of widening the column. */
+.facts dd {
+  overflow-wrap: anywhere;
+}
+
+/* Phones: each label above its value. */
+@media (max-width: 30rem) {
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .facts dt {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .facts dd {
+    padding-top: 0.15rem;
+  }
 }
 
 /* ---------- Accordions (FAQ) ---------- */

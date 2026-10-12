@@ -43,3 +43,8 @@ export function truncate(text: string, max = 155): string {
   const cut = text.slice(0, max - 1);
   return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,;:.—–-]+$/, '')}…`;
 }
+
+/** Keep a trailing roman numeral with the word before it: "Calculus I" never wraps before "I". */
+export function keepNumeral(title: string): string {
+  return title.replace(/ ((?:I{1,3}|IV|V|VI{0,3}))$/, ' $1');
+}

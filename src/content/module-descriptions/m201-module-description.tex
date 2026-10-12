@@ -1,0 +1,221 @@
+% =============================================================
+%  Module Description — Calculus II (M201-F27)
+%  Shown on https://wosm.academy as the course page for M201-F27.
+%  Compile with: pdflatex m201-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Calculus II}
+\newcommand{\ModuleCode}{M201-F27}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 3}
+\newcommand{\Semester}{Fall 2027}
+\newcommand{\Credits}{7 ECTS}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{Calculus I (M102-S27), Linear Algebra (M103-S27)}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+Calculus II continues Calculus I in two directions. First it completes the
+one-variable theory with infinite series, power series and Taylor series. Then it
+extends differentiation and integration to functions of several variables, using
+the vectors and matrices of Linear Algebra.
+
+The module covers:
+\begin{itemize}
+  \item Infinite series, convergence tests, power series and Taylor series
+        (first 4--5 weeks)
+  \item Differential calculus of several variables: partial derivatives, gradients,
+        the Jacobian and Hessian, and optimisation with and without constraints
+  \item Multiple integrals and change of variables
+  \item An introduction to ordinary differential equations
+\end{itemize}
+
+These tools are used directly later in the programme: gradients and Hessians in
+optimisation and machine learning, multiple integrals in Probability Theory and
+Statistics (joint densities), and series and generating functions in the analysis
+of algorithms.
+
+\section{Aims}
+\begin{itemize}
+  \item Complete the theory of one-variable calculus with series and uniform convergence.
+  \item Extend differential and integral calculus to functions of several variables.
+  \item Give students the tools for continuous optimisation, including gradient-based methods.
+  \item Prepare students for probability, statistics, machine learning and the analysis of algorithms.
+\end{itemize}
+
+\section{Learning Outcomes}
+On successful completion of this module, students will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Decide the convergence of series with the comparison, ratio, root, integral and alternating-series tests, and find the radius of convergence of power series.
+  \item Expand functions as Taylor series, bound the remainder, and use series and generating functions to solve counting and recurrence problems.
+  \item Compute partial derivatives, gradients, directional derivatives, Jacobians and Hessians, and apply the multivariable chain rule.
+  \item Find and classify critical points, solve constrained problems with Lagrange multipliers, and explain and apply gradient descent.
+  \item Evaluate double and triple integrals, change the order of integration, and change variables using polar, cylindrical and spherical coordinates and the Jacobian determinant.
+  \item Solve first-order and linear second-order ordinary differential equations and simple linear systems using eigenvalues.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Infinite series; geometric and telescoping series \\
+2  & Convergence tests: comparison, integral, ratio, root \\
+3  & Absolute and conditional convergence; alternating series; rearrangements \\
+4  & Sequences and series of functions; pointwise and uniform convergence \\
+5  & Power series; radius of convergence; term-by-term differentiation and integration \\
+6  & Taylor and Maclaurin series; remainder estimates \\
+7  & Generating functions; solving recurrences \\
+8  & Stirling's approximation \\
+9  & $\mathbb{R}^n$: norms, open and closed sets, limits and continuity \\
+10 & Partial derivatives; differentiability; the total derivative \\
+11 & Gradient and directional derivatives; level sets \\
+12 & The multivariable chain rule; the Jacobian matrix \\
+13 & Higher derivatives; the Hessian; multivariable Taylor expansion \\
+14 & Unconstrained optimisation: critical points, second-derivative test, convexity \\
+15 & Gradient descent and its convergence for convex quadratics \\
+16 & Constrained optimisation: Lagrange multipliers \\
+17 & Implicit and inverse function theorems (statement and use) \\
+18 & Double integrals over rectangles and general regions; Fubini's theorem \\
+19 & Triple integrals \\
+20 & Change of variables; polar, cylindrical and spherical coordinates \\
+21 & The Gaussian integral; improper multiple integrals \\
+22 & Introduction to vector fields and line integrals \\
+23 & First-order ODEs: separable and linear equations \\
+24 & Second-order linear ODEs with constant coefficients \\
+25 & Systems of linear ODEs via eigenvalues \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle: lecture notes and
+recorded lectures for each unit, tutorial problem sheets with worked solutions,
+short quizzes, and the briefs for the two projects. Problem sheets are for practice
+and are not marked. Questions are discussed in the module channel on Discord and in
+office hours. Independent study includes reading, problem sheets and project work.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 50 \\
+Labs / Tutorials    & 30 \\
+Independent study   & 130 \\
+\midrule
+\textbf{Total}      & \textbf{210} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Knowledge is assessed with weekly unit quizzes, two projects and a final
+exam. Because much of the module is theory, the exam carries slightly more weight.
+\begin{itemize}
+  \item \textbf{Project 1 -- Series and generating functions:} use generating
+        functions to solve recurrences from counting problems and algorithms, and
+        check the results numerically.
+  \item \textbf{Project 2 -- Optimisation in several variables:} analyse a function
+        with gradients and Hessians, solve a constrained version with Lagrange
+        multipliers, and implement gradient descent, studying how the step size
+        affects convergence.
+\end{itemize}
+The final exam tests computation (series, derivatives and integrals in several
+variables), the choice of method, and short proofs about convergence.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Unit quizzes (best 10 of 12) & 20\% & Weekly & LO1--LO3, LO5 \\
+Project 1: Series and generating functions & 15\% & Week 6 & LO1, LO2 \\
+Project 2: Optimisation in several variables & 20\% & Week 12 & LO3, LO4 \\
+Final exam (3 hours, written) & 45\% & End of term & LO1--LO6 \\
+\midrule
+\textbf{Total}      & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item G.\ Strang, E.\ Herman: \textit{Calculus, Volumes 2 and 3}, OpenStax, 2016. Free online at \url{https://openstax.org/subjects/math}.
+  \item J.\ E.\ Marsden, A.\ Tromba: \textit{Vector Calculus}, 6th ed., W.\ H.\ Freeman, 2012.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item T.\ M.\ Apostol: \textit{Calculus, Volume 2}, 2nd ed., Wiley, 1969.
+  \item J.\ H.\ Hubbard, B.\ B.\ Hubbard: \textit{Vector Calculus, Linear Algebra, and Differential Forms}, 5th ed., Matrix Editions, 2015.
+  \item H.\ S.\ Wilf: \textit{generatingfunctionology}, 3rd ed., A K Peters, 2006. Free online at \url{https://www2.math.upenn.edu/~wilf/DownldGF.html}.
+  \item S.\ Boyd, L.\ Vandenberghe: \textit{Convex Optimization}, Cambridge University Press, 2004 (Chapter 9).
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Not mandatory. The module is self-paced; work through the units at your own pace within the term.
+  \item \textbf{Late submissions:} Accepted, but penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

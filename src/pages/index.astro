@@ -1,4 +1,5 @@
 ---
+import { keepNumeral } from '../lib/format';
 import FormattedDate from '../components/FormattedDate.astro';
 import Manifesto from '../components/Manifesto.astro';
 import StatusBadge from '../components/StatusBadge.astro';
@@ -64,7 +65,7 @@ const jsonLd = {
                     {subjectCourses.map((course) => (
                       <li>
                         <span class="course-rows__code">{course.data.code}</span>
-                        <a href={courseUrl(course)}>{course.data.title}</a>
+                        <a href={courseUrl(course)}>{keepNumeral(course.data.title)}</a>
                         <StatusBadge status={course.data.status} />
                       </li>
                     ))}

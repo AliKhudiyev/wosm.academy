@@ -1,4 +1,5 @@
 ---
+import { keepNumeral } from '../lib/format';
 // A person on /about/#people: portrait, name, role, credentials, bio,
 // courses taught (derived from the courses collection) and links.
 import { Image } from 'astro:assets';
@@ -56,7 +57,7 @@ const personLinks = Object.entries(links).filter((entry): entry is [string, stri
         <p class="person__teaches">
           <span class="meta">Teaches</span>{' '}
           {teaches.map((course, i) => (
-            <><a href={courseUrl(course)}>{course.data.title}</a>{i < teaches.length - 1 ? ', ' : ''}</>
+            <><a href={courseUrl(course)}>{keepNumeral(course.data.title)}</a>{i < teaches.length - 1 ? ', ' : ''}</>
           ))}
         </p>
       )

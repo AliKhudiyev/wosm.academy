@@ -14,48 +14,41 @@ To find them all in the source: `grep -rn "TODO(owner)\|<Todo" src`.
       Then set `logoVariant` in `src/config/brand.ts`, run `npm run brand` (regenerates favicon, touch icon, OG image and
       the outlined SVGs in `src/assets/brand/`), and **delete `src/pages/brand-preview.astro`**. A is in use until then.
 
-### Courses (`src/content/courses/*.md`) — for each of CS101-F26, CS102-F26, CS103-F26
-- [ ] `status`: open / upcoming / archived (until set, the course shows `[tbc]` and no enrol button)
-- [ ] `moodleUrl`: the course's Moodle URL (`https://moodle.wosm.academy/course/view.php?id=…`)
-- [ ] `format`: self-paced or cohort; `startDate` if cohort
-- [ ] `durationWeeks`, `effortHoursPerWeek`
-- [ ] `prerequisites` (`[]` means none) and `recommended`. Earlier suggestion from `docs/CONTENT.md`:
-      CS102 recommends CS101; CS101 and CS103 have no prerequisites — **confirm or change**
-- [ ] Confirm the one-line `summary` (drafts from `docs/CONTENT.md`)
-- [ ] `durationWeeks: 12` and `effortHoursPerWeek: 4–6` are identical for all three courses — the same values as the
-      examples in the original file comments. Confirm they are real (CS102 has 22 syllabus units, CS103 has 27).
-- [ ] Note: the codes carry a term suffix (`-F26`), so URLs are `/courses/computer-science/cs101-f26/`. If a course
-      will run again next term, decide whether to add a new file (e.g. `cs101-s27.md`) or rename.
+### Courses (`src/content/courses/*.md`)
+Offered now (`status: open`): CS101-F26, CS102-F26, M101-F26. Planned (`status: planned`, no enrol button): CS201,
+CS302, CS401, CS402, CS501, CS502, CS503, M102-S27, M103-S27, M201-F27, M202-S28.
+- [ ] `durationWeeks: 12` and `effortHoursPerWeek: 4–6` are identical for CS101, CS102 and M101 — the same values as the
+      examples in the original file comments. Confirm they are real (CS102 has 22 syllabus units, M101 has 27).
+- [ ] Confirm the one-line `summary` of every course. The planned modules' summaries were drafted from the first
+      paragraph of their module descriptions.
+- [ ] When a planned module opens: set `status: open`, `moodleUrl`, `durationWeeks` and `effortHoursPerWeek`.
+- [ ] Course codes: CS2xx–CS5xx have no term suffix (`CS201`), the maths modules do (`M102-S27`). The code is also the
+      page address (`/courses/computer-science/cs201/`), so pick one convention before the links are shared.
 
-### Module descriptions (`src/content/module-descriptions/*.tex`) — CS101, CS102, CS103
-The course pages now show these LaTeX files (the Markdown course bodies were merged into them).
-- [ ] `\Credits` (e.g. `10 ECTS`; the number is used for semester totals on /programme/)
-- [ ] `\Email` and `\OfficeHours` (shown on the course page as written)
-- [ ] Hours table in *Teaching and Learning Methods* (Lectures, Labs / Tutorials, Independent study, **Total** — the
-      total appears on /programme/)
-- [ ] *Aims*; assessment weights; *Policies* → Attendance and Late submissions
-- [ ] `\Semester{Fall 2026}` was inferred from the `-F26` code suffix (as in your template, CS222-F26 = Fall 2026) — confirm
-- [ ] Obvious typos were fixed while merging — check you agree: “respondible”, “trasfer”, “relvant”, “sicnece”,
-      “grpah”, “Preidates”, “Propostional”, “Davind Harris”, “SPringer”, Gries & Schneider publisher “Spring” → Springer,
-      the RISC-V link `httsp://` → `https://`; CS101: “help them learn” → “help you learn”; Sedgewick & Wayne title
-      “Computer Science -- An Interdisciplinary Approach” → “Computer Science: An Interdisciplinary Approach”
+### Module descriptions (`src/content/module-descriptions/*.tex`)
+Each course page shows its .tex file; `npm run pdfs` recompiles the PDFs offered for download (run it after every edit).
+- [ ] `\Credits` for all computer science modules (CS101–CS503). The maths modules have them (7 or 8 ECTS);
+      semester totals on /programme/ appear once every module in the semester has a number.
+- [ ] CS101, CS102: hours table, *Aims*, assessment weights, *Policies* → Attendance and Late submissions
+- [ ] `\Semester` is just “Spring” or “Fall” in the CS2xx–CS5xx files; the maths files give the year (e.g. “Spring 2027”)
+- [ ] **Digital Design and Computer Architecture II** (Semester 3) has no module description yet
+- [ ] Obvious typos were fixed when the course texts were merged — check you agree: “respondible”, “trasfer”,
+      “relvant”, “sicnece”, “grpah”, “Preidates”, “Propostional”, “Davind Harris”, “SPringer”, Gries & Schneider
+      publisher “Spring” → Springer, the RISC-V link `httsp://` → `https://`; CS101: “help them learn” → “help you learn”;
+      Sedgewick & Wayne title “Computer Science -- An Interdisciplinary Approach” → “Computer Science: An
+      Interdisciplinary Approach”
 
 ### Programme (`src/content/programmes/`, page `/programme/`)
-- [ ] **CS102 title**: the plan calls it “Digital Design and Computer Architecture I”, the course is still
-      “Introduction to Digital Design and Computer Architecture”. Rename the course (title in `cs102-f26.md` and
-      `\ModuleTitle` in the .tex) or the plan entry, so the two match.
 - [ ] Approve the programme copy: summaries, “later modules build on earlier ones”, and the credits note (“They are not
       formally transferable credits.”)
 - [ ] Credits/hours for the thesis (after Semester 5)
 - [ ] Advanced programme (3–4 semesters): structure and modules when ready — set `status: available` and add semesters
-- [ ] When a new module is offered: add its course `.md`, its `…-module-description.tex`, and set `course:` on the
-      module in `src/content/programmes/foundation.md`
+- [ ] New module: add its course `.md`, its `…-module-description.tex` (copy `_template.tex`), run `npm run pdfs`, and
+      set `course:` on the module in `src/content/programmes/foundation.md`
 
 ### Subjects (`src/content/subjects/`)
-- [ ] Confirm the draft summaries and body text for Computer Science and Mathematics
-- [ ] **Mathematics has no courses** (Discrete Structures is listed under Computer Science as CS103-F26). The subject
-      page says so and invites teachers. Describe the planned mathematics programme, or remove the subject until its
-      first course exists. The home page lead (“…courses in computer science and mathematics…”) assumes it stays.
+- [ ] Confirm the summaries and body text for Computer Science and Mathematics (rewritten from the module descriptions
+      when Discrete Structures moved to Mathematics)
 
 ### Founder (`src/content/people/ali-khudiyev.md`)
 - [ ] Biography (80–150 words)

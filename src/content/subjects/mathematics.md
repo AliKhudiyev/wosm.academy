@@ -3,11 +3,11 @@ title: Mathematics
 colorToken: --subject-math
 order: 2
 # Draft summary — TODO(owner): confirm (listed in TODO.md).
-summary: "Mathematics taught for its own sake and as the language of computing."
+summary: "The mathematics that computer science relies on: discrete structures, linear algebra, calculus, probability and statistics."
 ---
 
-We plan to offer mathematics courses alongside computer science. There are no mathematics courses in the catalogue yet.
+Mathematics at WoSM Academy covers the mathematics that computer science relies on. The modules are part of the [Foundation programme](/programme/), alongside the computer science modules.
 
-In the meantime, [Discrete Structures (CS103-F26)](/courses/computer-science/cs103-f26/), the mathematics of computer science, is taught as part of Computer Science.
+Discrete Structures is taught in Semester 1. Linear Algebra and Calculus I follow in Semester 2, Calculus II in Semester 3, and Probability Theory and Statistics in Semester 4.
 
-TODO(owner): describe the mathematics programme you have in mind, or say when the first course is expected.
+Each course page shows the full module description, including its prerequisites.

@@ -22,10 +22,10 @@ Read these before writing code:
 - **Stack:** [Astro](https://astro.build) (latest stable — currently 7.x), static output, deployed by GitHub Actions to GitHub Pages. TypeScript for scripts. Plain CSS with custom properties (no Tailwind, no CSS-in-JS, no UI component libraries).
   - Astro 7 notes: Markdown is rendered by Sätteri (custom hast plugins in `src/lib/markdown/plugins.mjs`); `compressHTML: true` is set so multi-line copy keeps its spaces (v7's default JSX whitespace rules would glue words to links); stylesheets are inlined (`build.inlineStylesheets: 'always'`).
 - **Content as data:** Courses, subjects, people, vacancies and journal posts are Astro content collections (Markdown + frontmatter, schemas in `src/content.config.ts`). Adding a course or a vacancy must never require touching a layout or component.
-- **Subjects at launch:** Computer Science, Mathematics. More will be added. Mathematics has no courses yet (its page says so).
-- **Courses at launch:** 3, all Computer Science: CS101-F26 Introduction to Informatics, CS102-F26 Introduction to Digital Design and Computer Architecture, CS103-F26 Discrete Structures (see `docs/CONTENT.md`).
-- **Programme:** `/programme/` presents a **Foundation programme** (5 core semesters × 3 modules, then optional research/project work as a thesis) and an **Advanced programme** (3–4 semesters, planned, not designed yet). Never call them BSc/MSc or imply a degree. Only computer science materials are available so far. Plans live in `src/content/programmes/*.md`.
-- **Module descriptions are LaTeX:** `src/content/module-descriptions/<code>-module-description.tex`, based on `_template.tex`, converted to HTML at build time (`src/lib/module-descriptions/`). A description whose `\ModuleCode` equals a course's `code` replaces that course page's body; credits and hours on `/programme/` come from it. Keep the files compilable with `pdflatex`. Module leader email and office hours are shown as written.
+- **Subjects at launch:** Computer Science, Mathematics. More will be added.
+- **Courses:** 14, one per Foundation programme module with a description. Offered now (`status: open`): CS101-F26 Introduction to Informatics, CS102-F26 Digital Design and Computer Architecture I, M101-F26 Discrete Structures (Mathematics; replaced CS103-F26, whose URL redirects). The other 11 (CS201–CS503, M102-S27, M103-S27, M201-F27, M202-S28) are `status: planned`: their pages show the module description but no enrol button. Courses show the **semester** (from `\Level` in the .tex), not a level.
+- **Programme:** `/programme/` presents a **Foundation programme** (5 core semesters × 3 modules, then optional research/project work as a thesis) and an **Advanced programme** (3–4 semesters, planned, not designed yet). Never call them BSc/MSc or imply a degree. The note at the top of the page lists the modules that are offered (computed from course status). Plans live in `src/content/programmes/*.md`.
+- **Module descriptions are LaTeX:** `src/content/module-descriptions/<code>-module-description.tex`, based on `_template.tex`, converted to HTML at build time (`src/lib/module-descriptions/`). A description whose `\ModuleCode` equals a course's `code` replaces that course page's body; credits and hours on `/programme/` come from it. Keep the files compilable with `pdflatex`; the compiled PDFs are committed next to them (`npm run pdfs`) and offered for download at `/module-descriptions/<name>.pdf`. Module leader email and office hours are shown as written.
 - **Instructors at launch:** 1 — Ali Khudiyev, Founder & Director. The People section must scale to many.
 - **Admission:** free, open, self-enrolment on Moodle with email confirmation. No application for students.
 - **Teacher recruitment:** volunteers apply by email (teach@wosm.academy) with CV and/or motivation letter. No file uploads through the site.
@@ -55,6 +55,7 @@ Read these before writing code:
 ├── TODO.md                      # open questions & placeholders for the owner
 ├── docs/                        # these spec files
 ├── scripts/build-brand-assets.mjs  # `npm run brand`: favicon, touch icon, OG image, logo SVGs
+├── scripts/build-module-pdfs.mjs   # `npm run pdfs`: compile module descriptions with pdflatex
 ├── public/
 │   ├── CNAME                    # contains: wosm.academy
 │   ├── favicon.svg
@@ -69,7 +70,7 @@ Read these before writing code:
 │   │   ├── vacancies/           # one .md per open role
 │   │   ├── journal/             # posts
 │   │   ├── programmes/          # foundation.md, advanced.md (semester plans)
-│   │   └── module-descriptions/ # one .tex per course (+ _template.tex)
+│   │   └── module-descriptions/ # one .tex + compiled .pdf per course (+ _template.tex)
 │   ├── config/                  # site.ts (links, emails), giscus.ts, brand.ts (logo variant)
 │   ├── components/              # Header, Footer, ThemeToggle, CourseItem, Todo, ...
 │   ├── layouts/                 # BaseLayout, PageLayout, PostLayout

@@ -2,6 +2,7 @@
 // URLs and draft filtering are decided in one place.
 
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { capitalise } from './format';
 
 export type Subject = CollectionEntry<'subjects'>;
 export type Course = CollectionEntry<'courses'>;
@@ -68,6 +69,19 @@ export async function getPlacement(course: Course): Promise<{ programme: Program
     }
   }
   return undefined;
+}
+
+/**
+ * Where a course sits in the curriculum, e.g. "Semester 2": \Level from its
+ * module description, else its place in a programme plan, else the optional
+ * `level` field ("Introductory").
+ */
+export async function getSemester(course: Course): Promise<string | undefined> {
+  const description = await getModuleDescription(course);
+  if (description?.data.level) return description.data.level;
+  const placement = await getPlacement(course);
+  if (placement) return placement.semester;
+  return course.data.level ? capitalise(course.data.level) : undefined;
 }
 
 export const courseUrl = (course: Course) => `/courses/${course.data.subject.id}/${course.id}/`;

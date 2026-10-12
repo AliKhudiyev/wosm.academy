@@ -5,10 +5,12 @@
 import CourseItem from '../../components/CourseItem.astro';
 import PageLayout from '../../layouts/PageLayout.astro';
 import { capitalise } from '../../lib/format';
-import { getCourses, getSubjects, subjectUrl } from '../../lib/content';
-import { courseLevels, courseStatuses } from '../../lib/vocab';
+import { getCourses, getSemester, getSubjects, subjectUrl } from '../../lib/content';
+import { courseStatuses } from '../../lib/vocab';
 
 const [subjects, courses] = await Promise.all([getSubjects(), getCourses()]);
+const semesters = await Promise.all(courses.map(getSemester));
+const semesterNumber = (label: string) => Number(/\d+/.exec(label)?.[0] ?? Number.MAX_SAFE_INTEGER);
 
 const distinct = <T,>(values: T[]) => [...new Set(values)];
 const facets = [
@@ -21,11 +23,11 @@ const facets = [
     })),
   },
   {
-    name: 'level',
-    label: 'Level',
-    options: courseLevels
-      .filter((level) => courses.some((c) => c.data.level === level))
-      .map((level) => ({ value: level, label: capitalise(level) })),
+    name: 'semester',
+    label: 'Semester',
+    options: distinct(semesters.filter((s): s is string => Boolean(s)))
+      .sort((a, b) => semesterNumber(a) - semesterNumber(b) || a.localeCompare(b))
+      .map((semester) => ({ value: semester, label: semester })),
   },
   {
     name: 'status',

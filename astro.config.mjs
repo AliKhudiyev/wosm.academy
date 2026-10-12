@@ -14,10 +14,14 @@ export default defineConfig({
   compressHTML: true,
   // Inline the (small) stylesheet so first paint needs no extra request.
   build: { inlineStylesheets: 'always' },
+  redirects: {
+    // Discrete Structures moved from Computer Science (CS103-F26) to Mathematics (M101-F26).
+    '/courses/computer-science/cs103-f26/': '/courses/mathematics/m101-f26/',
+  },
   integrations: [
     sitemap({
       // Temporary review pages never belong in the sitemap.
-      filter: (page) => !page.includes('/brand-preview/'),
+      filter: (page) => !page.includes('/brand-preview/') && !page.includes('/courses/computer-science/cs103-f26/'),
     }),
   ],
   markdown: {

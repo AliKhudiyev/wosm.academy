@@ -3,7 +3,7 @@ import { render } from 'astro:content';
 import CourseItem from '../../../components/CourseItem.astro';
 import PageLayout from '../../../layouts/PageLayout.astro';
 import { courseUrl, getCourses, getSubjects, learningPath, type Subject } from '../../../lib/content';
-import { truncate } from '../../../lib/format';
+import { truncate, keepNumeral } from '../../../lib/format';
 
 export async function getStaticPaths() {
   const subjects = await getSubjects();
@@ -61,7 +61,7 @@ const hasDependencies = courses.some((c) => (c.data.prerequisites?.length ?? 0) 
         <ol class="path">
           {path.map((course) => (
             <li>
-              <span class="meta">{course.data.code}</span> <a href={courseUrl(course)}>{course.data.title}</a>
+              <span class="meta">{course.data.code}</span> <a href={courseUrl(course)}>{keepNumeral(course.data.title)}</a>
             </li>
           ))}
         </ol>

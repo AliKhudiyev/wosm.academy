@@ -8,11 +8,13 @@ import Txt from '../../../components/Txt.astro';
 import { site } from '../../../config/site';
 import PageLayout from '../../../layouts/PageLayout.astro';
 import { capitalise, truncate } from '../../../lib/format';
+import { hasModulePdf, modulePdfUrl } from '../../../lib/module-descriptions/pdf';
 import {
   courseUrl,
   getCourses,
   getModuleDescription,
   getPlacement,
+  getSemester,
   personUrl,
   programmeUrl,
   type Course,
@@ -42,6 +44,10 @@ const meta = description?.data;
 const placement = await getPlacement(course);
 const { Content } = await render(description ?? course);
 const leader = meta?.leader ? instructors.find((p) => meta.leader?.includes(p.data.name)) : undefined;
+const semester = await getSemester(course);
+const pdf = description && hasModulePdf(description.id) ? modulePdfUrl(description.id) : undefined;
+// Planned modules are not offered yet: don't ask for enrolment details.
+const planned = data.status === 'planned';
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 const jsonLd = {
@@ -53,7 +59,7 @@ const jsonLd = {
   url: new URL(courseUrl(course), site.url).href,
   inLanguage: 'en',
   isAccessibleForFree: true,
-  educationalLevel: data.level,
+  ...(semester ? { educationalLevel: semester } : {}),
   provider: { '@type': 'EducationalOrganization', name: site.name, url: `${site.url}/` },
   ...(meta?.creditsValue ? { numberOfCredits: meta.creditsValue } : {}),
   ...(prerequisites?.length
@@ -66,7 +72,7 @@ const jsonLd = {
   title={`${data.title} (${data.code})`}
   heading={data.title}
   description={truncate(`${data.code}, a free course at WoSM Academy. ${data.summary}`)}
-  eyebrow={`${data.code} · ${subject.data.title} · ${capitalise(data.level)}`}
+  eyebrow={[data.code, subject.data.title, semester].filter(Boolean).join(' · ')}
   jsonLd={jsonLd}
 >
   <p slot="header" class="lead"><Txt text={data.summary} /></p>
@@ -89,18 +95,44 @@ const jsonLd = {
         </span>
       )
     }
+    {
+      planned && (
+        <p class="meta">
+          This module is planned and not offered yet. See the <a href="/programme/">Programme</a>.
+        </p>
+      )
+    }
     {!data.status && <Todo>enrolment status and Moodle course URL</Todo>}
+    {
+      pdf && (
+        <a class="button button--secondary" href={pdf}>
+          Module description (PDF)
+        </a>
+      )
+    }
   </div>
 
   <dl class="facts" style={`--subject-color: var(${subject.data.colorToken})`}>
     <dt>Format</dt>
     <dd>{data.format ? capitalise(data.format) : <Todo>self-paced or cohort</Todo>}</dd>
 
-    <dt>Duration</dt>
-    <dd>{data.durationWeeks ? <>{data.durationWeeks}&nbsp;weeks</> : <Todo>number of weeks</Todo>}</dd>
+    {
+      (data.durationWeeks || !planned) && (
+        <>
+          <dt>Duration</dt>
+          <dd>{data.durationWeeks ? <>{data.durationWeeks}&nbsp;weeks</> : <Todo>number of weeks</Todo>}</dd>
+        </>
+      )
+    }
 
-    <dt>Effort</dt>
-    <dd>{data.effortHoursPerWeek ? <>{data.effortHoursPerWeek}&nbsp;hours per week</> : <Todo>hours per week</Todo>}</dd>
+    {
+      (data.effortHoursPerWeek || !planned) && (
+        <>
+          <dt>Effort</dt>
+          <dd>{data.effortHoursPerWeek ? <>{data.effortHoursPerWeek}&nbsp;hours per week</> : <Todo>hours per week</Todo>}</dd>
+        </>
+      )
+    }
 
     <dt>Status</dt>
     <dd><StatusBadge status={data.status} /></dd>
@@ -241,6 +273,14 @@ const jsonLd = {
 <style>
   .enrol {
     margin-top: var(--space-l);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+  }
+
+  .enrol .meta {
+    flex-basis: 100%;
   }
 
   .facts {

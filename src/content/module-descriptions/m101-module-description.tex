@@ -1,7 +1,7 @@
 % =============================================================
-%  Module Description — Discrete Structures (CS103-F26)
-%  Shown on https://wosm.academy as the course page for CS103-F26.
-%  Compile with: pdflatex cs103-module-description.tex
+%  Module Description — Discrete Structures (M101-F26)
+%  Shown on https://wosm.academy as the course page for M101-F26.
+%  Compile with: pdflatex m101-module-description.tex
 %  Write "TODO(owner): ..." where information is still missing;
 %  the website highlights it.
 % =============================================================
@@ -23,14 +23,14 @@
 % ---------- Module details (edit these) ----------------------
 % \ModuleCode must equal the course's `code` in src/content/courses/.
 \newcommand{\ModuleTitle}{Discrete Structures}
-\newcommand{\ModuleCode}{CS103-F26}
+\newcommand{\ModuleCode}{M101-F26}
 \newcommand{\Programme}{Foundation programme}
 \newcommand{\Level}{Semester 1}
 \newcommand{\Semester}{Fall 2026}
-\newcommand{\Credits}{TODO(owner)}
+\newcommand{\Credits}{7 ECTS}
 \newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
-\newcommand{\Email}{TODO(owner)}
-\newcommand{\OfficeHours}{TODO(owner)}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
 \newcommand{\Prerequisites}{None}
 
 % ---------- Styling ------------------------------------------
@@ -84,7 +84,14 @@ that are relevant to students of computer science.
 
 \section{Aims}
 \begin{itemize}
-  \item TODO(owner): aims of the module.
+  \item Introduce the mathematical language of computer science: logic, sets,
+        relations, functions and proofs.
+  \item Train students to read, write and check rigorous proofs, including proofs
+        by induction.
+  \item Develop the counting, graph-theoretic and algebraic tools used in the design
+        and analysis of algorithms.
+  \item Lay the foundations for the later mathematics modules and for Data
+        Structures and Algorithms and Theory of Computation.
 \end{itemize}
 
 \section{Learning Outcomes}
@@ -134,29 +141,54 @@ After completing this course, you will be able to:
 \end{tabularx}
 
 \section{Teaching and Learning Methods}
-The module is self-paced. All materials are provided on Moodle.
+The module is self-paced. All materials are provided on Moodle: lecture notes and
+recorded lectures for each unit, tutorial problem sheets with worked solutions,
+short quizzes, and the briefs for the two projects. Problem sheets are for practice
+and are not marked. Questions are discussed in the module channel on Discord and in
+office hours. Independent study includes reading, problem sheets and project work.
 
 \begin{tabularx}{0.6\textwidth}{X r}
 \toprule
 \textbf{Activity} & \textbf{Hours} \\
 \midrule
-Lectures            & TODO(owner) \\
-Labs / Tutorials    & TODO(owner) \\
-Independent study   & TODO(owner) \\
+Lectures            & 54 \\
+Labs / Tutorials    & 36 \\
+Independent study   & 120 \\
 \midrule
-\textbf{Total}      & \textbf{TODO(owner)} \\
+\textbf{Total}      & \textbf{210} \\
 \bottomrule
 \end{tabularx}
 
 \section{Assessment}
-Your knowledge will be assessed throughout the course with quizzes and the final
-exam. The exam evaluates whether you can correctly use the mathematical terms and
+Your knowledge will be assessed throughout the course with quizzes, two projects and the
+final exam. The exam evaluates whether you can correctly use the mathematical terms and
 concepts introduced in the lectures, such as sets, relations, logic, graphs, and
 other mathematical objects. It also tests whether you can select and apply the
 right logical, combinatorial, graph-theoretical, or algebraic methods to solve
 specific problems.
 
-TODO(owner): weight of each assessment component and the learning outcomes it covers.
+The two projects are:
+\begin{itemize}
+  \item \textbf{Project 1 -- Proofs and counting:} a short portfolio of written
+        proofs (induction, relations, functions, cardinality) and combinatorial
+        problems, each solved and justified in full.
+  \item \textbf{Project 2 -- Graphs and SAT:} implement a few graph algorithms
+        (e.g.\ spanning trees, Eulerian circuits) and a DPLL SAT solver, test them,
+        and analyse their running time.
+\end{itemize}
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Unit quizzes (best 10 of 12) & 20\% & Weekly & LO1--LO3 \\
+Project 1: Proofs and counting & 20\% & Week 7 & LO1, LO2 \\
+Project 2: Graphs and SAT & 20\% & Week 13 & LO1, LO3 \\
+Final exam (3 hours, written) & 40\% & End of term & LO1--LO3 \\
+\midrule
+\textbf{Total}      & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
 
 \section{Reading List}
 \begin{itemize}
@@ -180,8 +212,8 @@ licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.a
 
 \section{Policies}
 \begin{itemize}
-  \item \textbf{Attendance:} TODO(owner)
-  \item \textbf{Late submissions:} TODO(owner)
+  \item \textbf{Attendance:} Not mandatory. The module is self-paced; work through the units at your own pace within the term.
+  \item \textbf{Late submissions:} Accepted, but penalised.
   \item \textbf{Academic integrity:} All submitted work must be your own.
         See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
 \end{itemize}

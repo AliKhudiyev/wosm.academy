@@ -16,39 +16,39 @@ semesters:
       - title: Digital Design and Computer Architecture I
         course: cs102-f26
       - title: Discrete Structures
-        course: cs103-f26
+        course: m101-f26
   - title: Semester 2
     modules:
       - title: Data Structures and Algorithms I
-        subject: computer-science
+        course: cs201
       - title: Linear Algebra
-        subject: mathematics
+        course: m103-s27
       - title: Calculus I
-        subject: mathematics
+        course: m102-s27
   - title: Semester 3
     modules:
       - title: Digital Design and Computer Architecture II
         subject: computer-science
       - title: Data Structures and Algorithms II
-        subject: computer-science
+        course: cs302
       - title: Calculus II
-        subject: mathematics
+        course: m201-f27
   - title: Semester 4
     modules:
       - title: Theory of Computation
-        subject: computer-science
+        course: cs401
       - title: Operating Systems
-        subject: computer-science
+        course: cs402
       - title: Probability Theory and Statistics
-        subject: mathematics
+        course: m202-s28
   - title: Semester 5
     modules:
       - title: Networks
-        subject: computer-science
+        course: cs501
       - title: Databases
-        subject: computer-science
+        course: cs502
       - title: Software Engineering
-        subject: computer-science
+        course: cs503
   - title: After Semester 5
     optional: true
     modules:

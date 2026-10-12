@@ -1,0 +1,191 @@
+% =============================================================
+%  Module Description — Data Structures and Algorithms II (CS302)
+%  DRAFT for a planned module (Semester 3 of the Foundation programme).
+%  The code CS302 is a proposal (semester digit + position in the
+%  semester); add the term suffix (e.g. -S27) once the term is known and
+%  make it equal the course's `code` in src/content/courses/.
+%  Compile with: pdflatex cs302-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Data Structures and Algorithms II}
+\newcommand{\ModuleCode}{CS302}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 3}
+\newcommand{\Semester}{Fall}
+\newcommand{\Credits}{TODO(owner)}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{CS201 Data Structures and Algorithms I}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+Data Structures and Algorithms II continues from Data Structures and Algorithms I.
+Where the first module concentrated on data structures and sorting, this module
+concentrates on \emph{algorithm design}: graph algorithms, and the general techniques
+of divide and conquer, greedy algorithms, dynamic programming and network flow.
+
+The last part of the module looks at problems for which no efficient algorithm is
+known. You will learn to recognise NP-hard problems through reductions and to cope
+with them using approximation, randomisation and systematic search. This prepares
+you for Theory of Computation in Semester 4. Programming is done in C, as in Data
+Structures and Algorithms I.
+
+\section{Aims}
+\begin{itemize}
+  \item Teach the main paradigms of algorithm design and how to justify algorithms built with them.
+  \item Give you the standard algorithms on graphs and networks and practice in modelling problems as graphs.
+  \item Introduce amortised analysis and advanced data structures used inside efficient algorithms.
+  \item Introduce intractability and practical strategies for hard problems.
+\end{itemize}
+
+\section{Learning Outcomes}
+After completing this course, you will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Model problems as graphs and apply and analyse algorithms for traversal, topological sorting, connectivity, shortest paths and minimum spanning trees.
+  \item Design algorithms with divide and conquer, greedy choice and dynamic programming, and justify them with recurrences, exchange arguments and optimal substructure.
+  \item Formulate problems as network flow and bipartite matching problems and solve them.
+  \item Analyse algorithms and data structures, such as union--find, with aggregate, accounting and potential-method amortised analysis.
+  \item Prove problems NP-complete by polynomial-time reduction and choose a suitable strategy for them: approximation, randomisation, or exact search.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Graphs: representations, breadth-first and depth-first search \\
+2  & Applications of DFS: topological sorting, strongly connected components \\
+3  & Shortest paths I: Dijkstra's algorithm \\
+4  & Shortest paths II: Bellman--Ford; all-pairs shortest paths \\
+5  & Minimum spanning trees: Prim and Kruskal; union--find \\
+6  & Amortised analysis: aggregate, accounting and potential methods \\
+7  & Divide and conquer: Karatsuba, Strassen, closest pair of points \\
+8  & Greedy algorithms: exchange arguments, scheduling, Huffman coding \\
+9  & Dynamic programming I: principles; sequence problems \\
+10 & Dynamic programming II: knapsack, edit distance, shortest paths revisited \\
+11 & Network flow: Ford--Fulkerson, Edmonds--Karp, max-flow min-cut theorem \\
+12 & Applications of flow: bipartite matching and related problems \\
+13 & String algorithms: Knuth--Morris--Pratt, Rabin--Karp, suffix arrays \\
+14 & Reductions, P, NP and NP-completeness \\
+15 & Approximation algorithms \\
+16 & Randomised algorithms; backtracking and branch and bound \\
+17 & Course Review \& Exam \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle.
+Each unit has a lecture, exercises on designing and proving algorithms, and
+programming tasks in C.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 34 \\
+Labs / Tutorials    & 36 \\
+Independent study   & 130 \\
+\midrule
+\textbf{Total}      & \textbf{200} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Your knowledge will be assessed throughout the course with quizzes, programming
+assignments and the final exam. The exam checks whether you can choose a suitable
+design technique for an unfamiliar problem, develop an algorithm with it, and argue
+its correctness and running time.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Quizzes & 20\% & Throughout & LO1--LO5 \\
+Programming assignments & 40\% & Throughout & LO1--LO3 \\
+Final exam & 40\% & End of module & LO1--LO5 \\
+\midrule
+\textbf{Total} & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item T.\ H.\ Cormen, C.\ E.\ Leiserson, R.\ L.\ Rivest, C.\ Stein: \textit{Introduction to Algorithms}, 4th ed., MIT Press, 2022.
+  \item J.\ Kleinberg, \'E.\ Tardos: \textit{Algorithm Design}, Addison-Wesley, 2005.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item S.\ Dasgupta, C.\ H.\ Papadimitriou, U.\ V.\ Vazirani: \textit{Algorithms}, McGraw-Hill, 2006.
+  \item S.\ S.\ Skiena: \textit{The Algorithm Design Manual}, 3rd ed., Springer, 2020.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

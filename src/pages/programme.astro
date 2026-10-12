@@ -1,4 +1,5 @@
 ---
+import { keepNumeral } from '../lib/format';
 // Study programmes and their semester plans. Plans come from
 // src/content/programmes/*.md; credits and hours from each course's LaTeX
 // module description (src/content/module-descriptions/*.tex).
@@ -71,6 +72,12 @@ const plans = await Promise.all(
     };
   }),
 );
+
+// Modules that can be studied now (open or upcoming), for the note at the top.
+const offered = plans
+  .flatMap((plan) => plan.semesters.flatMap((semester) => semester.rows))
+  .filter((row) => row.status === 'open' || row.status === 'upcoming');
+const listFormat = new Intl.ListFormat('en-GB', { style: 'long', type: 'conjunction' });
 ---
 
 <PageLayout
@@ -92,10 +99,17 @@ const plans = await Promise.all(
   </nav>
 
   <Callout title="What is available now" level={2} class="block">
-    <p>
-      So far, only computer science materials are available. Modules shown with a link have a course page; the others
-      are not offered yet.
-    </p>
+    {
+      offered.length > 0 ? (
+        <p>
+          So far, {offered.length === 1 ? 'one module is' : `${offered.length} modules are`} offered:{' '}
+          {listFormat.format(offered.map((row) => row.title))}. The others are planned. Where a planned module links to
+          a page, its module description is already published, so you can see what it will cover.
+        </p>
+      ) : (
+        <p>No modules are offered yet. Where a planned module links to a page, its module description is published.</p>
+      )
+    }
   </Callout>
 
   {
@@ -141,7 +155,7 @@ const plans = await Promise.all(
                         <tr style={row.style}>
                           <th scope="row" class:list={['plan__module', { 'plan__module--marked': row.style }]}>
                             {row.code && <span class="plan__code">{row.code}</span>}
-                            {row.url ? <a href={row.url}>{row.title}</a> : <span class="plan__title">{row.title}</span>}
+                            {row.url ? <a href={row.url}>{keepNumeral(row.title)}</a> : <span class="plan__title">{keepNumeral(row.title)}</span>}
                             {row.offered ? <StatusBadge status={row.status} /> : <span class="badge">[planned]</span>}
                           </th>
                           <td class="num">

@@ -1,0 +1,193 @@
+% =============================================================
+%  Module Description — Operating Systems (CS402)
+%  DRAFT for a planned module (Semester 4 of the Foundation programme).
+%  The code CS402 is a proposal (semester digit + position in the
+%  semester); add the term suffix (e.g. -S27) once the term is known and
+%  make it equal the course's `code` in src/content/courses/.
+%  Compile with: pdflatex cs402-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Operating Systems}
+\newcommand{\ModuleCode}{CS402}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 4}
+\newcommand{\Semester}{Spring}
+\newcommand{\Credits}{TODO(owner)}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{CS102-F26 Digital Design and Computer Architecture I; CS201 Data Structures and Algorithms I}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+An operating system turns bare hardware into a machine that many programs can share
+safely and efficiently. This module explains how it does so, around three ideas:
+\emph{virtualisation} of the processor and memory, \emph{concurrency}, and
+\emph{persistence} of data in file systems.
+
+The module builds on the two Digital Design and Computer Architecture modules, which
+explain the hardware the operating system manages: privilege modes, interrupts,
+caches and memory. Practical work is in C using the POSIX interface, building on the
+C programming from the Data Structures and Algorithms modules.
+
+\section{Aims}
+\begin{itemize}
+  \item Explain how an operating system virtualises the processor and memory and manages devices and storage.
+  \item Teach the principles and pitfalls of concurrent programming.
+  \item Show the design trade-offs in scheduling, memory management and file systems.
+  \item Give practical experience of systems programming in C.
+\end{itemize}
+
+\section{Learning Outcomes}
+After completing this course, you will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Explain the role and structure of an operating system, including privilege modes, interrupts, traps and system calls.
+  \item Explain processes and threads, and evaluate CPU scheduling policies.
+  \item Write correct concurrent programs using locks, semaphores and condition variables, and recognise, prevent and handle race conditions and deadlock.
+  \item Explain and analyse memory management: address spaces, segmentation, paging, translation lookaside buffers and page replacement.
+  \item Explain how file systems and I/O are implemented, including crash consistency.
+  \item Write systems programs in C that use the POSIX interface for processes, threads, memory and files.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Introduction: what an operating system does; operating system structures \\
+2  & Hardware support: privilege modes, interrupts, traps and system calls \\
+3  & Processes and the process API: fork, exec, wait \\
+4  & Inter-process communication: pipes, signals and shared memory \\
+5  & Threads and POSIX threads \\
+6  & CPU scheduling: FCFS, SJF, round robin, MLFQ; multiprocessor scheduling \\
+7  & Synchronisation I: race conditions, critical sections, locks \\
+8  & Synchronisation II: semaphores, condition variables, monitors; classic problems \\
+9  & Deadlock: conditions, prevention, avoidance and detection \\
+10 & Memory management: address spaces, segmentation and paging \\
+11 & Virtual memory: TLBs, multi-level page tables, page replacement \\
+12 & I/O devices, device drivers; hard disks and SSDs \\
+13 & File systems: files, directories and their implementation \\
+14 & Crash consistency: journaling and log-structured file systems \\
+15 & Protection and security \\
+16 & Virtual machines and containers \\
+17 & Course Review \& Exam \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle.
+Each unit has a lecture and exercises. Programming assignments in C let you build
+parts of operating-system functionality, such as a shell, a thread-safe data
+structure or a memory allocator.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 34 \\
+Labs / Tutorials    & 46 \\
+Independent study   & 145 \\
+\midrule
+\textbf{Total}      & \textbf{225} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Your knowledge will be assessed throughout the course with quizzes, programming
+assignments and the final exam. The exam checks whether you can explain and analyse
+operating-system mechanisms and policies and reason about concurrent code. The
+programming assignments check whether you can write working systems programs in C.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Quizzes & 20\% & Throughout & LO1--LO5 \\
+Programming assignments & 40\% & Throughout & LO3, LO6 \\
+Final exam & 40\% & End of module & LO1--LO5 \\
+\midrule
+\textbf{Total} & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item R.\ H.\ Arpaci-Dusseau, A.\ C.\ Arpaci-Dusseau: \textit{Operating Systems: Three Easy Pieces}, Arpaci-Dusseau Books, 2018. Free online at \url{https://pages.cs.wisc.edu/~remzi/OSTEP/}.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item A.\ Silberschatz, P.\ B.\ Galvin, G.\ Gagne: \textit{Operating System Concepts}, 10th ed., Wiley, 2018.
+  \item A.\ S.\ Tanenbaum, H.\ Bos: \textit{Modern Operating Systems}, 4th ed., Pearson, 2014.
+  \item R.\ E.\ Bryant, D.\ R.\ O'Hallaron: \textit{Computer Systems: A Programmer's Perspective}, 3rd ed., Pearson, 2016.
+  \item B.\ W.\ Kernighan, D.\ M.\ Ritchie: \textit{The C Programming Language}, 2nd ed., Prentice Hall, 1988.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

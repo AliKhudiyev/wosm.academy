@@ -30,9 +30,11 @@ const courses = defineCollection({
     title: z.string(),
     code: z.string(),
     subject: reference('subjects'),
-    level: z.enum(courseLevels),
+    /** Optional: pages show the semester from the module description (\Level) instead. */
+    level: z.enum(courseLevels).optional(),
     summary: z.string(),
-    /** Omit until confirmed: the course is then shown as "[tbc]" with no enrol button. */
+    /** Omit until confirmed: the course is then shown as "[tbc]" with no enrol button.
+     *  `planned`: described but not offered yet (no enrol button). */
     status: z.enum(courseStatuses).optional(),
     format: z.enum(courseFormats).optional(),
     durationWeeks: z.number().int().positive().optional(),

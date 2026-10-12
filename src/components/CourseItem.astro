@@ -1,8 +1,8 @@
 ---
-// One course in a list: eyebrow (code · level), title link, summary, meta row.
+// One course in a list: eyebrow (code · semester), title link, summary, meta row.
 // The subject colour is a 3 px left border; the whole item is clickable.
-import { capitalise } from '../lib/format';
-import { courseUrl, type Course, type Subject } from '../lib/content';
+import { capitalise, keepNumeral } from '../lib/format';
+import { courseUrl, getSemester, type Course, type Subject } from '../lib/content';
 import StatusBadge from './StatusBadge.astro';
 import Txt from './Txt.astro';
 
@@ -13,7 +13,8 @@ interface Props {
 }
 
 const { course, subject, headingLevel = 3 } = Astro.props;
-const { code, title, level, summary, durationWeeks, effortHoursPerWeek, format, status } = course.data;
+const { code, title, summary, durationWeeks, effortHoursPerWeek, format, status } = course.data;
+const semester = await getSemester(course);
 const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
 ---
 
@@ -22,11 +23,11 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
   style={`--subject-color: var(${subject.data.colorToken})`}
   data-course
   data-subject={subject.id}
-  data-level={level}
+  data-semester={semester}
   data-status={status ?? 'tbc'}
 >
-  <p class="eyebrow">{code} · {capitalise(level)}</p>
-  <Heading class="course-item__title"><a href={courseUrl(course)}>{title}</a></Heading>
+  <p class="eyebrow">{semester ? `${code} · ${semester}` : code}</p>
+  <Heading class="course-item__title"><a href={courseUrl(course)}>{keepNumeral(title)}</a></Heading>
   <p class="course-item__summary"><Txt text={summary} /></p>
   <p class="meta">
     {format && <span>{capitalise(format)}</span>}

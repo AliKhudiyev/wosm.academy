@@ -1,0 +1,764 @@
+% =============================================================
+%  M201-F27 Calculus II — Lecture 01
+%  Unit 1: Infinite series; geometric and telescoping series
+%
+%  Build from the repository root:   npm run materials -- lecture-01
+%  This writes lecture-01.pdf (slides, with overlays) and
+%  lecture-01-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{wosm axis/.style={
+  axis lines=left, axis line style={wosm-muted, -},
+  tick style={wosm-muted}, tick label style={font=\scriptsize, text=wosm-muted},
+  label style={font=\scriptsize, text=wosm-muted},
+  legend style={draw=none, fill=none, font=\scriptsize, text=wosm-text},
+  legend cell align=left}}
+
+\newcommand{\R}{\mathbb{R}}
+
+\course{M201-F27}{Calculus II}
+\title[L01 \textperiodcentered\ Infinite series]{Infinite series}
+\subtitle{Geometric and telescoping series}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 01\enspace\textperiodcentered\enspace Unit 1\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Calculus II at a glance}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{25 units in four parts}
+      \begin{itemize}
+        \item Units 1--8: series, power series, Taylor series
+        \item Units 9--17: differential calculus in $\R^n$ and optimisation
+        \item Units 18--22: multiple integrals
+        \item Units 23--25: ordinary differential equations
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \textbf{Assessment}
+      \begin{itemize}
+        \item Unit quizzes, best 10 of 12: 20\%
+        \item Project 1, series and generating functions: 15\%
+        \item Project 2, optimisation in several variables: 20\%
+        \item Final exam: 45\%
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vskip1.2em
+  {\small\color{wosm-muted}
+  Prerequisites: Calculus I (M102-S27) and Linear Algebra (M103-S27).
+  We use limits of sequences, improper integrals and the bounds
+  $\int f \le \sum f(k)$ from Calculus I throughout this part.\par}
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 2} (OpenStax), Section 5.2.\par}
+\end{frame}
+
+% =============================================================
+\section{Adding infinitely many numbers}
+
+\begin{frame}{Can we add infinitely many numbers?}
+  Walk halfway to a wall, then half of the remaining distance, then half again, \dots
+  \begin{center}
+  \begin{tikzpicture}[x=11cm, y=1.3cm]
+    \foreach \a/\b/\c in {0/0.5/38, 0.5/0.75/28, 0.75/0.875/20,
+                          0.875/0.9375/13, 0.9375/0.96875/8, 0.96875/0.984375/4}
+      \fill[wosm-accent!\c] (\a,0) rectangle (\b,0.5);
+    \draw[wosm-muted] (0,0) rectangle (1,0.5);
+    \node at (0.25,0.25) {$\frac12$};
+    \node at (0.625,0.25) {$\frac14$};
+    \node[font=\small] at (0.8125,0.25) {$\frac18$};
+    \node[font=\footnotesize, text=wosm-muted, below] at (0,0) {$0$};
+    \node[font=\footnotesize, text=wosm-muted, below] at (1,0) {$1$};
+  \end{tikzpicture}
+  \end{center}
+  After $n$ steps you have covered $\tfrac12 + \tfrac14 + \dots + \tfrac1{2^n} = 1 - \tfrac1{2^n}$,
+  and $\tfrac{1}{2^n}$ is left.
+  \pause
+  \vskip0.6em
+  It seems right to write
+  \[ \frac12 + \frac14 + \frac18 + \frac1{16} + \cdots = 1 . \]
+  But the additions never finish. \alert{What does ``$=$'' mean here?}
+\end{frame}
+
+\begin{frame}{Three answers to one question}
+  Let $S = 1 - 1 + 1 - 1 + 1 - 1 + \cdots$. Three ``proofs'':
+  \begin{align*}
+    S &= (1-1) + (1-1) + (1-1) + \cdots = 0 + 0 + 0 + \cdots = 0 \\
+    \uncover<2->{S} &\uncover<2->{= 1 + (-1+1) + (-1+1) + \cdots = 1 + 0 + 0 + \cdots = 1} \\
+    \uncover<3->{S} &\uncover<3->{= 1 - (1 - 1 + 1 - 1 + \cdots) = 1 - S
+      \quad\Longrightarrow\quad S = \tfrac12}
+  \end{align*}
+  \onslide<4->{
+  \begin{warning}[The lesson]
+    The rules for finite sums --- regrouping, reordering, solving for the sum ---
+    do not automatically hold for infinite sums.
+    We need a \textbf{definition} of an infinite sum, and then \textbf{theorems}
+    that say which manipulations are allowed.
+  \end{warning}}
+\end{frame}
+
+\begin{frame}{Where series appear in this module and later}
+  \begin{itemize}
+    \item \textbf{Functions as series} (Units 5--6):
+      $\displaystyle e^x = \sum_{k=0}^{\infty} \frac{x^k}{k!}$,\quad
+      $\sin x = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \cdots$
+    \item \textbf{Counting and recurrences} (Unit 7, Project 1): generating functions
+    \item \textbf{Approximation} (Unit 8): Stirling's formula for $n!$
+    \item \textbf{Algorithms}: the cost of a growing array, recursion trees,
+      the $\ln n$ in the analysis of Quicksort
+    \item \textbf{Probability}: the probabilities of infinitely many outcomes
+      add up to $1$; expected values are series
+  \end{itemize}
+  \vskip0.5em
+  Today: what a convergent series is, the two families of series we can sum exactly
+  (geometric and telescoping), and the first warning sign of divergence.
+\end{frame}
+
+% =============================================================
+\section{Series and partial sums}
+
+\begin{frame}{Recall: sequences (Calculus I)}
+  \begin{itemize}
+    \item $(s_n)$ \textbf{converges} to $s$ if for every $\varepsilon > 0$ there is an $N$
+      such that $|s_n - s| < \varepsilon$ for all $n \ge N$.
+    \item \textbf{Limit laws}: if $s_n \to s$ and $t_n \to t$, then
+      $s_n + t_n \to s + t$, \ $c\,s_n \to c\,s$, \ $s_n t_n \to s t$.
+    \item \textbf{Monotone convergence}: an increasing sequence that is bounded above
+      converges (to its supremum). An increasing sequence that is not bounded above
+      tends to $\infty$.
+    \item \textbf{Cauchy criterion}: $(s_n)$ converges if and only if for every
+      $\varepsilon > 0$ there is an $N$ with $|s_n - s_m| < \varepsilon$ for all $n, m \ge N$.
+    \item If $|r| < 1$, then $r^n \to 0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Series}
+  \begin{definition}[Series, partial sums, sum]
+    Let $(a_k)_{k \ge 1}$ be a sequence of real numbers. Its $n$-th \textbf{partial sum} is
+    \[ S_n = a_1 + a_2 + \dots + a_n = \sum_{k=1}^{n} a_k . \]
+    The \textbf{series} $\sum_{k=1}^{\infty} a_k$ \textbf{converges} if the sequence
+    $(S_n)$ converges, and then its \textbf{sum} is
+    $\displaystyle\sum_{k=1}^{\infty} a_k = \lim_{n\to\infty} S_n$.
+    Otherwise the series \textbf{diverges}.
+  \end{definition}
+  If $S_n \to \infty$ we write $\sum_{k=1}^\infty a_k = \infty$ and say the series
+  \textbf{diverges to $\infty$}.
+  A series \emph{is} its sequence of partial sums, so everything we know about sequences applies.
+\end{frame}
+
+\begin{frame}{First examples}
+  \begin{example}[Halves]
+    $a_k = \frac{1}{2^k}$:\quad
+    $S_1 = \frac12,\ S_2 = \frac34,\ S_3 = \frac78,\ \dots,\ S_n = 1 - \frac{1}{2^n} \to 1$,
+    \ so $\sum_{k=1}^\infty \frac1{2^k} = 1$.
+  \end{example}
+  \pause
+  \begin{example}[Grandi's series]
+    $a_k = (-1)^{k+1}$:\quad $S_1 = 1,\ S_2 = 0,\ S_3 = 1,\ S_4 = 0,\ \dots$ \
+    has no limit, so the series diverges.
+  \end{example}
+  \pause
+  \begin{example}[Natural numbers]
+    $a_k = k$:\quad $S_n = \frac{n(n+1)}{2} \to \infty$, \ so $\sum_{k=1}^\infty k = \infty$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Partial sums, plotted}
+  \begin{columns}[c]
+    \begin{column}{0.6\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.4cm,
+            xmin=0, xmax=27, ymin=-0.2, ymax=3.9, clip=false,
+            xlabel={$n$}, ylabel={$S_n$}, xtick={1,5,10,15,20}]
+          \addplot[wosm-brick, mark=square*, mark size=1.1pt, thin] coordinates {
+            (1,1.0000) (2,1.5000) (3,1.8333) (4,2.0833) (5,2.2833) (6,2.4500) (7,2.5929)
+            (8,2.7179) (9,2.8290) (10,2.9290) (11,3.0199) (12,3.1032) (13,3.1801)
+            (14,3.2516) (15,3.3182) (16,3.3807) (17,3.4396) (18,3.4951) (19,3.5477)
+            (20,3.5977)};
+          \addplot[wosm-accent, mark=*, mark size=1.1pt, thin, domain=1:20, samples=20] {1 - 0.5^x};
+          \addplot[wosm-muted, mark=triangle*, mark size=1.3pt, thin] coordinates {
+            (1,1) (2,0) (3,1) (4,0) (5,1) (6,0) (7,1) (8,0) (9,1) (10,0) (11,1) (12,0)
+            (13,1) (14,0) (15,1) (16,0) (17,1) (18,0) (19,1) (20,0)};
+          \node[font=\scriptsize, text=wosm-brick, anchor=west] at (axis cs:20.4,3.6) {$\sum \frac1k$};
+          \node[font=\scriptsize, text=wosm-accent, anchor=west] at (axis cs:20.4,1.08) {$\sum \frac1{2^k}$};
+          \node[font=\scriptsize, text=wosm-muted, anchor=west] at (axis cs:20.4,0) {$\sum (-1)^{k+1}$};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \small
+      \begin{itemize}
+        \item $\sum 1/2^k$: the partial sums settle at $1$.
+        \item $\sum (-1)^{k+1}$: they jump between $1$ and $0$ forever.
+        \item $\sum 1/k$: they keep growing, ever more slowly.
+          Do they settle? (Section 6.)
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Notation and the starting index}
+  \begin{itemize}
+    \item A series may start at any index:
+      $\displaystyle\sum_{k=0}^{\infty} r^k$, \quad $\displaystyle\sum_{k=2}^{\infty} \frac{1}{k^2-1}$.
+      Partial sums then start there too.
+    \item Shifting the index changes nothing:
+      $\displaystyle\sum_{k=1}^{\infty} a_k = \sum_{j=0}^{\infty} a_{j+1}$ \quad (put $j = k-1$).
+    \item The name of the index does not matter: $\sum_k a_k = \sum_j a_j$.
+    \item When the range is clear we write $\sum a_k$.
+  \end{itemize}
+  \begin{warning}
+    The symbol $\sum_{k=1}^\infty a_k$ stands for two things: the series (the sequence of
+    partial sums) and, if it converges, its sum (a number).
+    Writing $\sum_{k=1}^\infty a_k = S$ \emph{claims} that the series converges.
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{Geometric series}
+
+\begin{frame}{Finite geometric sums}
+  \begin{lemma}
+    For $r \ne 1$ and $n \ge 0$:
+    \[ \sum_{k=0}^{n} r^k = 1 + r + r^2 + \dots + r^n = \frac{1 - r^{n+1}}{1 - r} . \]
+  \end{lemma}
+  \pause
+  \begin{proof}
+    Let $G_n = 1 + r + \dots + r^n$. Then $r G_n = r + r^2 + \dots + r^{n+1}$, so in
+    $G_n - r G_n = 1 - r^{n+1}$ every other term cancels --- our first
+    \emph{telescoping} sum (Section 5). Divide by $1 - r \ne 0$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{The geometric series}
+  \begin{theorem}[Geometric series]
+    $\sum_{k=0}^{\infty} r^k$ converges if and only if $|r| < 1$, and then
+    $\sum_{k=0}^{\infty} r^k = \frac{1}{1-r}$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    Use $G_n = \frac{1 - r^{n+1}}{1-r}$ for $r \ne 1$.
+    \begin{itemize}
+      \item $|r| < 1$: \ $r^{n+1} \to 0$, so $G_n \to \frac{1}{1-r}$.
+      \item $r = 1$: \ $G_n = n + 1 \to \infty$. \quad
+        $r = -1$: \ $G_n = 1, 0, 1, 0, \dots$ has no limit.
+      \item $|r| > 1$: \ $|G_n| \ge \frac{|r|^{n+1} - 1}{|1 - r|} \to \infty$:
+        unbounded, so divergent. \qedhere
+    \end{itemize}
+  \end{proof}
+\end{frame}
+
+\begin{frame}{First term over one minus the ratio}
+  \begin{corollary}
+    If $|r| < 1$, then for any number $a$ and any integer $m$
+    \[ \sum_{k=m}^{\infty} a r^k = \frac{a r^m}{1-r}
+       = \frac{\text{first term}}{1 - \text{ratio}} . \]
+  \end{corollary}
+  {\small Proof: the partial sums are $a r^m G_n$ (put $j = k - m$); use the limit laws.\par}
+  \vskip0.5em
+  To use it: identify the first term and the ratio $r$, and check that $|r| < 1$.
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{align*}
+    \sum_{k=1}^\infty \frac{3}{4^k}
+      &\uncover<2->{= \frac{3/4}{1 - 1/4} = 1}
+    & \sum_{k=0}^\infty \Bigl(-\frac23\Bigr)^k
+      &\uncover<2->{= \frac{1}{1 + 2/3} = \frac35} \\[0.6em]
+    \sum_{k=2}^\infty \frac{2^{k+1}}{5^k}
+      &\uncover<2->{= \frac{8/25}{1 - 2/5} = \frac{8}{15}}
+    & \sum_{k=0}^\infty \Bigl(\frac32\Bigr)^k
+      &\uncover<2->{\ \text{diverges: } |r| = \tfrac32 \ge 1}
+  \end{align*}
+  \onslide<3->
+  \begin{warning}[Common mistakes]
+    The first term is not always the coefficient: in $\sum_{k=2}^\infty \frac{2^{k+1}}{5^k}$
+    it is $\frac{2^3}{5^2} = \frac{8}{25}$.
+    And $\frac{1}{1-r}$ is the sum only when the series starts at $r^0 = 1$.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{Repeating decimals}
+  \begin{example}
+    \[ 0.999\ldots = \frac{9}{10} + \frac{9}{100} + \frac{9}{1000} + \cdots
+       = \frac{9/10}{1 - 1/10} = 1 . \]
+    \pause
+    \[ 0.363636\ldots = \frac{36}{100} + \frac{36}{100^2} + \frac{36}{100^3} + \cdots
+       = \frac{36/100}{1 - 1/100} = \frac{36}{99} = \frac{4}{11} . \]
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item The same argument shows that every repeating decimal is a rational number.
+    \item A decimal expansion \emph{is} a series:
+      $0.d_1 d_2 d_3\ldots = \sum_{k=1}^\infty d_k\,10^{-k}$.
+    \item In binary, $0.0111\ldots_2 = \frac14 + \frac18 + \cdots = \frac12 = 0.1_2$:
+      some numbers have two expansions.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Application: an array that doubles}
+  When a growable array is full, a common implementation allocates one of twice the
+  capacity and copies every element across: capacities $1, 2, 4, 8, \dots$
+  \begin{itemize}
+    \item Inserting $n$ elements copies $1, 2, 4, \dots, 2^j$ elements, where $2^j$ is the
+      largest power of $2$ below $n$. In total, reading from the largest term:
+      \[ 2^j \Bigl(1 + \frac12 + \frac14 + \dots + \frac1{2^j}\Bigr)
+         < 2^j \sum_{i=0}^{\infty} \frac{1}{2^i} = 2 \cdot 2^j < 2n . \]
+      So $n$ insertions cost $O(n)$ in total: $O(1)$ per insertion, amortised.
+  \end{itemize}
+  \pause
+  \begin{remark}
+    Terms that shrink geometrically sum to at most a constant times the largest one.
+    So $T(n) = T(n/2) + n$ gives $T(n) \le n\,(1 + \frac12 + \frac14 + \cdots) = 2n$.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Application: waiting for a success}
+  Repeat independent trials, each succeeding with probability $p$, $0 < p < 1$.
+  \[ P(\text{first success at trial } k) = (1-p)^{k-1}\, p , \qquad k = 1, 2, 3, \dots \]
+  \pause
+  These probabilities form a geometric series with ratio $1 - p$, and $|1-p| < 1$:
+  \[ \sum_{k=1}^{\infty} (1-p)^{k-1} p = \frac{p}{1 - (1-p)} = 1 . \]
+  So, with probability $1$, a success eventually happens.
+  \pause
+  \begin{remark}[Later in the module]
+    The expected number of trials is $\sum_{k=1}^\infty k\,(1-p)^{k-1} p = \frac1p$.
+    Summing it needs $\sum_{k \ge 1} k x^{k-1} = \frac{1}{(1-x)^2}$,
+    which we prove in Unit 5 by differentiating a power series.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{A first power series}
+  \begin{columns}[c]
+    \begin{column}{0.56\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.4cm,
+            xmin=-1, xmax=0.9, ymin=0, ymax=10.5,
+            xlabel={$x$}, xtick={-1,-0.5,0,0.5}, legend pos=north west]
+          \addplot[wosm-text, very thick, domain=-1:0.9, samples=120] {1/(1-x)};
+          \addlegendentry{$\frac{1}{1-x}$}
+          \addplot[wosm-brick, domain=-1:0.9, samples=60] {1 + x};
+          \addlegendentry{$n = 1$}
+          \addplot[wosm-brick!60, domain=-1:0.9, samples=60] {1 + x*(1 + x*(1 + x*(1 + x*(1 + x))))};
+          \addlegendentry{$n = 5$}
+          \addplot[wosm-accent, domain=-1:0.9, samples=100]
+            {1 + x*(1 + x*(1 + x*(1 + x*(1 + x*(1 + x*(1 + x*(1 + x*(1 + x*(1 + x)))))))))};
+          \addlegendentry{$n = 10$}
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      For $-1 < x < 1$:
+      \[ \frac{1}{1-x} = \sum_{k=0}^{\infty} x^k = 1 + x + x^2 + \cdots \]
+      and the series diverges for $|x| \ge 1$.
+      \vskip0.5em
+      {\small The partial sums $1 + x + \dots + x^n$ approach $\frac{1}{1-x}$ for every
+      $x$ in $(-1,1)$ --- more slowly the closer $x$ is to $\pm 1$.
+      A function written as a series in powers of $x$ is a \emph{power series}:
+      Unit 5.\par}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{First properties}
+
+\begin{frame}{Linearity}
+  \begin{theorem}
+    If $\sum a_k = A$ and $\sum b_k = B$ both converge and $c \in \R$, then
+    \[ \sum (a_k + b_k) = A + B \qquad\text{and}\qquad \sum c\,a_k = c A . \]
+  \end{theorem}
+  {\small Proof: the partial sums are $A_n + B_n$ and $c A_n$; use the limit laws.\par}
+  \pause
+  \begin{example}
+    $\displaystyle\sum_{k=0}^\infty \frac{2^k + 3^k}{6^k}
+      = \sum_{k=0}^\infty \Bigl(\frac13\Bigr)^k + \sum_{k=0}^\infty \Bigl(\frac12\Bigr)^k
+      = \frac32 + 2 = \frac72 .$
+  \end{example}
+\end{frame}
+
+\begin{frame}{Splitting a series}
+  \begin{warning}
+    Linearity works one way only: $\sum (1 + (-1)) = 0$ converges, but $\sum 1$ and
+    $\sum (-1)$ diverge. Split a series only when you know both parts converge.
+  \end{warning}
+  \pause
+  \begin{corollary}
+    If $\sum a_k$ converges and $\sum b_k$ diverges, then $\sum (a_k + b_k)$ diverges.
+  \end{corollary}
+  \begin{proof}
+    If $\sum (a_k + b_k)$ converged, then by linearity so would
+    $\sum \bigl((a_k + b_k) - a_k\bigr) = \sum b_k$.
+  \end{proof}
+  For example, $\sum \bigl(\frac1{2^k} + 1\bigr)$ diverges.
+\end{frame}
+
+\begin{frame}{Only the tail matters}
+  \begin{theorem}
+    Let $m \ge 1$. Then $\sum_{k=1}^\infty a_k$ converges if and only if
+    $\sum_{k=m+1}^\infty a_k$ converges, and then
+    \[ \sum_{k=1}^\infty a_k = \sum_{k=1}^{m} a_k + \sum_{k=m+1}^\infty a_k . \]
+  \end{theorem}
+  {\small Proof: for $n > m$, $S_n = S_m + \sum_{k=m+1}^{n} a_k$, and $S_m$ is a fixed number.\par}
+  \pause
+  \begin{itemize}
+    \item Changing, adding or removing \emph{finitely many} terms does not change
+      whether a series converges. It may change the sum.
+    \item If $\sum a_k = S$, the \textbf{remainder}
+      $R_n = \sum_{k=n+1}^\infty a_k = S - S_n$ tends to $0$.
+      The error of stopping after $n$ terms is $R_n$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The $n$-th term test}
+  \begin{theorem}
+    If $\sum a_k$ converges, then $a_k \to 0$.
+  \end{theorem}
+  \begin{proof}
+    $a_n = S_n - S_{n-1} \to S - S = 0$.
+  \end{proof}
+  \pause
+  \begin{corollary}[Divergence test]
+    If $(a_k)$ does not converge to $0$, then $\sum a_k$ diverges.
+  \end{corollary}
+\end{frame}
+
+\begin{frame}{Using the $n$-th term test}
+  \begin{example}
+    These all diverge, because their terms do not tend to $0$:
+    \begin{itemize}
+      \item $\sum \frac{k}{k+1}$ \ (terms $\to 1$) \qquad
+        $\sum k \sin\frac1k$ \ (terms $\to 1$)
+      \item $\sum (-1)^k$ \ (terms have no limit) \qquad
+        $\sum r^k$ with $|r| \ge 1$ \ ($|r^k| \ge 1$)
+    \end{itemize}
+  \end{example}
+  \pause
+  \begin{warning}
+    The converse is false: $a_k \to 0$ does \emph{not} imply that $\sum a_k$ converges
+    (Sections 5 and 6). The test can only prove divergence.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{Grouping terms}
+  \begin{theorem}
+    If $\sum a_k$ converges to $S$, then inserting parentheses --- grouping
+    consecutive terms into blocks --- gives a series that also converges to $S$.
+  \end{theorem}
+  {\small Proof: the partial sums of the grouped series are
+  $S_{n_1}, S_{n_2}, S_{n_3}, \dots$ for some $n_1 < n_2 < \cdots$: a subsequence of $(S_n)$,
+  which has the same limit.\par}
+  \pause
+  \begin{warning}
+    Removing parentheses is not allowed:
+    $(1 - 1) + (1 - 1) + \cdots = 0$ converges, but $1 - 1 + 1 - 1 + \cdots$ diverges.
+  \end{warning}
+  \pause
+  So for $1 - 1 + 1 - \cdots$: the first two ``proofs'' grouped a \emph{divergent}
+  series, and the third assumed that the sum exists. None of $0$, $1$, $\frac12$ is its sum.
+\end{frame}
+
+\begin{frame}{The Cauchy criterion}
+  \begin{theorem}[Cauchy criterion for series]
+    $\sum a_k$ converges if and only if for every $\varepsilon > 0$ there is an $N$ such that
+    \[ |a_{m+1} + a_{m+2} + \dots + a_n| < \varepsilon \qquad\text{for all } n > m \ge N . \]
+  \end{theorem}
+  \begin{proof}
+    $a_{m+1} + \dots + a_n = S_n - S_m$, and $(S_n)$ converges if and only if it is a
+    Cauchy sequence (Calculus I, Unit 4).
+  \end{proof}
+  \begin{itemize}
+    \item It proves convergence \emph{without knowing the sum}. Lecture 3 uses it for
+      absolutely convergent series.
+    \item With $n = m + 1$ it gives the $n$-th term test again.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Telescoping series}
+
+\begin{frame}{Telescoping sums}
+  If each term is a difference of consecutive terms of another sequence,
+  $a_k = b_k - b_{k+1}$, the partial sums collapse:
+  \[ S_n = (b_1 - b_2) + (b_2 - b_3) + \dots + (b_n - b_{n+1}) = b_1 - b_{n+1} . \]
+  \pause
+  \begin{theorem}[Telescoping series]
+    $\sum_{k=1}^\infty (b_k - b_{k+1})$ converges if and only if $(b_n)$ converges, and then
+    \[ \sum_{k=1}^\infty (b_k - b_{k+1}) = b_1 - \lim_{n\to\infty} b_n . \]
+  \end{theorem}
+  {\small Proof: $S_n = b_1 - b_{n+1}$. \quad
+  The finite geometric sum used the same cancellation.\par}
+\end{frame}
+
+\begin{frame}{Example: $\sum \frac{1}{k(k+1)}$}
+  Partial fractions (Calculus I): \quad
+  $\displaystyle\frac{1}{k(k+1)} = \frac1k - \frac1{k+1}$, \quad so $b_k = \frac1k$.
+  \pause
+  \[ S_4 = \Bigl(1 - \tfrac12\Bigr) + \Bigl(\tfrac12 - \tfrac13\Bigr)
+         + \Bigl(\tfrac13 - \tfrac14\Bigr) + \Bigl(\tfrac14 - \tfrac15\Bigr)
+         = 1 - \tfrac15 \]
+  and in general $S_n = 1 - \frac{1}{n+1} \to 1$.
+  \pause
+  \[ \sum_{k=1}^\infty \frac{1}{k(k+1)} = \frac12 + \frac16 + \frac1{12} + \frac1{20} + \cdots = 1 . \]
+  {\small\color{wosm-muted} We found the sum because $S_n$ has a closed form. Usually it does
+  not, and we can only decide \emph{whether} a series converges (Lecture 2).\par}
+\end{frame}
+
+\begin{frame}{Example: a gap of two}
+  \[ \sum_{k=2}^\infty \frac{1}{k^2 - 1}, \qquad
+     \frac{1}{k^2-1} = \frac{1}{(k-1)(k+1)} = \frac12\Bigl(\frac{1}{k-1} - \frac{1}{k+1}\Bigr). \]
+  \pause
+  In $\sum_{k=2}^{n} \bigl(\frac{1}{k-1} - \frac{1}{k+1}\bigr)$ the positive terms are
+  $1, \frac12, \frac13, \dots, \frac1{n-1}$ and the negative terms are
+  $\frac13, \dots, \frac1{n-1}, \frac1n, \frac1{n+1}$. Two survive at each end:
+  \[ S_n = \frac12\Bigl(1 + \frac12 - \frac1n - \frac1{n+1}\Bigr)
+     \;\longrightarrow\; \frac12 \cdot \frac32 = \frac34 . \]
+\end{frame}
+
+\begin{frame}{Example: three factors}
+  \[ \frac{1}{k(k+1)(k+2)} = \frac12\Bigl(\frac{1}{k(k+1)} - \frac{1}{(k+1)(k+2)}\Bigr) \]
+  {\small (check: the bracket is $\frac{(k+2) - k}{k(k+1)(k+2)}$).}
+  \pause
+  So the term is $b_k - b_{k+1}$ with $b_k = \frac{1}{2k(k+1)}$, and $b_n \to 0$:
+  \[ \sum_{k=1}^\infty \frac{1}{k(k+1)(k+2)} = b_1 - \lim_{n\to\infty} b_n = \frac14 . \]
+\end{frame}
+
+\begin{frame}{Example: telescoping series that diverge}
+  \begin{example}
+    $\displaystyle\sum_{k=1}^\infty \ln\Bigl(1 + \frac1k\Bigr)
+      = \sum_{k=1}^\infty \bigl(\ln(k+1) - \ln k\bigr)$:
+    \quad $S_n = \ln(n+1) - \ln 1 = \ln(n+1) \to \infty$.
+  \end{example}
+  \pause
+  \begin{example}
+    $\displaystyle\sum_{k=1}^\infty \bigl(\sqrt{k+1} - \sqrt{k}\bigr)$:
+    \quad $S_n = \sqrt{n+1} - 1 \to \infty$.
+  \end{example}
+  \pause
+  In both the terms tend to $0$: \ $\ln(1 + \frac1k) \to 0$ and
+  $\sqrt{k+1} - \sqrt{k} = \frac{1}{\sqrt{k+1} + \sqrt{k}} \to 0$.
+  They are our first divergent series with $a_k \to 0$.
+\end{frame}
+
+\begin{frame}{Always work with partial sums}
+  \begin{warning}[Two wrong arguments]
+    \begin{itemize}
+      \item $\sum \bigl(\frac1k - \frac1{k+1}\bigr) = \sum \frac1k - \sum \frac1{k+1}$:
+        both series on the right diverge (Section 6), and $\infty - \infty$ means nothing.
+        Linearity needs both parts to converge.
+      \item ``In $\sum \bigl(\ln(k+1) - \ln k\bigr)$ every term cancels, so the sum is
+        $-\ln 1 = 0$.'' \ In fact $S_n = \ln(n+1) \to \infty$.
+    \end{itemize}
+  \end{warning}
+  \pause
+  \textbf{Recipe}
+  \begin{enumerate}
+    \item Write $a_k = b_k - b_{k+1}$ (partial fractions, rules for logarithms,
+      rationalising, \dots).
+    \item Compute $S_n$ exactly: which terms survive?
+    \item Take the limit of $S_n$.
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{The harmonic series}
+
+\begin{frame}{The harmonic series diverges}
+  The $n$-th \textbf{harmonic number} is $H_n = \sum_{k=1}^{n} \frac1k$.
+  \begin{theorem}
+    $\displaystyle\sum_{k=1}^\infty \frac1k = \infty$.
+  \end{theorem}
+  The terms tend to $0$, so the $n$-th term test says nothing. The partial sums grow
+  (Section 2's plot), but do they stay below some bound?
+  Two proofs that they do not.
+\end{frame}
+
+\begin{frame}{Oresme's proof (14th century)}
+  \begin{proof}
+    Group the terms in blocks that end at powers of $2$:
+    \[ 1 + \tfrac12 + \underbrace{\bigl(\tfrac13 + \tfrac14\bigr)}_{\ge\, 2 \cdot \frac14}
+         + \underbrace{\bigl(\tfrac15 + \dots + \tfrac18\bigr)}_{\ge\, 4 \cdot \frac18}
+         + \underbrace{\bigl(\tfrac19 + \dots + \tfrac1{16}\bigr)}_{\ge\, 8 \cdot \frac1{16}}
+         + \cdots \]
+    The block that ends at $\frac{1}{2^j}$ has $2^{j-1}$ terms, each at least $\frac1{2^j}$,
+    so it adds at least $\frac12$. Hence $H_{2^m} \ge 1 + \frac m2 \to \infty$.
+    As $(H_n)$ is increasing, $H_n \to \infty$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{A second proof}
+  For $x > -1$, \ $\ln(1 + x) \le x$ \ (the graph of $\ln(1+x)$ lies below its tangent at $0$).
+  \pause
+  With $x = \frac1k$:
+  \[ H_n = \sum_{k=1}^{n} \frac1k \;\ge\; \sum_{k=1}^{n} \ln\Bigl(1 + \frac1k\Bigr)
+       = \ln(n+1) \;\to\; \infty , \]
+  using the telescoping sum from Section 5.
+  \pause
+  \begin{remark}
+    We compared $\sum \frac1k$ with a series that we already knew diverges, term by term.
+    Lecture 2 turns this idea into a test: the \emph{comparison test}.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{How fast does $H_n$ grow?}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      From Calculus I (Unit 26):
+      \[ \ln(n+1) \le H_n \le 1 + \ln n . \]
+      \begin{center}
+      \small
+      \begin{tabular}{rccc}
+        \toprule
+        $n$ & $\ln(n+1)$ & $H_n$ & $1 + \ln n$ \\
+        \midrule
+        $10$     & $2.398$  & $2.929$  & $3.303$ \\
+        $100$    & $4.615$  & $5.187$  & $5.605$ \\
+        $1000$   & $6.909$  & $7.485$  & $7.908$ \\
+        $10^6$   & $13.816$ & $14.393$ & $14.816$ \\
+        \bottomrule
+      \end{tabular}
+      \end{center}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{itemize}
+        \item $H_n$ grows like $\ln n$: without bound, but very slowly.
+        \item The first $n$ with $H_n > 10$ is $n = 12\,367$.
+        \item In fact $H_n - \ln n \to \gamma \approx 0.5772$,
+          the Euler--Mascheroni constant.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Harmonic numbers in algorithms}
+  \begin{itemize}
+    \item \textbf{Quicksort} with a uniformly random pivot, on $n$ distinct keys, makes
+      on average
+      \[ 2(n+1) H_n - 4n \;\approx\; 2 n \ln n \quad\text{comparisons.} \]
+    \item \textbf{Coupon collector}: draw uniformly at random, with replacement,
+      from $n$ coupons. The expected number of draws until every coupon has been seen is
+      \[ n H_n \;\approx\; n \ln n . \]
+  \end{itemize}
+  In both, the logarithm comes from a harmonic sum $\sum_{k=1}^{n} \frac1k$.
+\end{frame}
+
+\begin{frame}{In contrast: $\sum \frac{1}{k^2}$ converges}
+  The terms are positive, so the partial sums $S_n = \sum_{k=1}^{n} \frac1{k^2}$ increase.
+  \pause
+  For $k \ge 2$: \quad
+  $\displaystyle\frac1{k^2} < \frac{1}{k(k-1)} = \frac1{k-1} - \frac1k$. \quad Hence
+  \[ S_n = 1 + \sum_{k=2}^{n} \frac1{k^2}
+         < 1 + \sum_{k=2}^{n} \Bigl(\frac1{k-1} - \frac1k\Bigr) = 2 - \frac1n < 2 . \]
+  \pause
+  An increasing sequence that is bounded above converges, so $\sum \frac1{k^2}$ converges,
+  and its sum is at most $2$.
+  \begin{remark}
+    Euler found the sum: $\sum_{k=1}^\infty \frac1{k^2} = \frac{\pi^2}{6} \approx 1.6449$
+    (the Basel problem). Our argument proves convergence without finding the sum.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Looking ahead}
+  In both $\sum \frac1k$ and $\sum \frac1{k^2}$ the terms tend to $0$,
+  yet one diverges and the other converges. Where is the boundary?
+  \[ \sum \frac{1}{k^{1.01}}\,? \qquad \sum \frac{1}{\sqrt k}\,? \qquad
+     \sum \frac{1}{k \ln k}\,? \qquad \sum \frac{k^{10}}{2^k}\,? \qquad
+     \sum \frac{k!}{k^k}\,? \]
+  \pause
+  \begin{block}{The key fact for Lecture 2}
+    If $a_k \ge 0$ for all $k$, the partial sums increase, so
+    \[ \sum a_k \text{ converges} \iff (S_n) \text{ is bounded above.} \]
+  \end{block}
+  Lecture 2 turns this into practical tests: comparison, integral, ratio and root.
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item $\sum a_k$ \textbf{converges} if its partial sums $S_n$ converge;
+      the sum is $\lim S_n$.
+    \item \textbf{Geometric}: $\sum_{k=0}^\infty r^k = \frac{1}{1-r}$ if $|r| < 1$, and
+      it diverges if $|r| \ge 1$. \ In general: first term $/ (1 - \text{ratio})$.
+    \item \textbf{Linearity} holds for convergent series.
+      Finitely many terms never decide convergence.
+    \item \textbf{$n$-th term test}: if $\sum a_k$ converges, then $a_k \to 0$.
+      It can only prove divergence.
+    \item \textbf{Grouping} a convergent series is allowed; removing parentheses is not.
+    \item \textbf{Telescoping}: $\sum (b_k - b_{k+1}) = b_1 - \lim b_n$, if the limit exists.
+    \item \textbf{Harmonic series}: $\sum \frac1k = \infty$, with $H_n \approx \ln n$;
+      but $\sum \frac1{k^2}$ converges (bounded partial sums).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find $\displaystyle\sum_{k=1}^\infty (-1)^{k+1} \frac{5}{3^k}$.
+    \item Write $0.142857142857\ldots$ as a fraction.
+    \item Find $\displaystyle\sum_{k=1}^\infty \frac{1}{4k^2 - 1}$.
+    \item Find $\displaystyle\sum_{k=1}^\infty \ln \frac{k(k+2)}{(k+1)^2}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Practice, continued}
+  \small
+  \begin{enumerate}
+    \setcounter{enumi}{4}
+    \item Do these converge? \ (a) $\displaystyle\sum \frac{k^2}{2k^2 + 1}$ \quad
+      (b) $\displaystyle\sum \Bigl(1 + \frac1k\Bigr)^k$
+    \item For which $x$ does $\sum_{k=0}^\infty (x-1)^k$ converge? Find its sum.
+    \item True or false: if $\sum a_k$ and $\sum b_k$ both diverge, then
+      $\sum (a_k + b_k)$ diverges.
+    \item Show that if $\sum a_k$ converges, then $\sum_{k=n+1}^\infty a_k \to 0$ as $n \to \infty$.
+    \item A ball is dropped from a height of $2$\,m. After each bounce it rises to
+      $\frac35$ of its previous height. How far does it travel in total?
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $\frac54$ \ (first term $\frac53$, ratio $-\frac13$).
+    \item $\frac{142857}{999999} = \frac17$.
+    \item $\frac12$, \ since $\frac{1}{4k^2-1} = \frac12\bigl(\frac1{2k-1} - \frac1{2k+1}\bigr)$.
+    \item $-\ln 2$, \ with $b_k = \ln\frac{k}{k+1}$: the term is $b_k - b_{k+1}$, $b_1 = -\ln 2$, $b_n \to 0$.
+    \item Both diverge: the terms tend to $\frac12$ and to $e$.
+    \item For $0 < x < 2$ (ratio $x - 1$); the sum is $\frac{1}{2-x}$.
+    \item False: $a_k = 1$, $b_k = -1$.
+    \item The tail is $S - S_n$, and $S_n \to S$.
+    \item $2 + 2 \cdot \dfrac{2 \cdot \frac35}{1 - \frac35} = 2 + 6 = 8$\,m.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 02 --- Convergence tests} (Unit 2)
+  \begin{itemize}
+    \item Series with nonnegative terms
+    \item The integral test and $p$-series
+    \item Comparison and limit comparison
+    \item The ratio and root tests
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 2}, Sections 5.3, 5.4 and 5.6.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

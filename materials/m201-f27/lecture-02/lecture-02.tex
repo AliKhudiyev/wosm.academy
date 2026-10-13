@@ -1,0 +1,580 @@
+% =============================================================
+%  M201-F27 Calculus II — Lecture 02
+%  Unit 2: Convergence tests: comparison, integral, ratio, root
+%
+%  Build from the repository root:   npm run materials -- lecture-02
+%  This writes lecture-02.pdf (slides, with overlays) and
+%  lecture-02-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dx}{\,\mathrm{d}x}
+
+\course{M201-F27}{Calculus II}
+\title[L02 \textperiodcentered\ Convergence tests]{Convergence tests}
+\subtitle{Comparison, integral, ratio and root tests}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 02\enspace\textperiodcentered\enspace Unit 2\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item $\sum a_k$ converges if its partial sums $S_n = a_1 + \dots + a_n$ converge.
+    \item Geometric series: $\sum_{k=0}^\infty r^k = \frac{1}{1-r}$ if $|r| < 1$;
+      divergent if $|r| \ge 1$.
+    \item $n$-th term test: if $\sum a_k$ converges, then $a_k \to 0$ --- not conversely.
+    \item Telescoping series: $\sum (b_k - b_{k+1}) = b_1 - \lim b_n$.
+    \item $\sum \frac1k = \infty$, but $\sum \frac1{k^2} \le 2$: its partial sums are bounded.
+  \end{itemize}
+  \vskip0.6em
+  For most series we cannot compute $S_n$ exactly.
+  Today: how to decide \emph{whether} a series converges without finding its sum.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 2} (OpenStax), Sections 5.3, 5.4 and 5.6.\par}
+\end{frame}
+
+% =============================================================
+\section{Series with nonnegative terms}
+
+\begin{frame}{Bounded partial sums}
+  \begin{theorem}
+    If $a_k \ge 0$ for all $k$, then $(S_n)$ is increasing, and $\sum a_k$ converges
+    if and only if $(S_n)$ is bounded above. Otherwise $\sum a_k = \infty$.
+  \end{theorem}
+  {\small Proof: $S_{n+1} = S_n + a_{n+1} \ge S_n$; use the monotone convergence theorem.\par}
+  \pause
+  \begin{itemize}
+    \item For such series we write $\sum a_k < \infty$ for ``$\sum a_k$ converges''.
+    \item Today's tests assume $a_k \ge 0$ (for $k \ge N$ is enough). Both signs: Lecture 3.
+  \end{itemize}
+  \pause
+  \begin{remark}
+    Tests decide \emph{whether} a series converges, rarely what the sum is:
+    no simple closed form is known for $\sum_{k=1}^\infty \frac{1}{k^3}$.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{The integral test}
+
+\begin{frame}{Sums and integrals}
+  Let $f$ be positive and decreasing, $a_k = f(k)$. Rectangles of width $1$ against the
+  area under the graph (Calculus I, Unit 26):
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}[x=0.82cm, y=1.95cm]
+        \foreach \k in {1,...,5}
+          \filldraw[fill=wosm-accent!18, draw=wosm-accent] (\k,0) rectangle (\k+1,1/\k);
+        \draw[wosm-text, thick, domain=0.85:6.4, samples=60] plot (\x,{1/\x});
+        \draw[wosm-muted] (0.6,0) -- (6.6,0);
+        \foreach \k in {1,...,6}
+          \node[below, font=\scriptsize, text=wosm-muted] at (\k,0) {$\k$};
+        \node[font=\scriptsize, text=wosm-accent] at (1.5,0.45) {$a_1$};
+        \node[font=\scriptsize, text=wosm-accent] at (2.5,0.22) {$a_2$};
+      \end{tikzpicture}
+      \par\small
+      The rectangle on $[k, k+1]$ has height $a_k$ and lies \emph{above} the graph, so
+      $\int_1^{n+1} f(x)\dx \le a_1 + \dots + a_n$.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}[x=0.82cm, y=1.95cm]
+        \foreach \k in {2,...,6}
+          \filldraw[fill=wosm-brick!18, draw=wosm-brick] (\k-1,0) rectangle (\k,1/\k);
+        \draw[wosm-text, thick, domain=0.85:6.4, samples=60] plot (\x,{1/\x});
+        \draw[wosm-muted] (0.6,0) -- (6.6,0);
+        \foreach \k in {1,...,6}
+          \node[below, font=\scriptsize, text=wosm-muted] at (\k,0) {$\k$};
+        \node[font=\scriptsize, text=wosm-brick] at (1.5,0.22) {$a_2$};
+        \node[font=\scriptsize, text=wosm-brick] at (2.5,0.15) {$a_3$};
+      \end{tikzpicture}
+      \par\small
+      The rectangle on $[k-1, k]$ has height $a_k$ and lies \emph{below} the graph, so
+      $a_2 + \dots + a_n \le \int_1^{n} f(x)\dx$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The integral test}
+  \begin{theorem}[Integral test]
+    Let $f\colon [1, \infty) \to [0, \infty)$ be decreasing, and $a_k = f(k)$. Then
+    $\sum_{k=1}^\infty a_k$ converges if and only if $\int_1^\infty f(x)\dx$ converges, and
+    \[ \int_1^{n+1} f(x)\dx \le S_n \le a_1 + \int_1^n f(x)\dx \qquad\text{for every } n. \]
+  \end{theorem}
+  \pause
+  \begin{proof}
+    $a_{k+1} \le \int_k^{k+1} f \le a_k$ as $f$ decreases; sum over $k$.
+    $F(t) = \int_1^t f$ increases, so $\int_1^\infty f$ converges iff $F$ is bounded,
+    iff $(S_n)$ is bounded.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{$p$-series}
+  \begin{theorem}[$p$-series]
+    $\displaystyle\sum_{k=1}^\infty \frac{1}{k^p}$ converges if and only if $p > 1$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    If $p \le 0$, the terms do not tend to $0$. If $p > 0$, then $f(x) = x^{-p}$ is positive
+    and decreasing, and $\int_1^t x^{-p} \dx$ equals $\frac{t^{1-p} - 1}{1-p}$ for $p \ne 1$
+    and $\ln t$ for $p = 1$. It has a finite limit as $t \to \infty$ if and only if $p > 1$
+    (Calculus I, Unit 23).
+  \end{proof}
+  \pause
+  So $\sum \frac{1}{\sqrt k}$ and $\sum \frac1k$ diverge, while $\sum \frac{1}{k^{1.01}}$
+  and $\sum \frac{1}{k^2}$ converge. These are the standard series to compare with.
+\end{frame}
+
+\begin{frame}{Logarithms at the boundary}
+  The test works on $[2, \infty)$ too. Both functions below are positive and decreasing
+  there; substitute $u = \ln x$.
+  \begin{itemize}
+    \item $\displaystyle\sum_{k=2}^\infty \frac{1}{k \ln k} = \infty$, \ since
+      $\displaystyle\int_2^t \frac{\mathrm{d}x}{x \ln x} = \ln\ln t - \ln\ln 2 \to \infty$.
+    \item $\displaystyle\sum_{k=2}^\infty \frac{1}{k (\ln k)^2} < \infty$, \ since
+      $\displaystyle\int_2^t \frac{\mathrm{d}x}{x (\ln x)^2} = \frac{1}{\ln 2} - \frac{1}{\ln t}
+      \to \frac{1}{\ln 2}$.
+  \end{itemize}
+  \pause
+  How slowly does the first one diverge? The upper bound of the integral test, started at $k = 2$:
+  \[ \sum_{k=2}^{n} \frac{1}{k \ln k} \;\le\; \frac{1}{2 \ln 2} + \ln\ln n - \ln\ln 2 . \]
+  For $n = 10^{100}$ the right-hand side is about $6.53$.
+  The series diverges, but no computer will ever show it.
+\end{frame}
+
+\begin{frame}{How good is a partial sum?}
+  \begin{theorem}[Remainder estimate]
+    Under the conditions of the integral test, if $\sum a_k = S$ converges, then the
+    remainder $R_n = S - S_n = \sum_{k=n+1}^\infty a_k$ satisfies
+    $\int_{n+1}^{\infty} f(x)\dx \le R_n \le \int_n^\infty f(x)\dx$.
+  \end{theorem}
+  {\small Proof: the same rectangles, starting at $n + 1$ instead of $1$.\par}
+  \pause
+  \begin{example}[$\sum \frac{1}{k^2}$ with $n = 10$]
+    $S_{10} = 1.549768\ldots$ and $\frac{1}{11} \le R_{10} \le \frac{1}{10}$, so
+    $1.64068 \le S \le 1.64977$. The true value is $\frac{\pi^2}{6} = 1.644934\ldots$;
+    $S_{10}$ alone is off by almost $0.1$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Two warnings}
+  \begin{warning}[The integral is not the sum]
+    $\int_1^\infty \frac{\mathrm{d}x}{x^2} = 1$, but $\sum_{k=1}^\infty \frac{1}{k^2} = \frac{\pi^2}{6}$.
+    The test says \emph{whether} the series converges; the bounds say roughly \emph{where}.
+  \end{warning}
+  \pause
+  \begin{warning}[The function must be decreasing]
+    $f(x) = \sin^2(\pi x)$ is nonnegative, and $a_k = f(k) = 0$ for every $k$,
+    so $\sum a_k = 0$ converges. But $\int_1^\infty \sin^2(\pi x)\dx = \infty$.
+    Without monotonicity the rectangles say nothing about the graph between the integers.
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{Comparison tests}
+
+\begin{frame}{The comparison test}
+  \begin{theorem}[Comparison test]
+    Suppose $0 \le a_k \le b_k$ for all $k \ge N$.
+    \begin{enumerate}
+      \item If $\sum b_k$ converges, then $\sum a_k$ converges.
+      \item If $\sum a_k$ diverges, then $\sum b_k$ diverges.
+    \end{enumerate}
+  \end{theorem}
+  \pause
+  \begin{proof}
+    Only the tail matters, so take $N = 1$. Then
+    $\sum_{k=1}^n a_k \le \sum_{k=1}^n b_k \le \sum_{k=1}^\infty b_k$:
+    the partial sums of $\sum a_k$ increase and are bounded, so they converge.
+    Part 2 is the contrapositive of part 1.
+  \end{proof}
+  In short: below a convergent series converges; above a divergent series diverges.
+\end{frame}
+
+\begin{frame}{Comparison: examples}
+  \begin{itemize}
+    \item $\displaystyle\sum \frac{1}{2^k + k}$
+      \uncover<2->{: \ $\dfrac{1}{2^k + k} \le \dfrac{1}{2^k}$, a geometric series. Converges.}
+    \item $\displaystyle\sum \frac{\sin^2 k}{k^2}$
+      \uncover<3->{: \ $0 \le \dfrac{\sin^2 k}{k^2} \le \dfrac{1}{k^2}$. Converges.}
+    \item $\displaystyle\sum \frac{1}{k!}$
+      \uncover<4->{: \ $k! \ge 2^{k-1}$, so $\dfrac{1}{k!} \le \dfrac{1}{2^{k-1}}$.
+      Converges (to $e - 1$: Unit 6).}
+    \item $\displaystyle\sum \frac{\ln k}{k}$
+      \uncover<5->{: \ $\dfrac{\ln k}{k} \ge \dfrac{1}{k}$ for $k \ge 3$. Diverges.}
+    \item $\displaystyle\sum \frac{1}{\sqrt{k^2 + 1}}$
+      \uncover<6->{: \ $\sqrt{k^2+1} \le \sqrt{2}\,k$, so the term is $\ge \dfrac{1}{\sqrt2\,k}$.
+      Diverges.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Compare in the right direction}
+  \begin{warning}
+    $\frac{1}{k^2 + 1} \le \frac{1}{k}$ is true but useless: being below a \emph{divergent}
+    series proves nothing. Neither does being above a convergent one.
+  \end{warning}
+  \pause
+  \begin{example}[$\sum_{k=3}^\infty \frac{1}{k^2 - 5}$]
+    Here $\frac{1}{k^2 - 5} \ge \frac{1}{k^2}$: the wrong direction for proving convergence.
+    \pause
+    Fix: for $k \ge 4$, $k^2 \ge 10$, so $k^2 - 5 \ge \frac{k^2}{2}$ and
+    $\frac{1}{k^2 - 5} \le \frac{2}{k^2}$. As $\sum \frac{2}{k^2}$ converges,
+    so does $\sum \frac{1}{k^2 - 5}$.
+  \end{example}
+  \pause
+  Finding such inequalities is fiddly. The next test does it for us.
+\end{frame}
+
+\begin{frame}{The limit comparison test}
+  \begin{theorem}[Limit comparison test]
+    Let $a_k \ge 0$, \ $b_k > 0$ and $\dfrac{a_k}{b_k} \to L$.
+    \begin{enumerate}
+      \item If $0 < L < \infty$, then $\sum a_k$ and $\sum b_k$ both converge or both diverge.
+      \item If $L = 0$ and $\sum b_k$ converges, then $\sum a_k$ converges.
+      \item If $L = \infty$ and $\sum b_k$ diverges, then $\sum a_k$ diverges.
+    \end{enumerate}
+  \end{theorem}
+  \pause
+  \begin{proof}
+    1. For $k \ge N$: $\frac L2 \le \frac{a_k}{b_k} \le 2L$, so
+    $\frac L2\, b_k \le a_k \le 2L\, b_k$; compare both ways.
+    2 and 3: eventually $a_k \le b_k$, respectively $a_k \ge b_k$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{Choosing what to compare with}
+  Keep the dominant terms; compare with $\frac{1}{k^p}$ or $r^k$.
+  \begin{itemize}
+    \item $\displaystyle\sum_{k=3}^\infty \frac{1}{k^2 - 5}$:
+      \uncover<2->{$b_k = \frac{1}{k^2}$, \ $L = 1$. Converges.}
+    \item $\displaystyle\sum \frac{3k^2 + 7k}{k^4 + 2}$:
+      \uncover<3->{$b_k = \frac{1}{k^2}$, \ $L = 3$. Converges.}
+    \item $\displaystyle\sum \frac{1}{\sqrt{k^3 + 1}}$:
+      \uncover<4->{$b_k = \frac{1}{k^{3/2}}$, \ $L = 1$, \ $p = \frac32 > 1$. Converges.}
+    \item $\displaystyle\sum \frac{2k + 1}{k^2 + \sqrt{k}}$:
+      \uncover<5->{$b_k = \frac{1}{k}$, \ $L = 2$. Diverges.}
+    \item $\displaystyle\sum \sin\frac1k$:
+      \uncover<6->{$b_k = \frac{1}{k}$, \ $\frac{\sin x}{x} \to 1$ as $x \to 0$. Diverges.}
+    \item $\displaystyle\sum \Bigl(1 - \cos\frac1k\Bigr)$:
+      \uncover<7->{$b_k = \frac{1}{k^2}$, \ $\frac{1 - \cos x}{x^2} \to \frac12$. Converges.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Comparison in $O$-notation}
+  For $a_k, b_k \ge 0$:
+  \begin{itemize}
+    \item If $a_k = O(b_k)$ and $\sum b_k$ converges, then $\sum a_k$ converges \
+      ($a_k \le C b_k$ for $k \ge N$).
+    \item If $a_k = \Theta(b_k)$, the two series converge or diverge together.
+  \end{itemize}
+  So convergence depends only on how fast the terms decrease. From slow to fast:
+  \[ \underbrace{\frac{1}{\sqrt k},\ \ \frac1k,\ \ \frac{1}{k \ln k}}_{\text{diverge}}
+     \qquad
+     \underbrace{\frac{1}{k (\ln k)^2},\ \ \frac{1}{k^{1.01}},\ \ \frac{\ln k}{k^2},\ \
+       \frac{1}{k^2},\ \ \frac{k^{10}}{2^k},\ \ \frac{1}{k!}}_{\text{converge}} \]
+  \pause
+  \begin{remark}
+    $\ln k = O(k^\varepsilon)$ for every $\varepsilon > 0$, so
+    $\sum \frac{(\ln k)^m}{k^p}$ converges for every $m$ when $p > 1$.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{The ratio test}
+
+\begin{frame}{The ratio test}
+  In a geometric series the ratio $\frac{a_{k+1}}{a_k} = r$ is constant.
+  If the ratio is eventually below some $q < 1$, the series does at least as well as
+  a geometric series with ratio $q$.
+  \begin{theorem}[Ratio test]
+    Let $a_k > 0$ and $\dfrac{a_{k+1}}{a_k} \to L$, where $L$ may be $\infty$.
+    \begin{enumerate}
+      \item If $L < 1$, then $\sum a_k$ converges.
+      \item If $L > 1$, then $\sum a_k$ diverges.
+      \item If $L = 1$, the test gives no information.
+    \end{enumerate}
+  \end{theorem}
+\end{frame}
+
+\begin{frame}{Proof of the ratio test}
+  \begin{proof}
+    \begin{enumerate}
+      \item Choose $q$ with $L < q < 1$. There is an $N$ with $a_{k+1} \le q\, a_k$ for all
+        $k \ge N$, so by induction
+        \[ a_k \le a_N\, q^{k-N} \qquad (k \ge N) . \]
+        $\sum_k a_N q^{k-N}$ is a geometric series with ratio $q < 1$; compare.
+      \item There is an $N$ with $a_{k+1} > a_k$ for all $k \ge N$. The terms are positive
+        and increasing, so they do not tend to $0$: the series diverges.
+      \item For $a_k = \frac1k$ and for $a_k = \frac{1}{k^2}$ the ratio tends to $1$.
+        The first series diverges, the second converges. \qedhere
+    \end{enumerate}
+  \end{proof}
+\end{frame}
+
+\begin{frame}{Ratio test: examples}
+  \begin{itemize}
+    \item $\displaystyle\sum \frac{k}{2^k}$:
+      \uncover<2->{$\dfrac{k+1}{2^{k+1}} \cdot \dfrac{2^k}{k} = \dfrac{k+1}{2k} \to \dfrac12$. Converges.}
+    \item $\displaystyle\sum \frac{2^k}{k!}$:
+      \uncover<3->{$\dfrac{2}{k+1} \to 0$. Converges.}
+    \item $\displaystyle\sum \frac{3^k}{k^3}$:
+      \uncover<4->{$3 \Bigl(\dfrac{k}{k+1}\Bigr)^3 \to 3$. Diverges.}
+    \item $\displaystyle\sum \frac{(2k)!}{(k!)^2\, 5^k}$:
+      \uncover<5->{$\dfrac{(2k+2)(2k+1)}{(k+1)^2 \cdot 5} \to \dfrac45$. Converges.}
+    \item $\displaystyle\sum \frac{k!}{k^k}$:
+      \uncover<6->{$\dfrac{(k+1)!}{(k+1)^{k+1}} \cdot \dfrac{k^k}{k!}
+        = \Bigl(\dfrac{k}{k+1}\Bigr)^k = \dfrac{1}{(1 + \frac1k)^k} \to \dfrac1e$. Converges.}
+  \end{itemize}
+  \uncover<7->{{\small\color{wosm-muted} The ratio test suits factorials and exponentials:
+  most of the factors cancel.\par}}
+\end{frame}
+
+\begin{frame}{Exponentials beat powers}
+  \begin{example}[$\sum \frac{k^{100}}{1.01^k}$]
+    \[ \frac{a_{k+1}}{a_k} = \Bigl(1 + \frac1k\Bigr)^{100} \cdot \frac{1}{1.01}
+       \;\to\; \frac{1}{1.01} < 1 . \]
+    The series converges.
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item Yet the terms \emph{grow} until $k \approx 10\,050$, where $a_k \approx 10^{356}$,
+      and fall below $1$ only after $k \approx 117\,000$.
+      Convergence is decided by the tail; any finite number of terms is irrelevant.
+    \item The same argument: $\sum k^m r^k$ converges for every power $m$ and every
+      $0 < r < 1$. In particular $k^m r^k \to 0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{When the ratio test fails}
+  \begin{warning}[$L = 1$]
+    For every series whose terms are powers of $k$, or quotients of polynomials in $k$,
+    the ratio tends to $1$:
+    \[ \frac{1/(k+1)^p}{1/k^p} = \Bigl(\frac{k}{k+1}\Bigr)^p \to 1 . \]
+    The ratio test says nothing about them. Use a comparison or the integral test.
+  \end{warning}
+  \pause
+  \begin{warning}[No limit]
+    The test needs the limit of $\frac{a_{k+1}}{a_k}$ to exist.
+    If the ratios oscillate, try the root test (next section).
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{The root test}
+
+\begin{frame}{The root test}
+  \begin{theorem}[Root test]
+    Let $a_k \ge 0$ and $\sqrt[k]{a_k} \to L$, where $L$ may be $\infty$.
+    If $L < 1$, then $\sum a_k$ converges. If $L > 1$, it diverges.
+    If $L = 1$, the test gives no information.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    \begin{itemize}
+      \item $L < 1$: choose $L < q < 1$. For $k \ge N$, $\sqrt[k]{a_k} \le q$, that is
+        $a_k \le q^k$. Compare with the geometric series $\sum q^k$.
+      \item $L > 1$: for $k \ge N$, $\sqrt[k]{a_k} \ge 1$, so $a_k \ge 1$ and
+        $a_k \not\to 0$.
+      \item $L = 1$: again $\frac1k$ and $\frac1{k^2}$, because $\sqrt[k]{k} \to 1$. \qedhere
+    \end{itemize}
+  \end{proof}
+\end{frame}
+
+\begin{frame}{Root test: examples}
+  Useful limits: \ $\sqrt[k]{k} \to 1$ \ (since $\frac{\ln k}{k} \to 0$), \quad
+  $\sqrt[k]{c} \to 1$ for $c > 0$, \quad $\bigl(1 + \frac{x}{k}\bigr)^k \to e^x$.
+  \begin{itemize}
+    \item $\displaystyle\sum \Bigl(\frac{k}{2k+1}\Bigr)^k$:
+      \uncover<2->{$\sqrt[k]{a_k} = \dfrac{k}{2k+1} \to \dfrac12$. Converges.}
+    \item $\displaystyle\sum \Bigl(1 - \frac1k\Bigr)^{k^2}$:
+      \uncover<3->{$\sqrt[k]{a_k} = \Bigl(1 - \dfrac1k\Bigr)^k \to \dfrac1e$. Converges.}
+    \item $\displaystyle\sum_{k=2}^\infty \frac{1}{(\ln k)^k}$:
+      \uncover<4->{$\sqrt[k]{a_k} = \dfrac{1}{\ln k} \to 0$. Converges.}
+    \item $\displaystyle\sum \frac{(1 + \frac1k)^{k^2}}{2^k}$:
+      \uncover<5->{$\sqrt[k]{a_k} = \dfrac{(1 + \frac1k)^k}{2} \to \dfrac{e}{2} > 1$. Diverges.}
+  \end{itemize}
+  \uncover<6->{{\small\color{wosm-muted} The root test suits terms that are $k$-th powers.\par}}
+\end{frame}
+
+\begin{frame}{Ratio or root?}
+  \begin{example}
+    $a_k = 2^{(-1)^k - k}$: \quad
+    $\frac14,\ \frac12,\ \frac1{16},\ \frac18,\ \frac1{64},\ \frac1{32},\ \dots$
+    \ (the powers of $\frac12$, swapped in pairs).
+    \begin{itemize}
+      \item The ratios are $2, \frac18, 2, \frac18, \dots$: no limit, so the ratio test
+        does not apply.
+      \item $\sqrt[k]{a_k} = 2^{(-1)^k/k - 1} \to \frac12 < 1$: the root test shows
+        convergence.
+    \end{itemize}
+  \end{example}
+  \pause
+  \begin{remark}
+    If $\frac{a_{k+1}}{a_k} \to L$, then also $\sqrt[k]{a_k} \to L$. So the root test
+    decides every series that the ratio test decides --- but ratios are often much easier
+    to compute, for instance with factorials.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Choosing a test}
+
+\begin{frame}{A strategy}
+  For $\sum a_k$ with $a_k \ge 0$:
+  \begin{enumerate}
+    \item Does $a_k \to 0$? If not, the series diverges.
+    \item Do you recognise it? Geometric $\sum r^k$, $p$-series $\sum \frac{1}{k^p}$,
+      telescoping.
+    \item Factorials or exponentials such as $k!$, $c^k$? \ Try the \textbf{ratio test}.
+    \item Is the whole term a $k$-th power, $(\ldots)^k$? \ Try the \textbf{root test}.
+    \item Powers, roots, quotients of polynomials in $k$? \
+      \textbf{Limit comparison} with $\frac{1}{k^p}$.
+    \item $a_k = f(k)$ with $f$ decreasing and an antiderivative you can find? \
+      \textbf{Integral test}.
+    \item Terms of both signs? Lecture 3.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Worked examples (1)}
+  \begin{itemize}
+    \item $\displaystyle\sum \frac{k + 5}{k^3 + 2k}$
+      \uncover<2->{\\ Limit comparison with $\frac{1}{k^2}$: $L = 1$. \ Converges.}
+    \item $\displaystyle\sum k^2 e^{-k}$
+      \uncover<3->{\\ Ratio test: $\bigl(\frac{k+1}{k}\bigr)^2 e^{-1} \to \frac1e < 1$. \ Converges.}
+    \item $\displaystyle\sum \Bigl(\frac{3k}{3k+1}\Bigr)^k$
+      \uncover<4->{\\ The root test gives $L = 1$: no information. But
+      $a_k = \bigl(1 - \frac{1}{3k+1}\bigr)^k \to e^{-1/3} \ne 0$. \ Diverges.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Worked examples (2)}
+  \begin{itemize}
+    \item $\displaystyle\sum \frac{1}{k^{1 + 1/k}}$
+      \uncover<2->{\\ The exponent is above $1$, but tends to $1$. Limit comparison with
+      $\frac1k$: \ $\frac{1}{\sqrt[k]{k}} \to 1$. \ Diverges.}
+    \item $\displaystyle\sum \ln\Bigl(1 + \frac{1}{k^2}\Bigr)$
+      \uncover<3->{\\ Limit comparison with $\frac{1}{k^2}$: \
+      $\frac{\ln(1+x)}{x} \to 1$ as $x \to 0$. \ Converges.}
+    \item $\displaystyle\sum_{k=2}^\infty \frac{1}{k \sqrt{\ln k}}$
+      \uncover<4->{\\ Integral test: $\displaystyle\int_2^t \frac{\mathrm{d}x}{x\sqrt{\ln x}}
+      = 2\sqrt{\ln t} - 2\sqrt{\ln 2} \to \infty$. \ Diverges.}
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  For series with $a_k \ge 0$: \ converges $\iff$ partial sums bounded.
+  \vskip0.4em
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Test} & \textbf{Use it when} & \textbf{Conclusion} \\
+    \midrule
+    $n$-th term & always, first & $a_k \not\to 0 \Rightarrow$ diverges \\
+    Integral & $a_k = f(k)$, $f \ge 0$ decreasing & $\sum a_k$ and $\int_1^\infty f$ behave alike \\
+    Comparison & $0 \le a_k \le b_k$ & $\sum b_k < \infty \Rightarrow \sum a_k < \infty$ \\
+    Limit comparison & $\frac{a_k}{b_k} \to L \in (0, \infty)$ & both converge or both diverge \\
+    Ratio & factorials, exponentials & $L < 1$ converges, $L > 1$ diverges \\
+    Root & $k$-th powers & $L < 1$ converges, $L > 1$ diverges \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vskip0.4em
+  Benchmarks: $\sum r^k$ converges iff $|r| < 1$; \ $\sum \frac{1}{k^p}$ converges iff $p > 1$.
+\end{frame}
+
+\begin{frame}{Practice}
+  Decide whether each series converges, and name the test you use.
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \begin{enumerate}
+        \item $\displaystyle\sum \frac{k}{k^3 + 1}$
+        \item $\displaystyle\sum \frac{1}{2k - 1}$
+        \item $\displaystyle\sum \frac{k^k}{k!}$
+        \item $\displaystyle\sum \frac{(k!)^2}{(2k)!}$
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \begin{enumerate}
+        \setcounter{enumi}{4}
+        \item $\displaystyle\sum \Bigl(1 + \frac1k\Bigr)^{-k^2}$
+        \item $\displaystyle\sum \frac{\ln k}{k^{3/2}}$
+        \item $\displaystyle\sum \frac{k^{1000}}{1.001^k}$
+      \end{enumerate}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Practice, continued}
+  \small
+  \begin{enumerate}
+    \setcounter{enumi}{7}
+    \item For which $p$ does $\displaystyle\sum_{k=2}^\infty \frac{1}{k (\ln k)^p}$ converge?
+    \item Use the remainder estimate to find $\sum_{k=1}^\infty \frac{1}{k^3}$ to within $0.005$.
+      How many terms do you need?
+    \item Show that if $a_k \ge 0$ and $\sum a_k$ converges, then $\sum a_k^2$ converges.
+      Is the converse true?
+    \item Show that the comparison test is false without the condition $a_k \ge 0$:
+      find $a_k \le b_k$ with $\sum b_k$ convergent and $\sum a_k$ divergent.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item Converges: limit comparison with $\frac1{k^2}$.
+    \item Diverges: limit comparison with $\frac1k$, \ $L = \frac12$.
+    \item Diverges: ratio $\bigl(1 + \frac1k\bigr)^k \to e > 1$.
+    \item Converges: ratio $\frac{(k+1)^2}{(2k+2)(2k+1)} \to \frac14$.
+    \item Converges: root $\bigl(1 + \frac1k\bigr)^{-k} \to \frac1e$.
+    \item Converges: limit comparison with $\frac{1}{k^{5/4}}$, \
+      $L = \lim \frac{\ln k}{k^{1/4}} = 0$.
+    \item Converges: ratio $\bigl(1 + \frac1k\bigr)^{1000} / 1.001 \to \frac{1}{1.001}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers, continued}
+  \small
+  \begin{enumerate}
+    \setcounter{enumi}{7}
+    \item $p > 1$ (integral test with $u = \ln x$).
+    \item $R_n \le \int_n^\infty x^{-3}\dx = \frac{1}{2n^2} \le 0.005$ for $n = 10$:
+      $1.20166 \le \sum \frac1{k^3} \le 1.20254$.
+    \item $a_k \to 0$, so $a_k \le 1$ and $a_k^2 \le a_k$ for $k \ge N$. \
+      Converse false: $a_k = \frac1k$.
+    \item $a_k = -1$, \ $b_k = 0$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 03 --- Absolute and conditional convergence} (Unit 3)
+  \begin{itemize}
+    \item Series with terms of both signs; absolute convergence
+    \item Alternating series: $\sum \frac{(-1)^{k+1}}{k}$ converges (to $\ln 2$),
+      although $\sum \frac1k$ does not
+    \item Rearrangements: reordering the terms can change the sum
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 2}, Section 5.5.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

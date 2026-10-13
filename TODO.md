@@ -119,7 +119,18 @@ Drafted from the spec; please read and approve or rewrite:
 
 ---
 
-## 4. Later / nice to have
+## 4. Course materials (`materials/`)
+
+- [ ] **`wosm.sty`**: it was not among the uploaded template files (`wosm-article.cls` came twice), so
+      `materials/templates/wosm.sty` is a reconstruction (site colours, Latin Modern, glider mark). If you have the
+      original, replace it and run `npm run materials`; the lectures only use `\course{…}{…}` from it
+- [ ] M201-F27 Lectures 01 and 02 (`materials/m201-f27/`): review the content. The title slides give the semester
+      as “Fall 2027” and the author as “Dr. Ali Khudiyev”, both from the module description. Reading references are to
+      Strang & Herman, *Calculus, Volume 2* (OpenStax), Chapter 5 — check the section numbers against your copy
+
+---
+
+## 5. Later / nice to have
 
 - [ ] Custom giscus themes matching the site tokens (currently giscus’s built-in `light` and `dark_dimmed`)
 - [ ] Analytics: none. If ever added, cookieless only (e.g. GoatCounter) and update the Privacy page first

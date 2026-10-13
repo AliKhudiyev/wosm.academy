@@ -26,6 +26,7 @@ Read these before writing code:
 - **Courses:** 14, one per Foundation programme module with a description. Offered now (`status: open`): CS101-F26 Introduction to Informatics, CS102-F26 Digital Design and Computer Architecture I, M101-F26 Discrete Structures (Mathematics; replaced CS103-F26, whose URL redirects). The other 11 (CS201–CS503, M102-S27, M103-S27, M201-F27, M202-S28) are `status: planned`: their pages show the module description but no enrol button. Courses show the **semester** (from `\Level` in the .tex), not a level.
 - **Programme:** `/programme/` presents a **Foundation programme** (5 core semesters × 3 modules, then optional research/project work as a thesis) and an **Advanced programme** (3–4 semesters, planned, not designed yet). Never call them BSc/MSc or imply a degree. The note at the top of the page lists the modules that are offered (computed from course status). Plans live in `src/content/programmes/*.md`.
 - **Module descriptions are LaTeX:** `src/content/module-descriptions/<code>-module-description.tex`, based on `_template.tex`, converted to HTML at build time (`src/lib/module-descriptions/`). A description whose `\ModuleCode` equals a course's `code` replaces that course page's body; credits and hours on `/programme/` come from it. Keep the files compilable with `pdflatex`; the compiled PDFs are committed next to them (`npm run pdfs`) and offered for download at `/module-descriptions/<name>.pdf`. Module leader email and office hours are shown as written.
+- **Course materials:** lecture slides live in `materials/<course code>/lecture-NN/` (one folder per lecture), written with the WoSM LaTeX classes in `materials/templates/` (`wosm-slides.cls` for slides, `wosm-article.cls` for sheets, shared `wosm.sty`). `npm run materials` compiles them; the PDFs (slides + `-handout`) are committed next to the source. They are published on Moodle, not on the website. Course details, semester and module leader come from the module description. See `materials/README.md`.
 - **Instructors at launch:** 1 — Ali Khudiyev, Founder & Director. The People section must scale to many.
 - **Admission:** free, open, self-enrolment on Moodle with email confirmation. No application for students.
 - **Teacher recruitment:** volunteers apply by email (teach@wosm.academy) with CV and/or motivation letter. No file uploads through the site.
@@ -56,6 +57,10 @@ Read these before writing code:
 ├── docs/                        # these spec files
 ├── scripts/build-brand-assets.mjs  # `npm run brand`: favicon, touch icon, OG image, logo SVGs
 ├── scripts/build-module-pdfs.mjs   # `npm run pdfs`: compile module descriptions with pdflatex
+├── scripts/build-materials.mjs     # `npm run materials`: compile lecture slides in materials/
+├── materials/
+│   ├── templates/               # wosm.sty, wosm-slides.cls, wosm-article.cls
+│   └── <course>/lecture-NN/     # one folder per lecture: .tex + compiled PDFs
 ├── public/
 │   ├── CNAME                    # contains: wosm.academy
 │   ├── favicon.svg

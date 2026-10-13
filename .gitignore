@@ -26,7 +26,7 @@ pnpm-debug.log*
 # lighthouse / local reports
 .reports/
 
-# LaTeX build files (module descriptions); the compiled PDFs are committed
+# LaTeX build files (module descriptions, course materials); the compiled PDFs are committed
 *.aux
 *.log
 *.out
@@ -34,4 +34,7 @@ pnpm-debug.log*
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*.nav
+*.snm
+*.vrb
 src/content/module-descriptions/_template.pdf

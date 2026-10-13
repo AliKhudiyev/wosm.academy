@@ -1,0 +1,104 @@
+% =============================================================
+%  wosm.sty — WoSM Academy house style, shared by wosm-slides.cls
+%  and wosm-article.cls: colours, fonts, the glider mark and logo,
+%  labels, the course line and the box style used for blocks.
+%
+%  Course details, set once in the preamble:
+%    \course{M201-F27}{Calculus II}
+%
+%  Colours follow the website's light theme (src/styles/tokens.css).
+% =============================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{wosm}[2026/10/13 v1.0 WoSM Academy house style]
+
+% ---------- Fonts and maths -----------------------------------
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage{microtype}
+\RequirePackage{amsmath, amssymb, mathtools}
+\RequirePackage{amsthm}
+
+% ---------- Colours -------------------------------------------
+\RequirePackage{xcolor}
+\definecolor{wosm-bg}{HTML}{F2EEE5}      % paper
+\definecolor{wosm-surface}{HTML}{EBE6DA} % raised areas
+\definecolor{wosm-text}{HTML}{2B2A27}    % warm charcoal
+\definecolor{wosm-muted}{HTML}{666158}   % metadata, captions
+\definecolor{wosm-rule}{HTML}{D6CFBF}    % rules
+\definecolor{wosm-accent}{HTML}{1D6864}  % deep teal
+\definecolor{wosm-brick}{HTML}{9A4A2E}   % warnings; the Mathematics colour
+\colorlet{wosm-box}{wosm-surface}        % box background (the classes may change it)
+
+% ---------- Graphics, tables ----------------------------------
+\RequirePackage{tikz}
+\RequirePackage{booktabs}
+
+% ---------- Course --------------------------------------------
+% \course{<code>}{<title>}: shown above the title and in the
+% header (article) or footline (slides).
+\newcommand*\wosm@coursecode{}
+\newcommand*\wosm@coursetitle{}
+\newcommand\course[2]{\gdef\wosm@coursecode{#1}\gdef\wosm@coursetitle{#2}}
+\newcommand*\wosm@courseline{%
+  \ifx\wosm@coursecode\@empty\else
+    {\ttfamily\small\color{wosm-accent}\wosm@coursecode
+     \ifx\wosm@coursetitle\@empty\else
+       \enspace\textperiodcentered\enspace\wosm@coursetitle\fi}%
+  \fi}
+
+% ---------- Mark, logo, labels --------------------------------
+% \wosmmark[<height>]: the glider, in the current colour, sitting
+% on the baseline. Same geometry as src/assets/brand/glider-mark.svg
+% (33 units square, 10-unit cells, 1.5-unit gaps).
+\newcommand*\wosmmark[1][1em]{%
+  \begingroup
+  \dimen@=#1\relax
+  \divide\dimen@ by 33
+  \edef\wosm@unit{\the\dimen@}%
+  \tikz[x=\wosm@unit, y=\wosm@unit, baseline=0pt]{%
+    \fill (11.5,23) rectangle ++(10,10);
+    \fill (23,11.5) rectangle ++(10,10);
+    \fill (0,0) rectangle ++(10,10);
+    \fill (11.5,0) rectangle ++(10,10);
+    \fill (23,0) rectangle ++(10,10);}%
+  \endgroup}
+
+% \wosmlogo: horizontal lockup — mark, "WoSM" in the serif,
+% "Academy" in the mono at 80% of the surrounding size.
+\newcommand*\wosmlogo{%
+  \mbox{\wosmmark[0.72em]\hspace{0.45em}%
+    {\rmfamily\bfseries WoSM}\hspace{0.35em}%
+    {\ttfamily\mdseries
+     \@tempdima=\f@size pt\@tempdima=0.8\@tempdima
+     \fontsize{\strip@pt\@tempdima}{\f@baselineskip}\selectfont Academy}}}
+
+% \wosmlabel{...}: small mono metadata, muted.
+\newcommand\wosmlabel[1]{{\ttfamily\footnotesize\color{wosm-muted}#1}}
+
+% \wosmbullet: one Life cell, in the accent colour.
+\newcommand*\wosmbullet{\textcolor{wosm-accent}{\rule[0.2ex]{0.8ex}{0.8ex}}}
+
+% \wosmlicence: the licence of all course materials.
+\newcommand*\wosmlicence{%
+  \href{https://creativecommons.org/licenses/by-sa/4.0/}{CC~BY-SA~4.0}}
+
+% ---------- Boxes ---------------------------------------------
+% tcolorbox style wosm=<colour>: a thin rule on the left in <colour>,
+% the title in <colour>, background wosm-box. Used for blocks,
+% theorems, examples, remarks, warnings and solutions.
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins}
+\tcbset{
+  wosm/.style={
+    enhanced, sharp corners, boxrule=0pt, frame hidden,
+    borderline west={1.6pt}{0pt}{#1},
+    colback=wosm-box, colbacktitle=wosm-box,
+    coltitle=#1, coltext=wosm-text,
+    fonttitle=\bfseries, titlerule=0pt,
+    left=7pt, right=7pt, top=3pt, bottom=4pt,
+    lefttitle=7pt, toptitle=4pt, bottomtitle=0pt,
+    before skip=0.5em, after skip=0.5em,
+  },
+}
+
+\endinput

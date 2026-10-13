@@ -23,6 +23,7 @@ npm run dev        # http://localhost:4321
 | `npm run linkcheck` | Check internal links and anchors in `dist/` (run after `build`) |
 | `npm run brand` | Regenerate favicon, touch icon, OG image and logo SVGs |
 | `npm run pdfs` | Compile the module descriptions (.tex) to the PDFs offered on course pages (needs `pdflatex`) |
+| `npm run materials` | Compile the course materials in `materials/` (lecture slides) to PDF (needs `pdflatex`) |
 
 ## Editing content
 
@@ -37,6 +38,7 @@ Content lives in Markdown files under `src/content/`. Adding one never requires 
 | a Journal post | `src/content/journal/` (a folder with `index.md` if the post has images) |
 | a module description | `src/content/module-descriptions/` — copy `_template.tex`; `\ModuleCode` must equal the course's `code`; then `npm run pdfs` |
 | a module to the programme plan | `src/content/programmes/foundation.md` |
+| a lecture | `materials/<course code>/lecture-NN/` — see [`materials/README.md`](materials/README.md); then `npm run materials` |
 
 Field definitions are in `src/content.config.ts` and `docs/CONTENT.md`. Links and addresses (Discord, email, Moodle)
 are in `src/config/site.ts`. Anything still missing is shown on the site as a highlighted `TODO(owner): …` and listed

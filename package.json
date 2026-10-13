@@ -16,7 +16,8 @@
     "linkcheck": "linkinator dist --recurse --check-css --check-fragments --skip \"^https?://(?!(localhost|127\\.0\\.0\\.1)[:/])\" --skip \"^mailto:\"",
     "astro": "astro",
     "brand": "node scripts/build-brand-assets.mjs",
-    "pdfs": "node scripts/build-module-pdfs.mjs"
+    "pdfs": "node scripts/build-module-pdfs.mjs",
+    "materials": "node scripts/build-materials.mjs"
   },
   "allowScripts": {
     "esbuild": true,

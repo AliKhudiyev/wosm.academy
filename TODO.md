@@ -124,10 +124,10 @@ Drafted from the spec; please read and approve or rewrite:
 - [ ] **`wosm.sty`**: it was not among the uploaded template files (`wosm-article.cls` came twice), so
       `materials/templates/wosm.sty` is a reconstruction (site colours, Latin Modern, glider mark). If you have the
       original, replace it and run `npm run materials`; the lectures only use `\course{…}{…}` from it
-- [ ] M201-F27 Lectures 01–04 (`materials/m201-f27/`): review the content. The title slides give the semester
+- [ ] M201-F27 Lectures 01–06 (`materials/m201-f27/`): review the content. The title slides give the semester
       as “Fall 2027” and the author as “Dr. Ali Khudiyev”, both from the module description. Reading references are to
-      Strang & Herman, *Calculus, Volume 2* (OpenStax), Sections 5.2–5.6 and 6.1–6.2 — check the section numbers
-      against your copy
+      Strang & Herman, *Calculus, Volume 2* (OpenStax), Sections 5.2–5.6 and 6.1–6.4, and (for Lecture 07) Wilf,
+      *generatingfunctionology*, Chapter 1 — check the section numbers against your copies
 - [ ] **M201-F27 Lecture 04 reading**: none of the books on the module's reading list covers uniform convergence
       (Unit 4). The “This lecture” slide shows a `TODO(owner)` placeholder until you choose a text
 

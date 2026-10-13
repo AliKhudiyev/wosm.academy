@@ -1,0 +1,409 @@
+% =============================================================
+%  M201-F27 Calculus II — Lecture 05
+%  Unit 5: Power series; radius of convergence; term-by-term
+%  differentiation and integration
+%
+%  Build from the repository root:   npm run materials -- lecture-05
+%  This writes lecture-05.pdf (slides, with overlays) and
+%  lecture-05-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dt}{\,\mathrm{d}t}
+
+\course{M201-F27}{Calculus II}
+\title[L05 \textperiodcentered\ Power series]{Power series}
+\subtitle{Radius of convergence; differentiation and integration term by term}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 05\enspace\textperiodcentered\enspace Unit 5\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item $f_n \to f$ \textbf{uniformly} on $D$ if $\sup_{x \in D} |f_n(x) - f(x)| \to 0$.
+    \item Uniform limits of continuous functions are continuous; on $[a, b]$ we may swap
+      $\lim$ and $\int$; derivatives need uniform convergence of $f_n'$.
+    \item \textbf{M-test}: $|f_k(x)| \le M_k$ with $\sum M_k < \infty$ gives uniform convergence
+      of $\sum f_k$.
+    \item $\sum x^k = \frac{1}{1-x}$ converges uniformly on every $[-a, a]$ with $a < 1$, so we
+      could integrate and differentiate it term by term.
+  \end{itemize}
+  \vskip0.6em
+  Today: the same for every power series.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 2} (OpenStax), Sections 6.1 and 6.2.\par}
+\end{frame}
+
+% =============================================================
+\section{Power series}
+
+\begin{frame}{Power series}
+  \begin{definition}
+    A \textbf{power series centred at $a$} is a series
+    \[ \sum_{k=0}^\infty c_k (x - a)^k = c_0 + c_1 (x - a) + c_2 (x - a)^2 + \cdots \]
+    with \textbf{coefficients} $c_k \in \R$. (We read $(x - a)^0$ as $1$, also at $x = a$.)
+  \end{definition}
+  \begin{itemize}
+    \item A polynomial ``of infinite degree''. Its partial sums are polynomials.
+    \item It always converges at $x = a$, to $c_0$.
+    \item For which $x$ does it converge? What function does it define?
+      Can we differentiate and integrate it like a polynomial?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Four examples}
+  With the ratio test (Lecture 3), for $x \ne 0$:
+  \begin{itemize}
+    \item $\displaystyle\sum x^k$:
+      \uncover<2->{ratio $|x|$. Converges for $|x| < 1$ only.}
+    \item $\displaystyle\sum \frac{x^k}{k!}$:
+      \uncover<3->{ratio $\frac{|x|}{k+1} \to 0$. Converges for every $x$.}
+    \item $\displaystyle\sum k!\, x^k$:
+      \uncover<4->{ratio $(k+1)|x| \to \infty$. Converges only at $x = 0$.}
+    \item $\displaystyle\sum_{k=1}^\infty \frac{x^k}{k}$:
+      \uncover<5->{ratio $\frac{k}{k+1}|x| \to |x|$. Converges for $|x| < 1$ and diverges for
+      $|x| > 1$. At $x = 1$: the harmonic series, divergent. At $x = -1$: the alternating
+      harmonic series, convergent. So: $[-1, 1)$.}
+  \end{itemize}
+  \uncover<6->{In each case the set of convergence is an interval centred at $0$
+  --- possibly a single point or all of $\R$.}
+\end{frame}
+
+% =============================================================
+\section{The radius of convergence}
+
+\begin{frame}{Convergence spreads inwards}
+  \begin{lemma}[centre $a = 0$; otherwise replace $x$ by $x - a$]
+    If $\sum c_k x_0^k$ converges for some $x_0 \ne 0$, then $\sum c_k x^k$ converges absolutely
+    for every $|x| < |x_0|$, and uniformly on $[-r, r]$ for every $r < |x_0|$.
+  \end{lemma}
+  \pause
+  \begin{proof}
+    The terms of a convergent series tend to $0$, so they are bounded:
+    $|c_k x_0^k| \le M$ for all $k$. For $|x| \le r$,
+    $|c_k x^k| = |c_k x_0^k| \, \bigl|\frac{x}{x_0}\bigr|^k \le M q^k$ with
+    $q = \frac{r}{|x_0|} < 1$. As $\sum M q^k$ converges, the M-test applies.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{The radius of convergence}
+  \begin{theorem}
+    For every power series $\sum c_k (x - a)^k$ there is an $R$ with $0 \le R \le \infty$,
+    the \textbf{radius of convergence}, such that the series
+    \begin{itemize}
+      \item converges absolutely if $|x - a| < R$, uniformly on every $[a - r, a + r]$ with $r < R$;
+      \item diverges if $|x - a| > R$.
+    \end{itemize}
+  \end{theorem}
+  {\small Proof: let $R$ be the supremum of $|x - a|$ over all $x$ where the series converges,
+  and apply the lemma.\par}
+  \pause
+  {\centering
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \draw[wosm-muted] (-5.5,0) -- (5.5,0);
+    \draw[wosm-accent, line width=2.4pt] (-2.6,0) -- (2.6,0);
+    \foreach \p in {-2.6, 2.6}
+      \node[circle, draw=wosm-text, fill=wosm-bg, inner sep=1.6pt] at (\p,0) {};
+    \fill[wosm-text] (0,0) circle (1.4pt);
+    \node[below, font=\small] at (-2.6,-0.1) {$a - R$};
+    \node[below, font=\small] at (0,-0.1) {$a$};
+    \node[below, font=\small] at (2.6,-0.1) {$a + R$};
+    \node[above, font=\small, text=wosm-accent] at (0,0.12) {converges absolutely};
+    \node[above, font=\small, text=wosm-muted] at (-4.1,0.12) {diverges};
+    \node[above, font=\small, text=wosm-muted] at (4.1,0.12) {diverges};
+    \node[above, font=\small, text=wosm-brick] at (-2.6,0.12) {?};
+    \node[above, font=\small, text=wosm-brick] at (2.6,0.12) {?};
+  \end{tikzpicture}\par}
+\end{frame}
+
+\begin{frame}{Computing $R$}
+  \begin{theorem}
+    If $c_k \ne 0$ and $\Bigl|\dfrac{c_{k+1}}{c_k}\Bigr| \to L$, then $R = \dfrac1L$
+    \ (with $\frac10 = \infty$ and $\frac1\infty = 0$).
+    The same holds if $\sqrt[k]{|c_k|} \to L$.
+  \end{theorem}
+  {\small Proof: the ratio of consecutive terms is
+  $\Bigl|\frac{c_{k+1}(x-a)^{k+1}}{c_k (x-a)^k}\Bigr| \to L\,|x - a|$, which is below $1$ if and
+  only if $|x - a| < \frac1L$. Apply the ratio test (Lecture 3).\par}
+  \pause
+  \begin{remark}
+    The \textbf{Cauchy--Hadamard formula} $R = 1 / \limsup_k \sqrt[k]{|c_k|}$ always holds,
+    even when the limits above do not exist. We will not need it.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{itemize}
+    \item $\displaystyle\sum_{k=1}^\infty \frac{(x-2)^k}{k\, 3^k}$
+      \uncover<2->{\\ $\bigl|\frac{c_{k+1}}{c_k}\bigr| = \frac{k}{3(k+1)} \to \frac13$, so $R = 3$:
+      converges for $-1 < x < 5$. At $x = 5$: $\sum \frac1k$, divergent; at $x = -1$:
+      $\sum \frac{(-1)^k}{k}$, convergent. Interval: $[-1, 5)$.}
+    \item $\displaystyle\sum_{k=0}^\infty \frac{x^{2k}}{4^k}$
+      \uncover<3->{\\ Every other coefficient is $0$, so the formula does not apply. Ratio test
+      on the terms: $\frac{x^2}{4} < 1$ iff $|x| < 2$, so $R = 2$. (Sum: $\frac{1}{1 - x^2/4}$.)}
+    \item $\displaystyle\sum_{k=1}^\infty k^k x^k$
+      \uncover<4->{\\ $\sqrt[k]{|c_k|} = k \to \infty$, so $R = 0$: it converges only at $x = 0$.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{At the endpoints anything can happen}
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    \textbf{Series} & $R$ & \textbf{At $x = 1$} & \textbf{At $x = -1$} \\
+    \midrule
+    $\sum x^k$               & $1$ & diverges & diverges \\
+    $\sum \frac{x^k}{k}$     & $1$ & diverges & converges conditionally \\
+    $\sum \frac{(-1)^k x^k}{k}$ & $1$ & converges conditionally & diverges \\
+    $\sum \frac{x^k}{k^2}$   & $1$ & converges absolutely & converges absolutely \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vskip0.3em
+  Check the endpoints separately, with the tests of Lectures 2 and 3.
+  \pause
+  \begin{remark}[Abel's theorem, without proof]
+    If the series converges at $x = a + R$, its sum is continuous there from the left:
+    $\lim_{x \to (a+R)^-} \sum c_k (x-a)^k = \sum c_k R^k$. Likewise at $a - R$.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Calculus with power series}
+
+\begin{frame}{Differentiation and integration term by term}
+  \begin{theorem}
+    Let $\sum c_k (x - a)^k$ have radius $R > 0$ and sum $f(x)$ for $|x - a| < R$. Then
+    $f$ is continuous and differentiable there, and
+    \begin{align*}
+      f'(x) &= \sum_{k=1}^\infty k\, c_k (x - a)^{k-1}, &
+      \int_a^x f(t)\dt &= \sum_{k=0}^\infty \frac{c_k}{k+1} (x - a)^{k+1} .
+    \end{align*}
+    Both new series have the same radius $R$.
+  \end{theorem}
+  \pause
+  \begin{itemize}
+    \item Inside the interval of convergence a power series behaves like a polynomial.
+    \item The radius stays the same; the behaviour at the endpoints may change.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Proof}
+  \begin{proof}
+    Take $a = 0$ and $|x| < r < R$. The series converges at $r$, so $|c_k r^k| \le M$. Then
+    \[ |k c_k x^{k-1}| \le \frac{M}{r}\, k\, q^{k-1}, \qquad q = \frac{|x|}{r} < 1 , \]
+    and $\sum k q^{k-1}$ converges (ratio test).
+    So the derivative series converges absolutely for $|x| < R$, and by the M-test uniformly on
+    every $[-r', r']$ with $r' < R$. Lecture 4: we may differentiate term by term there.
+    For integrals: on $[0, x]$ the series converges uniformly; swap $\int$ and $\sum$.
+    The radius cannot grow: $|c_k x^k| \le |x| \cdot |k c_k x^{k-1}|$ for $k \ge 1$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{Coefficients are derivatives}
+  \begin{corollary}
+    If $f(x) = \sum c_k (x - a)^k$ for $|x - a| < R$ with $R > 0$, then $f$ has derivatives of
+    every order there, and
+    \[ c_k = \frac{f^{(k)}(a)}{k!} \qquad (k = 0, 1, 2, \dots) . \]
+  \end{corollary}
+  \pause
+  {\small Proof: differentiate $k$ times. All terms with $j < k$ disappear; the term with $j = k$
+  becomes $k!\, c_k$; the terms with $j > k$ still contain a factor $(x - a)$, which is $0$ at
+  $x = a$.\par}
+  \pause
+  \begin{itemize}
+    \item \textbf{Uniqueness}: two power series centred at $a$ that agree near $a$ have the same
+      coefficients. However we find a power series for $f$, it is the same one.
+    \item Next lecture: start from $f$ and use $c_k = \frac{f^{(k)}(a)}{k!}$ --- the Taylor series.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Endpoints can change}
+  \begin{example}
+    \begin{itemize}
+      \item $\sum_{k=1}^\infty \frac{x^k}{k}$ converges on $[-1, 1)$. Its derivative
+        $\sum_{k=1}^\infty x^{k-1}$ converges on $(-1, 1)$ only.
+      \item $\sum_{k=1}^\infty \frac{x^k}{k^2}$ converges on $[-1, 1]$. Its derivative
+        $\sum_{k=1}^\infty \frac{x^{k-1}}{k}$ converges on $[-1, 1)$.
+    \end{itemize}
+  \end{example}
+  Differentiating can lose an endpoint; integrating can gain one.
+  The theorem is about the open interval $(a - R, a + R)$.
+\end{frame}
+
+% =============================================================
+\section{New series from old}
+
+\begin{frame}{Substitution into the geometric series}
+  Start from $\frac{1}{1-u} = \sum_{k=0}^\infty u^k$ for $|u| < 1$:
+  \begin{itemize}
+    \item $u = -x$: \quad
+      $\dfrac{1}{1+x} = \sum_{k=0}^\infty (-1)^k x^k$, \quad $|x| < 1$.
+    \item $u = -x^2$: \quad
+      $\dfrac{1}{1+x^2} = \sum_{k=0}^\infty (-1)^k x^{2k}$, \quad $|x| < 1$.
+    \item $u = \frac{x}{2}$: \quad
+      $\dfrac{1}{2-x} = \dfrac12 \cdot \dfrac{1}{1 - x/2} = \sum_{k=0}^\infty \dfrac{x^k}{2^{k+1}}$,
+      \quad $|x| < 2$.
+    \item Another centre, $u = -(x-1)$: \quad
+      $\dfrac1x = \dfrac{1}{1 + (x-1)} = \sum_{k=0}^\infty (-1)^k (x-1)^k$, \quad $|x - 1| < 1$.
+  \end{itemize}
+  \pause
+  {\small Note $\frac{1}{1+x^2}$ is defined for every $x$, yet its series has $R = 1$.
+  Something at $x = \pm i$ in the complex plane decides that --- a story for complex analysis.\par}
+\end{frame}
+
+\begin{frame}{Integrating term by term}
+  \begin{itemize}
+    \item $\displaystyle\ln(1 + x) = \int_0^x \frac{\mathrm{d}t}{1+t}
+      = \sum_{k=1}^\infty (-1)^{k+1} \frac{x^k}{k} = x - \frac{x^2}{2} + \frac{x^3}{3} - \cdots$
+      \quad $(|x| < 1)$
+    \item $\displaystyle -\ln(1 - x) = \sum_{k=1}^\infty \frac{x^k}{k}$ \quad $(|x| < 1)$
+    \item $\displaystyle\arctan x = \int_0^x \frac{\mathrm{d}t}{1+t^2}
+      = \sum_{k=0}^\infty (-1)^k \frac{x^{2k+1}}{2k+1} = x - \frac{x^3}{3} + \frac{x^5}{5} - \cdots$
+      \quad $(|x| < 1)$
+  \end{itemize}
+  \pause
+  \begin{remark}
+    At $x = 1$ the series for $\ln(1+x)$ and $\arctan x$ converge (alternating series).
+    By Abel's theorem their sums are $\ln 2$ and $\arctan 1 = \frac\pi4$. Next lecture
+    proves both directly, with an estimate of the error.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Differentiating term by term}
+  From $\frac{1}{1-x} = \sum_{k=0}^\infty x^k$, for $|x| < 1$:
+  \[ \frac{1}{(1-x)^2} = \sum_{k=1}^\infty k x^{k-1}, \qquad
+     \frac{x}{(1-x)^2} = \sum_{k=1}^\infty k x^k, \qquad
+     \frac{x(1+x)}{(1-x)^3} = \sum_{k=1}^\infty k^2 x^k . \]
+  \pause
+  \begin{example}[A binary counter]
+    An increment flips the trailing $1$s and one $0$: $\texttt{1011} \to \texttt{1100}$ flips
+    $3$ bits. A fraction $\frac{1}{2^k}$ of all values end in $\texttt{0}$ and then exactly $k - 1$
+    ones, so the average number of bit flips per increment is
+    $\sum_{k=1}^\infty \frac{k}{2^k} = \frac{1/2}{(1 - 1/2)^2} = 2$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{The exponential function}
+  Let $E(x) = \sum_{k=0}^\infty \frac{x^k}{k!}$. Its radius is $\infty$, and term by term
+  \[ E'(x) = \sum_{k=1}^\infty \frac{k\, x^{k-1}}{k!} = \sum_{k=1}^\infty \frac{x^{k-1}}{(k-1)!}
+     = E(x), \qquad E(0) = 1 . \]
+  \pause
+  \begin{theorem}
+    $e^x = \sum_{k=0}^\infty \frac{x^k}{k!}$ for every $x \in \R$.
+  \end{theorem}
+  {\small Proof: $\bigl(E(x) e^{-x}\bigr)' = E(x) e^{-x} - E(x) e^{-x} = 0$, so
+  $E(x) e^{-x} = E(0) e^0 = 1$.\par}
+  \pause
+  \begin{itemize}
+    \item $x = 1$: \ $e = \sum_{k=0}^\infty \frac{1}{k!}$, so $\sum_{k=1}^\infty \frac{1}{k!} = e - 1$
+      (Lecture 2).
+    \item $x = -1$: \ $\frac1e = \sum_{k=0}^\infty \frac{(-1)^k}{k!}$, so
+      $\sum_{k=1}^\infty \frac{(-1)^{k+1}}{k!} = 1 - \frac1e$ (Lecture 3).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Multiplying power series}
+  \begin{theorem}[Cauchy product]
+    If $\sum a_k x^k$ and $\sum b_k x^k$ both converge for $|x| < R$, then for $|x| < R$
+    \[ \Bigl(\sum_{k=0}^\infty a_k x^k\Bigr) \Bigl(\sum_{k=0}^\infty b_k x^k\Bigr)
+       = \sum_{k=0}^\infty c_k x^k, \qquad c_k = \sum_{j=0}^{k} a_j b_{k-j} . \]
+  \end{theorem}
+  {\small Both series converge absolutely, so all products $a_j x^j \cdot b_m x^m$ may be added
+  in any order (Lecture 3) --- in particular grouped by $j + m = k$. We omit the details.\par}
+\end{frame}
+
+\begin{frame}{Multiplying power series: an example}
+  \begin{example}
+    $\dfrac{1}{(1-x)^2} = \Bigl(\sum x^k\Bigr)^2 = \sum_{k=0}^\infty (k+1) x^k$, \ since
+    $c_k = \sum_{j=0}^k 1 \cdot 1 = k + 1$. The same as by differentiation.
+  \end{example}
+  {\small The sequence $(c_k)$ is the \emph{convolution} of $(a_k)$ and $(b_k)$.
+  In Unit 7 this turns counting problems into algebra.\par}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item A power series $\sum c_k (x - a)^k$ has a \textbf{radius of convergence}
+      $R \in [0, \infty]$: absolute convergence for $|x - a| < R$, divergence for
+      $|x - a| > R$. Check the endpoints separately.
+    \item $R = 1/L$ if $\bigl|\frac{c_{k+1}}{c_k}\bigr| \to L$ or $\sqrt[k]{|c_k|} \to L$.
+    \item Uniform convergence on every $[a - r, a + r]$ with $r < R$.
+    \item Inside, differentiate and integrate term by term; the radius does not change.
+    \item $c_k = \frac{f^{(k)}(a)}{k!}$: a function has at most one power series around $a$.
+    \item New series from old: substitute, integrate, differentiate, multiply.
+      Results so far: $\frac{1}{1-x}$, $\ln(1+x)$, $\arctan x$, $e^x$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find the radius and the interval of convergence:
+      \begin{enumerate}[(a)]
+        \item $\sum_{k=1}^\infty \frac{x^k}{k\, 2^k}$ \qquad
+          (b)\ $\sum_{k=1}^\infty k^2 x^k$ \qquad
+          (c)\ $\sum_{k=1}^\infty \frac{(x+1)^k}{k^2}$ \qquad
+          (d)\ $\sum_{k=0}^\infty \frac{(-1)^k x^{2k}}{(2k)!}$
+      \end{enumerate}
+    \item Find a power series for $\frac{x}{1+x^2}$ around $0$, and its radius.
+    \item Find a power series for $\ln(2 + x)$ around $0$, and its radius.
+    \item Find $\sum_{k=1}^\infty \frac{k}{3^k}$.
+    \item Use $\arctan\frac{1}{\sqrt3} = \frac\pi6$ to write $\pi$ as a series. How fast does it
+      converge?
+    \item Show that if $\sum c_k x^k$ has radius $R$, then $\sum c_k x^{2k}$ has radius $\sqrt R$.
+    \item Find $\bigl(\sum_{k=0}^\infty x^k\bigr)\bigl(\sum_{k=0}^\infty (-1)^k x^k\bigr)$
+      as a Cauchy product, and check your answer another way.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item (a) $R = 2$, interval $[-2, 2)$. \
+      (b) $R = 1$, interval $(-1, 1)$. \
+      (c) $R = 1$, interval $[-2, 0]$. \
+      (d) $R = \infty$ (ratio of terms $\frac{x^2}{(2k+1)(2k+2)} \to 0$).
+    \item $x \sum_{k=0}^\infty (-1)^k x^{2k} = \sum_{k=0}^\infty (-1)^k x^{2k+1}$, \ $R = 1$.
+    \item $\ln 2 + \ln\bigl(1 + \frac x2\bigr) = \ln 2 + \sum_{k=1}^\infty (-1)^{k+1} \frac{x^k}{k\, 2^k}$,
+      \ $R = 2$.
+    \item $\frac{x}{(1-x)^2}$ at $x = \frac13$: \ $\frac{1/3}{4/9} = \frac34$.
+    \item $\pi = 2\sqrt3 \sum_{k=0}^\infty \frac{(-1)^k}{3^k (2k+1)}$. The terms shrink by a
+      factor of about $3$ each time: roughly one decimal digit for every two terms.
+    \item $\sum c_k (x^2)^k$ converges absolutely if $x^2 < R$ and diverges if $x^2 > R$.
+    \item $c_k = \sum_{j=0}^k (-1)^{k-j}$ is $1$ for even $k$ and $0$ for odd $k$: the product
+      is $\sum x^{2k} = \frac{1}{1-x^2} = \frac{1}{1-x} \cdot \frac{1}{1+x}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 06 --- Taylor series} (Unit 6)
+  \begin{itemize}
+    \item Which functions are power series? Taylor and Maclaurin series
+    \item Taylor's theorem and estimates of the remainder
+    \item Series for $\sin$, $\cos$, $(1 + x)^\alpha$; and, at last, $\ln 2$ and $\frac\pi4$
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 2}, Sections 6.3 and 6.4.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

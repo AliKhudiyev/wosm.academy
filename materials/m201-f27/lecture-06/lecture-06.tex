@@ -1,0 +1,470 @@
+% =============================================================
+%  M201-F27 Calculus II — Lecture 06
+%  Unit 6: Taylor and Maclaurin series; remainder estimates
+%
+%  Build from the repository root:   npm run materials -- lecture-06
+%  This writes lecture-06.pdf (slides, with overlays) and
+%  lecture-06-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{wosm axis/.style={
+  axis lines=left, axis line style={wosm-muted, -},
+  tick style={wosm-muted}, tick label style={font=\scriptsize, text=wosm-muted},
+  label style={font=\scriptsize, text=wosm-muted},
+  legend style={draw=none, fill=none, font=\scriptsize, text=wosm-text},
+  legend cell align=left}}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dx}{\,\mathrm{d}x}
+\newcommand{\dt}{\,\mathrm{d}t}
+
+\course{M201-F27}{Calculus II}
+\title[L06 \textperiodcentered\ Taylor series]{Taylor series}
+\subtitle{Taylor and Maclaurin series; remainder estimates}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 06\enspace\textperiodcentered\enspace Unit 6\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item A power series $\sum c_k (x - a)^k$ converges absolutely for $|x - a| < R$ and
+      diverges for $|x - a| > R$.
+    \item Inside, we may differentiate and integrate it term by term.
+    \item If $f(x) = \sum c_k (x - a)^k$ near $a$, then $c_k = \frac{f^{(k)}(a)}{k!}$.
+    \item From the geometric series: $\ln(1 + x)$ and $\arctan x$ for $|x| < 1$.
+      From $E' = E$: \ $e^x = \sum \frac{x^k}{k!}$.
+  \end{itemize}
+  \vskip0.6em
+  Today we start from a function $f$ and ask: is it a power series, and which one?
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 2} (OpenStax), Sections 6.3 and 6.4.\par}
+\end{frame}
+
+% =============================================================
+\section{Taylor series}
+
+\begin{frame}{The only candidate}
+  If $f$ is a power series around $a$, its coefficients must be $\frac{f^{(k)}(a)}{k!}$ (Lecture 5).
+  \begin{definition}
+    Let $f$ have derivatives of every order at $a$. The \textbf{Taylor series} of $f$ at $a$ is
+    \[ \sum_{k=0}^\infty \frac{f^{(k)}(a)}{k!} (x - a)^k
+       = f(a) + f'(a)(x - a) + \frac{f''(a)}{2!}(x - a)^2 + \cdots \]
+    At $a = 0$ it is also called the \textbf{Maclaurin series}.
+  \end{definition}
+  Its partial sums are the \textbf{Taylor polynomials} of Calculus I (Unit 17),
+  $T_n(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!} (x - a)^k$.
+\end{frame}
+
+\begin{frame}{Two questions}
+  \begin{enumerate}
+    \item Does the Taylor series converge? \ (Its radius, Lecture 5.)
+    \item If it converges at $x$, is its sum $f(x)$?
+  \end{enumerate}
+  \pause
+  Let $R_n(x) = f(x) - T_n(x)$, the \textbf{remainder}. Then
+  \[ f(x) = \sum_{k=0}^\infty \frac{f^{(k)}(a)}{k!} (x - a)^k
+     \quad\iff\quad R_n(x) \to 0 . \]
+  \pause
+  \begin{definition}
+    $f$ is \textbf{analytic} at $a$ if its Taylor series at $a$ converges to $f$ on some
+    interval $(a - r, a + r)$, $r > 0$.
+  \end{definition}
+  Polynomials, $e^x$, $\sin$, $\cos$, $\ln$, rational functions and $(1+x)^\alpha$ are analytic
+  wherever they are defined. But not every smooth function is.
+\end{frame}
+
+\begin{frame}{A smooth function that is not analytic}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5cm,
+            xmin=-3.1, xmax=3.1, ymin=0, ymax=1, xlabel={$x$},
+            xtick={-3,-2,-1,0,1,2,3}, ytick={0,0.5,1}]
+          \addplot[wosm-brick, thick] coordinates {
+            (-3.000,0.8948) (-2.950,0.8914) (-2.900,0.8879) (-2.850,0.8842) (-2.800,0.8802) (-2.750,0.8761) (-2.700,0.8718) (-2.650,0.8673)
+            (-2.600,0.8625) (-2.550,0.8575) (-2.500,0.8521) (-2.450,0.8465) (-2.400,0.8406) (-2.350,0.8344) (-2.300,0.8278) (-2.250,0.8208)
+            (-2.200,0.8133) (-2.150,0.8055) (-2.100,0.7971) (-2.050,0.7882) (-2.000,0.7788) (-1.950,0.7688) (-1.900,0.7580) (-1.850,0.7466)
+            (-1.800,0.7344) (-1.750,0.7214) (-1.700,0.7075) (-1.650,0.6926) (-1.600,0.6766) (-1.550,0.6595) (-1.500,0.6412) (-1.450,0.6215)
+            (-1.400,0.6004) (-1.350,0.5777) (-1.300,0.5534) (-1.250,0.5273) (-1.200,0.4994) (-1.150,0.4695) (-1.100,0.4376) (-1.050,0.4037)
+            (-1.000,0.3679) (-0.950,0.3302) (-0.900,0.2910) (-0.850,0.2506) (-0.800,0.2096) (-0.750,0.1690) (-0.700,0.1299) (-0.650,0.0938)
+            (-0.600,0.0622) (-0.550,0.0367) (-0.500,0.0183) (-0.450,0.0072) (-0.400,0.0019) (-0.350,0.0003) (-0.300,0.0000) (-0.250,0.0000)
+            (-0.200,0.0000) (-0.150,0.0000) (-0.100,0.0000) (-0.050,0.0000) (0.000,0.0000) (0.050,0.0000) (0.100,0.0000) (0.150,0.0000)
+            (0.200,0.0000) (0.250,0.0000) (0.300,0.0000) (0.350,0.0003) (0.400,0.0019) (0.450,0.0072) (0.500,0.0183) (0.550,0.0367)
+            (0.600,0.0622) (0.650,0.0938) (0.700,0.1299) (0.750,0.1690) (0.800,0.2096) (0.850,0.2506) (0.900,0.2910) (0.950,0.3302)
+            (1.000,0.3679) (1.050,0.4037) (1.100,0.4376) (1.150,0.4695) (1.200,0.4994) (1.250,0.5273) (1.300,0.5534) (1.350,0.5777)
+            (1.400,0.6004) (1.450,0.6215) (1.500,0.6412) (1.550,0.6595) (1.600,0.6766) (1.650,0.6926) (1.700,0.7075) (1.750,0.7214)
+            (1.800,0.7344) (1.850,0.7466) (1.900,0.7580) (1.950,0.7688) (2.000,0.7788) (2.050,0.7882) (2.100,0.7971) (2.150,0.8055)
+            (2.200,0.8133) (2.250,0.8208) (2.300,0.8278) (2.350,0.8344) (2.400,0.8406) (2.450,0.8465) (2.500,0.8521) (2.550,0.8575)
+            (2.600,0.8625) (2.650,0.8673) (2.700,0.8718) (2.750,0.8761) (2.800,0.8802) (2.850,0.8842) (2.900,0.8879) (2.950,0.8914)
+            (3.000,0.8948)};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \[ f(x) = \begin{cases} e^{-1/x^2}, & x \ne 0, \\ 0, & x = 0. \end{cases} \]
+      \small
+      \begin{itemize}
+        \item For $x \ne 0$ every derivative has the form $p(\frac1x)\, e^{-1/x^2}$ with $p$ a
+          polynomial; it tends to $0$ as $x \to 0$. One shows $f^{(k)}(0) = 0$ for all $k$.
+        \item So the Taylor series at $0$ is $0 + 0x + 0x^2 + \cdots$. It converges
+          everywhere --- to $0$, not to $f(x)$.
+      \end{itemize}
+      The graph is so flat at $0$ that no derivative can see it rise.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Taylor's theorem}
+
+\begin{frame}{Taylor's theorem}
+  \begin{theorem}[Taylor's theorem, Lagrange remainder --- Calculus I]
+    If $f$ is $n + 1$ times differentiable on an interval containing $a$ and $x$, then
+    \[ R_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!} (x - a)^{n+1} \qquad
+       \text{for some } \xi \text{ between } a \text{ and } x . \]
+  \end{theorem}
+  \pause
+  \begin{corollary}[Remainder estimate]
+    If $|f^{(n+1)}(t)| \le M$ for all $t$ between $a$ and $x$, then
+    $|R_n(x)| \le \frac{M\, |x - a|^{n+1}}{(n+1)!}$.
+  \end{corollary}
+  We do not know $\xi$; a bound for $f^{(n+1)}$ on the interval is enough.
+\end{frame}
+
+\begin{frame}{The remainder as an integral}
+  \begin{theorem}
+    If $f^{(n+1)}$ is continuous between $a$ and $x$, then
+    $R_n(x) = \int_a^x \frac{f^{(n+1)}(t)}{n!} (x - t)^n \dt$.
+  \end{theorem}
+  \begin{proof}
+    Induction on $n$ ($n = 0$: the Fundamental Theorem of Calculus). By parts,
+    \[ \int_a^x \frac{f^{(n)}(t)}{(n-1)!} (x - t)^{n-1} \dt
+       = \frac{f^{(n)}(a)}{n!} (x - a)^n + \int_a^x \frac{f^{(n+1)}(t)}{n!} (x - t)^n \dt , \]
+    that is, $R_{n-1}(x) = \frac{f^{(n)}(a)}{n!}(x-a)^n + R_n(x)$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{A useful limit}
+  \begin{lemma}
+    For every $A \ge 0$: \ $\dfrac{A^n}{n!} \to 0$.
+  \end{lemma}
+  {\small Proof: these are the terms of $\sum \frac{A^n}{n!}$, which converges (ratio test).\par}
+  \pause
+  \begin{corollary}
+    If $|f^{(n)}(t)| \le M$ for all $n$ and all $t$ in an interval $I$ containing $a$, then
+    $f$ equals its Taylor series on $I$.
+  \end{corollary}
+  {\small Proof: $|R_n(x)| \le M \frac{|x - a|^{n+1}}{(n+1)!} \to 0$: the factorial beats any
+  fixed power.\par}
+\end{frame}
+
+% =============================================================
+\section{The classical series}
+
+\begin{frame}{The exponential function}
+  All derivatives of $e^x$ are $e^x$. Between $0$ and $x$, \ $e^\xi \le e^{|x|}$, so
+  \[ |R_n(x)| \le e^{|x|} \frac{|x|^{n+1}}{(n+1)!} \to 0 . \]
+  Again: $e^x = \sum_{k=0}^\infty \frac{x^k}{k!}$ for every $x$ --- a second proof.
+  \pause
+  \begin{example}[Computing $e$]
+    $e = \sum_{k=0}^\infty \frac{1}{k!}$, and $|R_n(1)| \le \frac{e}{(n+1)!} < \frac{3}{(n+1)!}$.
+    With $n = 10$: \ $\sum_{k=0}^{10} \frac{1}{k!} = 2.7182818\ldots$, with an error below
+    $\frac{3}{11!} \approx 7.5 \cdot 10^{-8}$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{$e$ is irrational}
+  \begin{theorem}
+    $e$ is not a rational number.
+  \end{theorem}
+  \begin{proof}
+    Suppose $e = \frac pq$ with integers $p, q \ge 1$. Then
+    $N = q! \bigl( e - \sum_{k=0}^{q} \frac{1}{k!} \bigr) = p\,(q-1)! - \sum_{k=0}^{q} \frac{q!}{k!}$
+    is an integer, and $N > 0$. But
+    \[ N = \sum_{k > q} \frac{q!}{k!} = \frac{1}{q+1} + \frac{1}{(q+1)(q+2)} + \cdots
+       < \frac{1}{q+1} + \frac{1}{(q+1)^2} + \cdots = \frac1q \le 1 . \]
+    An integer strictly between $0$ and $1$ does not exist.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{Sine and cosine}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.2cm,
+            xmin=-6.4, xmax=6.4, ymin=-2.2, ymax=2.2, xlabel={$x$},
+            xtick={-6.2832,-3.1416,0,3.1416,6.2832},
+            xticklabels={$-2\pi$,$-\pi$,$0$,$\pi$,$2\pi$}, ytick={-1,0,1}]
+          \addplot[wosm-text, very thick, domain=-6.4:6.4, samples=160] {sin(deg(x))};
+          \addplot[wosm-brick!50!wosm-bg, thick, domain=-6.4:6.4, samples=120]
+            {x*(1 - x*x/6)};
+          \addplot[wosm-brick!80!wosm-bg, thick, domain=-6.4:6.4, samples=120]
+            {x*(1 - x*x/6*(1 - x*x/20*(1 - x*x/42)))};
+          \addplot[wosm-accent, thick, domain=-6.4:6.4, samples=160]
+            {x*(1 - x*x/6*(1 - x*x/20*(1 - x*x/42*(1 - x*x/72*(1 - x*x/110)))))};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \small
+      The derivatives cycle through $\sin, \cos, -\sin, -\cos$, so all are bounded by $1$, and
+      $|R_n(x)| \le \frac{|x|^{n+1}}{(n+1)!} \to 0$. For every $x$:
+      \begin{align*}
+        \sin x &= \sum_{k=0}^\infty \frac{(-1)^k x^{2k+1}}{(2k+1)!} \\
+        \cos x &= \sum_{k=0}^\infty \frac{(-1)^k x^{2k}}{(2k)!}
+      \end{align*}
+      Each new term keeps the polynomial close to $\sin x$ on a wider interval:
+      {\color{wosm-brick!50!wosm-bg}$T_3$}, {\color{wosm-brick!80!wosm-bg}$T_7$},
+      {\color{wosm-accent}$T_{11}$}.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{How a computer might compute $\sin x$}
+  \begin{example}
+    $\sin 0.1 \approx 0.1 - \frac{0.1^3}{6} = 0.0998333\ldots$
+    Since $T_3 = T_4$ for $\sin$, the error is at most $\frac{0.1^5}{5!} \approx 8.4 \cdot 10^{-8}$.
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item Mathematical libraries typically first reduce $x$ to a small interval, such as
+      $|x| \le \frac\pi4$, using $\sin(x + 2\pi) = \sin x$ and similar identities.
+    \item On $|x| \le \frac\pi4$ the Taylor polynomial of degree $15$ has error at most
+      $\frac{(\pi/4)^{17}}{17!} < 5 \cdot 10^{-17}$ --- below the precision of a double.
+    \item Real libraries use polynomials tuned to the whole interval rather than Taylor
+      polynomials, but the principle is the same: a polynomial, plus a proof of how close it is.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{$\ln 2$, at last}
+  For $f(x) = \ln(1 + x)$: \ $f^{(n+1)}(t) = \dfrac{(-1)^n\, n!}{(1 + t)^{n+1}}$.
+  \pause
+  For $0 \le x \le 1$ and $\xi$ between $0$ and $x$, \ $1 + \xi \ge 1$, so
+  \[ |R_n(x)| = \frac{n!}{(1+\xi)^{n+1}} \cdot \frac{x^{n+1}}{(n+1)!} \le \frac{1}{n+1} \to 0 . \]
+  \pause
+  \begin{theorem}
+    $\displaystyle \ln 2 = 1 - \frac12 + \frac13 - \frac14 + \cdots$
+  \end{theorem}
+  {\small The value promised in Lecture 3. For $-1 < x < 0$ this bound is too weak, since
+  $1 + \xi < 1$; there Lecture 5 already gave us the series.\par}
+\end{frame}
+
+\begin{frame}{$\frac\pi4$, at last}
+  Stop the geometric series after $n + 1$ terms and keep the rest exactly:
+  \[ \frac{1}{1 + t^2} = \sum_{k=0}^{n} (-1)^k t^{2k} + \frac{(-1)^{n+1} t^{2n+2}}{1 + t^2} . \]
+  \pause
+  Integrate from $0$ to $1$:
+  \[ \frac{\pi}{4} = \sum_{k=0}^{n} \frac{(-1)^k}{2k+1} + E_n, \qquad
+     |E_n| \le \int_0^1 t^{2n+2} \dt = \frac{1}{2n+3} \to 0 . \]
+  Letting $n \to \infty$: \ $\displaystyle\frac\pi4 = 1 - \frac13 + \frac15 - \frac17 + \cdots$
+  \ (Leibniz).
+  {\small It converges slowly (Lecture 3). Machin's formula
+  $\frac\pi4 = 4 \arctan\frac15 - \arctan\frac{1}{239}$ converges fast: with it, Machin computed
+  $100$ decimal places of $\pi$ in 1706.\par}
+\end{frame}
+
+\begin{frame}{The binomial series}
+  For $\alpha \in \R$ let
+  $\binom{\alpha}{k} = \frac{\alpha (\alpha - 1) \cdots (\alpha - k + 1)}{k!}$ and $\binom{\alpha}{0} = 1$.
+  \begin{theorem}[Binomial series]
+    $\displaystyle (1 + x)^\alpha = \sum_{k=0}^\infty \binom{\alpha}{k} x^k$ \ for $|x| < 1$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    For $\alpha \in \{0, 1, 2, \dots\}$ the series stops: the binomial theorem. Otherwise
+    $\bigl|\binom{\alpha}{k+1} / \binom{\alpha}{k}\bigr| = \frac{|\alpha - k|}{k+1} \to 1$, so $R = 1$.
+    Let $g$ be the sum. As $(k+1)\binom{\alpha}{k+1} = (\alpha - k)\binom{\alpha}{k}$, term by term
+    $(1 + x)\, g' = \alpha\, g$. So $\bigl(g (1+x)^{-\alpha}\bigr)' = 0$, and $g(0) = 1$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{Binomial series: examples}
+  \begin{itemize}
+    \item $\alpha = \frac12$: \quad
+      $\sqrt{1 + x} = 1 + \dfrac{x}{2} - \dfrac{x^2}{8} + \dfrac{x^3}{16} - \cdots$
+    \item $\alpha = -1$: \quad
+      $\dfrac{1}{1 + x} = 1 - x + x^2 - \cdots$ \quad (the geometric series again)
+    \item $\alpha = -\frac12$, \ $x \to -4x$: \quad
+      $\dfrac{1}{\sqrt{1 - 4x}} = \sum_{k=0}^\infty \binom{2k}{k} x^k
+       = 1 + 2x + 6x^2 + 20x^3 + 70x^4 + \cdots$ \quad $(|x| < \frac14)$
+  \end{itemize}
+  \pause
+  \begin{remark}
+    $\binom{2k}{k}$ counts the paths from $(0, 0)$ to $(k, k)$ with unit steps right and up.
+    One function, $\frac{1}{\sqrt{1 - 4x}}$, holds all of these numbers at once: the idea of a
+    generating function (next lecture).
+  \end{remark}
+\end{frame}
+
+\begin{frame}{A table to remember}
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.45}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Function} & \textbf{Maclaurin series} & \textbf{Valid for} \\
+    \midrule
+    $\frac{1}{1-x}$ & $\sum x^k$ & $-1 < x < 1$ \\
+    $e^x$ & $\sum \frac{x^k}{k!}$ & all $x$ \\
+    $\sin x$ & $\sum \frac{(-1)^k x^{2k+1}}{(2k+1)!}$ & all $x$ \\
+    $\cos x$ & $\sum \frac{(-1)^k x^{2k}}{(2k)!}$ & all $x$ \\
+    $\ln(1 + x)$ & $\sum_{k \ge 1} \frac{(-1)^{k+1} x^k}{k}$ & $-1 < x \le 1$ \\
+    $\arctan x$ & $\sum \frac{(-1)^k x^{2k+1}}{2k+1}$ & $-1 \le x \le 1$ \\
+    $(1 + x)^\alpha$ & $\sum \binom{\alpha}{k} x^k$ & $-1 < x < 1$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  {\small Sums start at $k = 0$ unless shown. At $x = -1$, $\arctan$ follows from $\arctan(-x) = -\arctan x$.\par}
+\end{frame}
+
+% =============================================================
+\section{Working with Taylor series}
+
+\begin{frame}{New series from old --- and integrals without antiderivatives}
+  By uniqueness (Lecture 5), any power series we build for $f$ \emph{is} its Taylor series.
+  \[ e^{-x^2} = \sum_{k=0}^\infty \frac{(-1)^k x^{2k}}{k!} \qquad (\text{substitute } -x^2 \text{ into } e^u) \]
+  \pause
+  $e^{-x^2}$ has no elementary antiderivative, but term by term:
+  \[ \int_0^1 e^{-x^2} \dx = \sum_{k=0}^\infty \frac{(-1)^k}{k!\,(2k+1)}
+     = 1 - \frac13 + \frac{1}{10} - \frac{1}{42} + \frac{1}{216} - \cdots \]
+  \pause
+  An alternating series with decreasing terms: five terms give $0.74749$, with error at most
+  the next term, $\frac{1}{1320} < 0.0008$. \ (The true value is $0.746824\ldots$)
+  {\small This integral is at the heart of probability: the Gaussian integral, Unit 21.\par}
+\end{frame}
+
+\begin{frame}{Limits}
+  Replace each function by the start of its series:
+  \begin{itemize}
+    \item $\displaystyle\lim_{x\to0} \frac{\sin x - x}{x^3}
+      = \lim_{x\to0} \frac{-\frac{x^3}{6} + \frac{x^5}{120} - \cdots}{x^3} = -\frac16$
+    \item $\displaystyle\lim_{x\to0} \frac{1 - \cos x}{x^2}
+      = \lim_{x\to0} \Bigl(\frac12 - \frac{x^2}{24} + \cdots\Bigr) = \frac12$
+      \quad (used in Lecture 2)
+    \item $\displaystyle\lim_{x\to0} \frac{e^x - 1 - x}{x^2} = \frac12$
+  \end{itemize}
+  \pause
+  \begin{remark}[$O$-notation]
+    If $f^{(n+1)}$ is bounded near $a$, then $f(x) = T_n(x) + O\bigl((x-a)^{n+1}\bigr)$ as
+    $x \to a$. For example $\sin x = x - \frac{x^3}{6} + O(x^5)$.
+    Often quicker than L'H\^opital's rule, and it shows \emph{how} the limit is approached.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Asymptotics}
+  How fast does $\bigl(1 + \frac1n\bigr)^n$ approach $e$? With $\ln(1 + u) = u - \frac{u^2}{2} + O(u^3)$,
+  \ $n \ln\bigl(1 + \frac1n\bigr) = 1 - \frac{1}{2n} + O\bigl(\frac{1}{n^2}\bigr)$, and with
+  $e^u = 1 + u + O(u^2)$:
+  \[ \Bigl(1 + \frac1n\Bigr)^n = e \cdot e^{-\frac{1}{2n} + O(1/n^2)}
+     = e \Bigl(1 - \frac{1}{2n} + O\Bigl(\frac{1}{n^2}\Bigr)\Bigr) . \]
+  \pause
+  \begin{center}
+  \small
+  \begin{tabular}{rcc}
+    \toprule
+    $n$ & $\bigl(1 + \frac1n\bigr)^n$ & $e \bigl(1 - \frac{1}{2n}\bigr)$ \\
+    \midrule
+    $10$   & $2.59374$  & $2.58237$ \\
+    $100$  & $2.70481$  & $2.70469$ \\
+    $1000$ & $2.716924$ & $2.716923$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  {\small The same technique gives Stirling's formula for $n!$ (Unit 8).\par}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item The \textbf{Taylor series} of $f$ at $a$ is $\sum \frac{f^{(k)}(a)}{k!}(x - a)^k$.
+      It equals $f(x)$ exactly when the remainder $R_n(x) \to 0$.
+    \item \textbf{Taylor's theorem}: $R_n(x) = \frac{f^{(n+1)}(\xi)}{(n+1)!}(x - a)^{n+1}$, so
+      $|R_n(x)| \le \frac{M |x - a|^{n+1}}{(n+1)!}$ if $|f^{(n+1)}| \le M$.
+    \item Not every smooth function is analytic: $e^{-1/x^2}$.
+    \item $e^x$, $\sin$, $\cos$ for all $x$; $\ln(1+x)$ and $\arctan$ including $x = 1$:
+      $\ln 2 = 1 - \frac12 + \frac13 - \cdots$, \ $\frac\pi4 = 1 - \frac13 + \frac15 - \cdots$.
+    \item Binomial series: $(1 + x)^\alpha = \sum \binom{\alpha}{k} x^k$ for $|x| < 1$.
+    \item Uses: approximations with error bounds, integrals without antiderivatives,
+      limits, asymptotics.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find the Maclaurin series and its radius: \
+      (a) $x e^x$ \quad (b) $\cos(2x)$ \quad (c) $\sinh x = \frac{e^x - e^{-x}}{2}$ \quad
+      (d) $\ln\frac{1+x}{1-x}$
+    \item Find the Taylor series of $\ln x$ at $a = 1$. For which $x$ does it converge to $\ln x$?
+    \item Compute $\cos 0.2$ with an error below $10^{-6}$, and justify the bound.
+    \item Find $\displaystyle\lim_{x\to0} \frac{x - \arctan x}{x^3}$.
+    \item Approximate $\int_0^1 \sin(x^2)\dx$ with an error below $10^{-3}$.
+    \item Explain why the Taylor series of $e^{-1/x^2}$ at $0$ does not represent the function.
+    \item Show that $\frac{1}{\sqrt{1 - 4x}} = \sum_{k=0}^\infty \binom{2k}{k} x^k$ for $|x| < \frac14$.
+    \item Show that $e^{x}e^{y} = e^{x+y}$ by multiplying the series (Cauchy product).
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item (a) $\sum_{k=0}^\infty \frac{x^{k+1}}{k!}$ \
+      (b) $\sum_{k=0}^\infty \frac{(-1)^k 4^k x^{2k}}{(2k)!}$ \
+      (c) $\sum_{k=0}^\infty \frac{x^{2k+1}}{(2k+1)!}$: all with $R = \infty$. \
+      (d) $\ln(1+x) - \ln(1-x) = 2 \sum_{k=0}^\infty \frac{x^{2k+1}}{2k+1}$, \ $R = 1$.
+    \item $\ln x = \ln(1 + (x - 1)) = \sum_{k=1}^\infty \frac{(-1)^{k+1}(x-1)^k}{k}$, for $0 < x \le 2$.
+    \item $1 - \frac{0.04}{2} + \frac{0.0016}{24} = 0.9800667$. As $T_4 = T_5$ for $\cos$,
+      the error is at most $\frac{0.2^6}{6!} \approx 8.9 \cdot 10^{-8}$.
+    \item $\arctan x = x - \frac{x^3}{3} + O(x^5)$, so the limit is $\frac13$.
+    \item $\int_0^1 \bigl(x^2 - \frac{x^6}{6} + \frac{x^{10}}{120} - \cdots\bigr)\dx
+      = \frac13 - \frac{1}{42} + \frac{1}{1320} - \cdots$. Then $\frac13 - \frac1{42} \approx 0.3095$,
+      with error below $\frac{1}{1320} < 10^{-3}$ (alternating series).
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers, continued}
+  \small
+  \begin{enumerate}
+    \setcounter{enumi}{5}
+    \item All derivatives at $0$ are $0$, so the Taylor series is the zero series. It
+      converges for every $x$, but to $0 \ne f(x)$ when $x \ne 0$: the remainder
+      $R_n(x) = f(x)$ does not tend to $0$.
+    \item Binomial series with $\alpha = -\frac12$ and $x$ replaced by $-4x$ (valid for
+      $|4x| < 1$). Then $\binom{-1/2}{k}(-4)^k = \frac{2^k \cdot 1 \cdot 3 \cdots (2k-1)}{k!}
+      = \frac{(2k)!}{k!\,k!}$.
+    \item The coefficient of the product $\bigl(\sum \frac{x^j}{j!}\bigr)\bigl(\sum \frac{y^m}{m!}\bigr)$
+      collected over $j + m = k$ is
+      $\sum_{j=0}^k \frac{x^j y^{k-j}}{j!\,(k-j)!} = \frac{(x+y)^k}{k!}$ by the binomial theorem.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 07 --- Generating functions} (Unit 7)
+  \begin{itemize}
+    \item A sequence $a_0, a_1, a_2, \dots$ as the coefficients of one power series
+    \item Solving recurrences, such as the Fibonacci numbers
+    \item Counting with products of series; Project 1
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: H.~S.~Wilf, \emph{generatingfunctionology}, Chapter 1.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

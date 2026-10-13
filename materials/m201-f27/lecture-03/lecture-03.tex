@@ -1,0 +1,513 @@
+% =============================================================
+%  M201-F27 Calculus II — Lecture 03
+%  Unit 3: Absolute and conditional convergence; alternating
+%  series; rearrangements
+%
+%  Build from the repository root:   npm run materials -- lecture-03
+%  This writes lecture-03.pdf (slides, with overlays) and
+%  lecture-03-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{wosm axis/.style={
+  axis lines=left, axis line style={wosm-muted, -},
+  tick style={wosm-muted}, tick label style={font=\scriptsize, text=wosm-muted},
+  label style={font=\scriptsize, text=wosm-muted},
+  legend style={draw=none, fill=none, font=\scriptsize, text=wosm-text},
+  legend cell align=left}}
+
+\newcommand{\R}{\mathbb{R}}
+
+\course{M201-F27}{Calculus II}
+\title[L03 \textperiodcentered\ Absolute and conditional convergence]{Absolute and conditional convergence}
+\subtitle{Alternating series and rearrangements}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 03\enspace\textperiodcentered\enspace Unit 3\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  For series with $a_k \ge 0$:
+  \begin{itemize}
+    \item $\sum a_k$ converges if and only if its partial sums are bounded.
+    \item Integral test; $\sum \frac{1}{k^p}$ converges if and only if $p > 1$.
+    \item Comparison and limit comparison with known series.
+    \item Ratio and root tests: $L < 1$ converges, $L > 1$ diverges, $L = 1$ says nothing.
+  \end{itemize}
+  \vskip0.6em
+  Every one of these needed $a_k \ge 0$. Today: series whose terms have both signs.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 2} (OpenStax), Section 5.5.\par}
+\end{frame}
+
+% =============================================================
+\section{Absolute convergence}
+
+\begin{frame}{Terms of both signs}
+  \[ 1 - \frac12 + \frac13 - \frac14 + \cdots, \qquad
+     \sum_{k=1}^\infty \frac{\sin k}{k^2}, \qquad
+     \sum_{k=0}^\infty \frac{(-2)^k}{k!} \]
+  \pause
+  \begin{itemize}
+    \item The partial sums no longer increase, so ``bounded partial sums'' is not enough:
+      $1 - 1 + 1 - \cdots$ has bounded partial sums and diverges.
+    \item The tests of Lecture 2 need $a_k \ge 0$.
+  \end{itemize}
+  \pause
+  \vskip0.4em
+  Idea: first look at the \emph{sizes} of the terms, $|a_k|$.
+  Cancellation between positive and negative terms can only help.
+\end{frame}
+
+\begin{frame}{Absolute and conditional convergence}
+  \begin{definition}
+    The series $\sum a_k$ \textbf{converges absolutely} if $\sum |a_k|$ converges.
+    It \textbf{converges conditionally} if $\sum a_k$ converges but $\sum |a_k|$ diverges.
+  \end{definition}
+  \begin{itemize}
+    \item If $a_k \ge 0$, convergence and absolute convergence are the same thing.
+    \item $\sum |a_k|$ has nonnegative terms, so all the tests of Lecture 2 apply to it.
+  \end{itemize}
+  \pause
+  \begin{theorem}
+    If $\sum a_k$ converges absolutely, then it converges, and
+    $\displaystyle\Bigl|\sum_{k=1}^\infty a_k\Bigr| \le \sum_{k=1}^\infty |a_k|$.
+  \end{theorem}
+\end{frame}
+
+\begin{frame}{Proof}
+  \begin{proof}
+    Let $\varepsilon > 0$. Since $\sum |a_k|$ converges, the Cauchy criterion
+    (Lecture 1) gives an $N$ with $|a_{m+1}| + \dots + |a_n| < \varepsilon$ for
+    $n > m \ge N$. By the triangle inequality,
+    $|a_{m+1} + \dots + a_n| \le |a_{m+1}| + \dots + |a_n| < \varepsilon$:
+    $\sum a_k$ satisfies the Cauchy criterion too, so it converges.
+    Finally $|S_n| \le \sum_{k=1}^{n} |a_k| \le \sum_{k=1}^\infty |a_k|$; let $n \to \infty$.
+  \end{proof}
+  \pause
+  \begin{remark}[A proof without Cauchy]
+    $0 \le a_k + |a_k| \le 2|a_k|$, so $\sum (a_k + |a_k|)$ converges by comparison.
+    Then $a_k = (a_k + |a_k|) - |a_k|$ is a difference of two convergent series.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{itemize}
+    \item $\displaystyle\sum \frac{\sin k}{k^2}$:
+      \uncover<2->{$\Bigl|\dfrac{\sin k}{k^2}\Bigr| \le \dfrac{1}{k^2}$, so it converges absolutely.}
+    \item $\displaystyle\sum \frac{(-1)^k}{2^k}$:
+      \uncover<3->{$\sum \frac{1}{2^k}$ converges, so it converges absolutely
+      (to $\frac{1}{1 + 1/2} = \frac23$ from $k = 0$).}
+    \item $\displaystyle\sum \frac{\cos(k^2)}{k\sqrt{k}}$:
+      \uncover<4->{$|a_k| \le \dfrac{1}{k^{3/2}}$, a $p$-series with $p > 1$. Converges absolutely.}
+    \item $\displaystyle\sum \frac{(-1)^{k+1}}{k}$:
+      \uncover<5->{$\sum \frac1k$ diverges. The theorem says nothing --- see Section 2.}
+  \end{itemize}
+  \uncover<6->{
+  \begin{warning}
+    ``$\sum |a_k|$ diverges'' does \emph{not} mean that $\sum a_k$ diverges.
+  \end{warning}}
+\end{frame}
+
+\begin{frame}{Ratio and root tests for any series}
+  \begin{theorem}
+    Suppose $\bigl|\frac{a_{k+1}}{a_k}\bigr| \to L$ \ or \ $\sqrt[k]{|a_k|} \to L$.
+    If $L < 1$, then $\sum a_k$ converges absolutely.
+    If $L > 1$, then $\sum a_k$ diverges.
+  \end{theorem}
+  {\small Proof: for $L < 1$, apply Lecture 2 to $\sum |a_k|$. For $L > 1$, Lecture 2
+  showed $|a_k| \not\to 0$, so $a_k \not\to 0$.\par}
+  \pause
+  \begin{example}
+    \begin{itemize}
+      \item $\sum \frac{(-3)^k}{k!}$: \ $\bigl|\frac{a_{k+1}}{a_k}\bigr| = \frac{3}{k+1} \to 0$.
+        Converges absolutely.
+      \item $\sum \frac{(-2)^k}{k^2}$: \ $\bigl|\frac{a_{k+1}}{a_k}\bigr| = \frac{2k^2}{(k+1)^2} \to 2$.
+        Diverges.
+    \end{itemize}
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{Alternating series}
+
+\begin{frame}{The alternating harmonic series}
+  \begin{columns}[c]
+    \begin{column}{0.58\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.2cm,
+            xmin=0, xmax=31, ymin=0.45, ymax=1.05,
+            xlabel={$n$}, ylabel={$S_n$}, xtick={1,10,20,30},
+            ytick={0.5,0.6931,1}, yticklabels={$0.5$,$\ln 2$,$1$}]
+          \addplot[wosm-rule, domain=0:31] {0.6931};
+          \addplot[wosm-accent, mark=*, mark size=1.1pt, thin] coordinates {
+            (1,1.0000) (2,0.5000) (3,0.8333) (4,0.5833) (5,0.7833) (6,0.6167) (7,0.7595)
+            (8,0.6345) (9,0.7456) (10,0.6456) (11,0.7365) (12,0.6532) (13,0.7301)
+            (14,0.6587) (15,0.7254) (16,0.6629) (17,0.7217) (18,0.6661) (19,0.7188)
+            (20,0.6688) (21,0.7164) (22,0.6709) (23,0.7144) (24,0.6727) (25,0.7127)
+            (26,0.6743) (27,0.7113) (28,0.6756) (29,0.7101) (30,0.6768)};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      $1 - \frac12 + \frac13 - \frac14 + \cdots$
+      \vskip0.5em
+      \small
+      \begin{itemize}
+        \item The odd partial sums $S_1, S_3, S_5, \dots$ decrease.
+        \item The even ones $S_2, S_4, S_6, \dots$ increase.
+        \item Each step is shorter than the last, so they close in on one number.
+      \end{itemize}
+      The sum is $\ln 2 \approx 0.6931$ (Unit 6) --- yet $\sum \frac1k = \infty$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The alternating series test}
+  \begin{theorem}[Alternating series test, Leibniz]
+    Let $(b_k)$ be decreasing with $b_k \to 0$ (so $b_k \ge 0$). Then
+    $\sum_{k=1}^\infty (-1)^{k+1} b_k = b_1 - b_2 + b_3 - \cdots$ converges.
+    Its sum $S$ lies between any two consecutive partial sums, and
+    \[ |S - S_n| \le b_{n+1} . \]
+  \end{theorem}
+  \pause
+  \begin{itemize}
+    \item The error of stopping after $n$ terms is at most the first term left out,
+      and has the same sign as that term.
+    \item Only the tail matters: it is enough that $(b_k)$ decreases from some $k$ on.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Proof}
+  \begin{proof}
+    \begin{itemize}
+      \item $S_{2n+2} - S_{2n} = b_{2n+1} - b_{2n+2} \ge 0$: the even partial sums increase.
+      \item $S_{2n+1} - S_{2n-1} = -b_{2n} + b_{2n+1} \le 0$: the odd partial sums decrease.
+      \item $S_2 \le S_{2n} \le S_{2n} + b_{2n+1} = S_{2n+1} \le S_1$:
+        both sequences are bounded.
+    \end{itemize}
+    By monotone convergence $S_{2n} \to S'$ and $S_{2n+1} \to S''$, and
+    $S'' - S' = \lim b_{2n+1} = 0$. So $S_n \to S = S' = S''$, with
+    $S_{2n} \le S \le S_{2m+1}$ for all $n, m$.
+    Hence $S$ lies between $S_n$ and $S_{n+1}$, and $|S - S_n| \le |S_{n+1} - S_n| = b_{n+1}$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{itemize}
+    \item $\displaystyle\sum \frac{(-1)^{k+1}}{k}$ and $\displaystyle\sum \frac{(-1)^{k+1}}{\sqrt k}$
+      \uncover<2->{\\ $\frac1k$ and $\frac{1}{\sqrt k}$ decrease to $0$: both converge.
+      $\sum \frac1k$ and $\sum \frac{1}{\sqrt k}$ diverge, so both converge \emph{conditionally}.}
+    \item $\displaystyle\sum \frac{(-1)^k k}{k^2 + 1}$
+      \uncover<3->{\\ $\bigl(\frac{x}{x^2+1}\bigr)' = \frac{1 - x^2}{(x^2+1)^2} \le 0$ for $x \ge 1$,
+      and $\frac{k}{k^2+1} \to 0$: converges. $|a_k| \sim \frac1k$: conditionally.}
+    \item $\displaystyle\sum \frac{(-1)^k \ln k}{k}$
+      \uncover<4->{\\ $\bigl(\frac{\ln x}{x}\bigr)' = \frac{1 - \ln x}{x^2} < 0$ for $x > e$:
+      decreasing from $k = 3$ on, and $\frac{\ln k}{k} \to 0$. Converges conditionally.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{How many terms do we need?}
+  \begin{example}[$\sum_{k=1}^\infty \frac{(-1)^{k+1}}{k!} = 1 - \frac1e$ \ (Unit 6)]
+    The error after $n$ terms is at most $\frac{1}{(n+1)!}$. As $10! = 3\,628\,800$,
+    nine terms give $1 - \frac1e$ to within $10^{-6}$.
+  \end{example}
+  \pause
+  \begin{example}[$1 - \frac13 + \frac15 - \frac17 + \cdots = \frac{\pi}{4}$ \ (Unit 6)]
+    The error after $n$ terms is at most $\frac{1}{2n+1}$. For an error below $10^{-3}$
+    we need about $500$ terms; for $10^{-6}$, about $500\,000$.
+  \end{example}
+  \pause
+  Both converge; how fast depends on how fast $b_k \to 0$.
+  The test always tells us how far we can be from the sum.
+\end{frame}
+
+\begin{frame}{Both conditions matter}
+  \begin{warning}[$b_k \to 0$]
+    $\sum (-1)^k \frac{k}{k+1}$ alternates, but its terms do not tend to $0$. It diverges.
+  \end{warning}
+  \pause
+  \begin{warning}[$(b_k)$ decreasing]
+    $1 - 1 + \frac12 - \frac14 + \frac13 - \frac19 + \frac14 - \frac1{16} + \cdots$
+    \ alternates, and $b_k \to 0$, but $(b_k)$ is not decreasing. Here
+    $S_{2n} = \sum_{j=1}^{n} \bigl(\frac1j - \frac1{j^2}\bigr) = H_n - \sum_{j=1}^{n} \frac1{j^2}
+    \to \infty$, as $H_n \to \infty$ and $\sum \frac{1}{j^2}$ converges. It diverges.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{A map}
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{@{}llll@{}}
+    \toprule
+    \textbf{Series} & $\sum |a_k|$ & $\sum a_k$ & \textbf{Verdict} \\
+    \midrule
+    $\sum \frac{(-1)^k}{k^2}$     & converges & converges & absolutely convergent \\
+    $\sum \frac{(-1)^k k}{2^k}$   & converges & converges & absolutely convergent \\
+    $\sum \frac{(-1)^k}{k}$       & diverges  & converges & conditionally convergent \\
+    $\sum \frac{(-1)^k}{\sqrt k}$ & diverges  & converges & conditionally convergent \\
+    $\sum (-1)^k$                 & diverges  & diverges  & divergent \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vskip0.4em
+  In general $\sum \frac{(-1)^k}{k^p}$ converges absolutely for $p > 1$, conditionally for
+  $0 < p \le 1$, and diverges for $p \le 0$.
+\end{frame}
+
+% =============================================================
+\section{Rearrangements}
+
+\begin{frame}{Changing the order}
+  A finite sum does not depend on the order of its terms. What about a series?
+  \begin{definition}[Rearrangement]
+    Let $\sigma\colon \{1, 2, 3, \dots\} \to \{1, 2, 3, \dots\}$ be a bijection.
+    The series $\sum_{k=1}^\infty a_{\sigma(k)}$ is a \textbf{rearrangement} of
+    $\sum_{k=1}^\infty a_k$: the same terms, each used exactly once, in another order.
+  \end{definition}
+  \pause
+  \begin{example}
+    $\sigma$ swaps $2j-1$ and $2j$:\quad
+    $a_2 + a_1 + a_4 + a_3 + a_6 + a_5 + \cdots$
+  \end{example}
+\end{frame}
+
+\begin{frame}{Same terms, half the sum}
+  $S = 1 - \frac12 + \frac13 - \frac14 + \frac15 - \frac16 + \cdots = \ln 2$.
+  Now take one positive term, then two negative ones:
+  \[ \Bigl(1 - \frac12 - \frac14\Bigr) + \Bigl(\frac13 - \frac16 - \frac18\Bigr)
+     + \Bigl(\frac15 - \frac1{10} - \frac1{12}\Bigr) + \cdots \]
+  \pause
+  The $j$-th block is
+  $\displaystyle\frac{1}{2j-1} - \frac{1}{4j-2} - \frac{1}{4j}
+   = \frac{1}{4j-2} - \frac{1}{4j} = \frac12\Bigl(\frac{1}{2j-1} - \frac{1}{2j}\Bigr)$,
+  so the blocks add up to
+  \[ \frac12\Bigl(1 - \frac12 + \frac13 - \frac14 + \cdots\Bigr) = \frac12 \ln 2 . \]
+  \pause
+  {\small Inside a block the partial sums differ from the block sums by terms that
+  tend to $0$, so the rearranged series itself converges to $\frac12 \ln 2$.\par}
+\end{frame}
+
+\begin{frame}{Any sum you like}
+  \begin{columns}[c]
+    \begin{column}{0.58\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.4cm,
+            xmin=0, xmax=81, ymin=0.45, ymax=1.6,
+            xlabel={$n$}, ylabel={$S_n$}, xtick={1,20,40,60,80},
+            ytick={0.5,0.6931,1,1.5}, yticklabels={$0.5$,$\ln 2$,$1$,$1.5$}]
+          \addplot[wosm-rule, domain=0:81] {1.5};
+          \addplot[wosm-rule, domain=0:81] {0.6931};
+          \addplot[wosm-accent, thin] coordinates {
+            (1,1.0000) (2,0.5000) (3,0.8333) (4,0.5833) (5,0.7833) (6,0.6167) (7,0.7595)
+            (8,0.6345) (9,0.7456) (10,0.6456) (11,0.7365) (12,0.6532) (13,0.7301)
+            (14,0.6587) (15,0.7254) (16,0.6629) (17,0.7217) (18,0.6661) (19,0.7188)
+            (20,0.6688) (21,0.7164) (22,0.6709) (23,0.7144) (24,0.6727) (25,0.7127)
+            (26,0.6743) (27,0.7113) (28,0.6756) (29,0.7101) (30,0.6768) (31,0.7090)
+            (32,0.6778) (33,0.7081) (34,0.6787) (35,0.7072) (36,0.6795) (37,0.7065)
+            (38,0.6802) (39,0.7058) (40,0.6808) (41,0.7052) (42,0.6814) (43,0.7046)
+            (44,0.6819) (45,0.7041) (46,0.6824) (47,0.7037) (48,0.6828) (49,0.7032)
+            (50,0.6832) (51,0.7029) (52,0.6836) (53,0.7025) (54,0.6840) (55,0.7022)
+            (56,0.6843) (57,0.7018) (58,0.6846) (59,0.7015) (60,0.6849) (61,0.7013)
+            (62,0.6851) (63,0.7010) (64,0.6854) (65,0.7008) (66,0.6856) (67,0.7006)
+            (68,0.6858) (69,0.7003) (70,0.6861) (71,0.7001) (72,0.6863) (73,0.6999)
+            (74,0.6864) (75,0.6998) (76,0.6866) (77,0.6996) (78,0.6868) (79,0.6994)
+            (80,0.6869)};
+          \addplot[wosm-brick, thin] coordinates {
+            (1,1.0000) (2,1.3333) (3,1.5333) (4,1.0333) (5,1.1762) (6,1.2873) (7,1.3782)
+            (8,1.4551) (9,1.5218) (10,1.2718) (11,1.3306) (12,1.3833) (13,1.4309)
+            (14,1.4744) (15,1.5144) (16,1.3477) (17,1.3847) (18,1.4192) (19,1.4515)
+            (20,1.4818) (21,1.5103) (22,1.3853) (23,1.4124) (24,1.4380) (25,1.4624)
+            (26,1.4857) (27,1.5079) (28,1.4079) (29,1.4292) (30,1.4496) (31,1.4692)
+            (32,1.4880) (33,1.5062) (34,1.4229) (35,1.4404) (36,1.4574) (37,1.4738)
+            (38,1.4896) (39,1.5050) (40,1.4336) (41,1.4485) (42,1.4630) (43,1.4771)
+            (44,1.4908) (45,1.5041) (46,1.4416) (47,1.4546) (48,1.4673) (49,1.4796)
+            (50,1.4917) (51,1.5034) (52,1.4479) (53,1.4594) (54,1.4706) (55,1.4816)
+            (56,1.4924) (57,1.5029) (58,1.4529) (59,1.4632) (60,1.4733) (61,1.4832)
+            (62,1.4929) (63,1.5024) (64,1.4570) (65,1.4663) (66,1.4755) (67,1.4845)
+            (68,1.4933) (69,1.5020) (70,1.4604) (71,1.4689) (72,1.4773) (73,1.4856)
+            (74,1.4937) (75,1.5017) (76,1.4633) (77,1.4711) (78,1.4789) (79,1.4865)
+            (80,1.4940)};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \small
+      The same terms $1, -\frac12, \frac13, -\frac14, \dots$, in two orders:
+      \begin{itemize}
+        \item {\color{wosm-accent}in the usual order}: the sum is $\ln 2$;
+        \item {\color{wosm-brick}greedy}: add positive terms $1, \frac13, \frac15, \dots$
+          until the sum is above $1.5$, then negative terms $-\frac12, -\frac14, \dots$
+          until it is below, and repeat.
+      \end{itemize}
+      The greedy order converges to $1.5$. Any target works.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Riemann's rearrangement theorem}
+  \begin{theorem}[Riemann]
+    If $\sum a_k$ converges conditionally, then for every $c \in \R$ some rearrangement
+    of it converges to $c$. Other rearrangements diverge to $\infty$ or to $-\infty$.
+  \end{theorem}
+  \pause
+  \textbf{Idea of the proof.} Split the nonzero terms into positive terms $p_1, p_2, \dots$ and
+  negative terms $-q_1, -q_2, \dots$ \ ($q_j > 0$), each in their original order.
+  \begin{itemize}
+    \item Both $\sum p_j$ and $\sum q_j$ diverge. Among the first $n$ terms, if $P_n$ and
+      $Q_n$ are the sums of the $p$'s and $q$'s, then $S_n = P_n - Q_n$. If $(P_n)$ were
+      bounded, so would $Q_n = P_n - S_n$ be, and then $\sum |a_k|$ would converge.
+    \item So the greedy algorithm never gets stuck. Each time it crosses $c$ it overshoots by
+      at most the last term used, and the terms tend to $0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Absolute convergence: order does not matter}
+  \begin{theorem}
+    If $\sum a_k$ converges absolutely with sum $S$, then every rearrangement converges
+    absolutely, also with sum $S$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    Let $T_m = \sum_{k=1}^m a_{\sigma(k)}$ and $\varepsilon > 0$. Choose $N$ with
+    $\sum_{k > N} |a_k| < \varepsilon$, then $M$ so large that
+    $\sigma(1), \dots, \sigma(M)$ include $1, \dots, N$.
+    For $m \ge M$, $T_m - S_N$ is a sum of terms $a_k$ with $k > N$, so
+    $|T_m - S_N| < \varepsilon$. Also $|S - S_N| < \varepsilon$, hence $|T_m - S| < 2\varepsilon$.
+    The same argument for $\sum |a_{\sigma(k)}|$ gives absolute convergence.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{What this means in practice}
+  \begin{itemize}
+    \item An \textbf{absolutely convergent} series behaves like a finite sum: you may
+      reorder it, regroup it, or sum its positive and negative terms separately.
+    \item In a \textbf{conditionally convergent} series the order is part of the series.
+      Keep it.
+    \item Power series (Units 5--7) converge absolutely inside their interval of convergence.
+      That is why we can rearrange and multiply them freely.
+  \end{itemize}
+  \pause
+  \begin{remark}[On a computer]
+    In floating-point arithmetic even a \emph{finite} sum depends on the order, because each
+    addition rounds. For a slowly converging series, adding the small terms first usually
+    loses less accuracy. This is a different effect from Riemann's theorem.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item $\sum a_k$ \textbf{converges absolutely} if $\sum |a_k|$ converges, and then it
+      converges. Test $\sum |a_k|$ with the tests of Lecture 2.
+    \item Ratio and root tests work for any series: $L < 1$ absolutely convergent,
+      $L > 1$ divergent.
+    \item \textbf{Alternating series test}: if $b_k$ decreases to $0$, then
+      $\sum (-1)^{k+1} b_k$ converges, with error $|S - S_n| \le b_{n+1}$.
+    \item \textbf{Conditionally convergent}: convergent, but not absolutely. Example:
+      $\sum \frac{(-1)^{k+1}}{k} = \ln 2$.
+    \item Rearranging an absolutely convergent series does not change its sum.
+      A conditionally convergent series can be rearranged to any sum (Riemann).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  Does the series converge absolutely, converge conditionally, or diverge?
+  \begin{columns}[T]
+    \begin{column}{0.45\textwidth}
+      \begin{enumerate}
+        \item $\displaystyle\sum \frac{(-1)^k}{k^{3/2}}$
+        \item $\displaystyle\sum_{k=2}^\infty \frac{(-1)^k}{\ln k}$
+        \item $\displaystyle\sum \frac{(-1)^k k}{k + 5}$
+        \item $\displaystyle\sum \frac{\cos(k\pi)}{\sqrt{k}}$
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \begin{enumerate}
+        \setcounter{enumi}{4}
+        \item $\displaystyle\sum \frac{(-5)^k}{k!}$
+        \item $\displaystyle\sum \frac{\sin k}{k^3}$
+        \item $\displaystyle\sum (-1)^k \bigl(\sqrt{k+1} - \sqrt{k}\bigr)$
+      \end{enumerate}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Practice, continued}
+  \small
+  \begin{enumerate}
+    \setcounter{enumi}{7}
+    \item How many terms of $\sum_{k=1}^\infty \frac{(-1)^{k+1}}{k^3}$ guarantee an error
+      below $10^{-4}$?
+    \item For which $p$ does $\sum \frac{(-1)^k}{k^p}$ converge absolutely? Conditionally?
+    \item Show that if $\sum a_k$ converges absolutely, then $\sum a_k^2$ converges.
+      Is this still true if $\sum a_k$ only converges conditionally?
+    \item Describe a rearrangement of $1 - \frac12 + \frac13 - \frac14 + \cdots$ that
+      diverges to $\infty$.
+    \item (Challenge) Show that $1 + \frac13 - \frac12 + \frac15 + \frac17 - \frac14 + \cdots$
+      (two positive terms, then one negative) has sum $\frac32 \ln 2$. \
+      Hint: $H_n = \ln n + \gamma + \varepsilon_n$ with $\varepsilon_n \to 0$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item Absolutely: $\sum \frac{1}{k^{3/2}}$ converges.
+    \item Conditionally: $\frac{1}{\ln k}$ decreases to $0$; \ $\frac{1}{\ln k} \ge \frac1k$.
+    \item Diverges: the terms do not tend to $0$.
+    \item Conditionally: $\cos(k\pi) = (-1)^k$.
+    \item Absolutely: ratio $\frac{5}{k+1} \to 0$.
+    \item Absolutely: $\bigl|\frac{\sin k}{k^3}\bigr| \le \frac{1}{k^3}$.
+    \item Conditionally: $\sqrt{k+1} - \sqrt{k} = \frac{1}{\sqrt{k+1} + \sqrt{k}}$ decreases
+      to $0$, and its sum telescopes to $\infty$ (Lecture 1).
+    \item $21$ terms: \ $\frac{1}{22^3} = \frac{1}{10\,648} < 10^{-4}$, but $21^3 = 9261$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers, continued}
+  \small
+  \begin{enumerate}
+    \setcounter{enumi}{8}
+    \item Absolutely for $p > 1$; conditionally for $0 < p \le 1$ (diverges for $p \le 0$).
+    \item $|a_k| \to 0$, so $|a_k| \le 1$ and $a_k^2 \le |a_k|$ for $k \ge N$; compare. \
+      Not true for conditional convergence: $a_k = \frac{(-1)^k}{\sqrt k}$ gives
+      $\sum a_k^2 = \sum \frac1k$.
+    \item Add positive terms until the sum exceeds $1$, then one negative term; positive
+      terms until it exceeds $2$, then one negative term; and so on. Each stage ends because
+      $\sum \frac{1}{2j-1} = \infty$.
+    \item After $n$ blocks the partial sum is
+      $\sum_{j=1}^{2n} \frac{1}{2j-1} - \frac12 H_n = H_{4n} - \frac12 H_{2n} - \frac12 H_n
+       \to \ln 4 - \frac12 \ln 2 = \frac32 \ln 2$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 04 --- Sequences and series of functions} (Unit 4)
+  \begin{itemize}
+    \item Pointwise and uniform convergence
+    \item When the limit of continuous functions is continuous; integrating and
+      differentiating limits
+    \item Series of functions and the Weierstrass M-test
+  \end{itemize}
+  \vskip1em
+  {\small
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

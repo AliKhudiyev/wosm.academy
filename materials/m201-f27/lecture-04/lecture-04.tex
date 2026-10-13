@@ -1,0 +1,556 @@
+% =============================================================
+%  M201-F27 Calculus II — Lecture 04
+%  Unit 4: Sequences and series of functions; pointwise and
+%  uniform convergence
+%
+%  Build from the repository root:   npm run materials -- lecture-04
+%  This writes lecture-04.pdf (slides, with overlays) and
+%  lecture-04-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{wosm axis/.style={
+  axis lines=left, axis line style={wosm-muted, -},
+  tick style={wosm-muted}, tick label style={font=\scriptsize, text=wosm-muted},
+  label style={font=\scriptsize, text=wosm-muted},
+  legend style={draw=none, fill=none, font=\scriptsize, text=wosm-text},
+  legend cell align=left}}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dx}{\,\mathrm{d}x}
+\newcommand{\dt}{\,\mathrm{d}t}
+
+\course{M201-F27}{Calculus II}
+\title[L04 \textperiodcentered\ Sequences and series of functions]{Sequences and series of functions}
+\subtitle{Pointwise and uniform convergence}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 04\enspace\textperiodcentered\enspace Unit 4\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item $\sum a_k$ converges \textbf{absolutely} if $\sum |a_k|$ converges; then it converges.
+    \item \textbf{Alternating series test}: if $b_k$ decreases to $0$, then
+      $\sum (-1)^{k+1} b_k$ converges, and $|S - S_n| \le b_{n+1}$.
+    \item \textbf{Conditionally} convergent series, such as $\sum \frac{(-1)^{k+1}}{k}$,
+      can be rearranged to any sum. Absolutely convergent ones cannot.
+  \end{itemize}
+  \vskip0.6em
+  So far every term $a_k$ was a number. Today the terms are \emph{functions} of $x$.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: \alert{TODO(owner): choose a text for this unit --- the books on the module's
+  reading list do not cover uniform convergence.}\par}
+\end{frame}
+
+% =============================================================
+\section{From numbers to functions}
+
+\begin{frame}{Series whose terms depend on $x$}
+  \[ \sum_{k=0}^\infty x^k = \frac{1}{1-x}, \qquad
+     e^x = \sum_{k=0}^\infty \frac{x^k}{k!}, \qquad
+     \sum_{k=1}^\infty \frac{\sin(kx)}{k^2} \]
+  Each partial sum is a polynomial or a trigonometric sum: continuous, easy to
+  differentiate and to integrate. The sum is a limit of such functions.
+  \pause
+  \vskip0.4em
+  \textbf{Three questions} about a limit $f = \lim f_n$:
+  \begin{enumerate}
+    \item If every $f_n$ is continuous, is $f$ continuous?
+    \item Is $\int_a^b f = \lim \int_a^b f_n$?
+    \item Is $f' = \lim f_n'$?
+  \end{enumerate}
+  For finite sums the answer is always yes. For limits it is not.
+  Today: a condition that makes it yes. Units 5--7 depend on it.
+\end{frame}
+
+% =============================================================
+\section{Pointwise convergence}
+
+\begin{frame}{Pointwise convergence}
+  \begin{definition}
+    Let $f_n\colon D \to \R$ for $n = 1, 2, \dots$ The sequence $(f_n)$
+    \textbf{converges pointwise} to $f\colon D \to \R$ if $f_n(x) \to f(x)$ for every
+    $x \in D$: for every $x \in D$ and $\varepsilon > 0$ there is an $N$ such that
+    \[ |f_n(x) - f(x)| < \varepsilon \qquad\text{for all } n \ge N . \]
+  \end{definition}
+  Here $N$ may depend on $\varepsilon$ \emph{and on $x$}.
+  \pause
+  \begin{example}
+    $\frac{x}{n} \to 0$ on $\R$. \qquad
+    $\bigl(1 + \frac{x}{n}\bigr)^n \to e^x$ on $\R$ (Calculus I).
+  \end{example}
+\end{frame}
+
+\begin{frame}{Continuity can be lost}
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.2cm,
+            xmin=0, xmax=1.05, ymin=0, ymax=1.1, xlabel={$x$},
+            xtick={0,0.5,1}, ytick={0,0.5,1}]
+          \addplot[wosm-accent!100!wosm-bg, thick, domain=0:1, samples=120] {x^1};
+          \addplot[wosm-accent!80!wosm-bg, thick, domain=0:1, samples=120] {x^2};
+          \addplot[wosm-accent!65!wosm-bg, thick, domain=0:1, samples=120] {x^4};
+          \addplot[wosm-accent!50!wosm-bg, thick, domain=0:1, samples=120] {x^8};
+          \addplot[wosm-accent!38!wosm-bg, thick, domain=0:1, samples=120] {x^16};
+          \addplot[wosm-accent!28!wosm-bg, thick, domain=0:1, samples=120] {x^32};
+          \addplot[wosm-brick, only marks, mark=*, mark size=1.5pt] coordinates {(1,1)};
+          \addplot[wosm-brick, very thick, domain=0:0.99] {0};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.43\textwidth}
+      $f_n(x) = x^n$ on $[0, 1]$:
+      \[ f(x) = \lim_{n\to\infty} x^n =
+         \begin{cases} 0, & 0 \le x < 1, \\ 1, & x = 1. \end{cases} \]
+      \small
+      Every $f_n$ is continuous; the limit $f$ is not.
+      \vskip0.4em
+      For $x^n < \varepsilon$ we need $n > \frac{\ln \varepsilon}{\ln x}$, which grows
+      without bound as $x \to 1$: no single $N$ works for all $x$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Integrals can be lost}
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.2cm,
+            xmin=0, xmax=1.05, ymin=0, ymax=4.1, xlabel={$x$},
+            xtick={0,0.5,1}, legend pos=north east]
+          \addplot[wosm-accent!35!wosm-bg, thick, domain=0:1, samples=150] {2*x*exp(-x^2)};
+          \addlegendentry{$n = 1$}
+          \addplot[wosm-accent!65!wosm-bg, thick, domain=0:1, samples=150] {10*x*exp(-5*x^2)};
+          \addlegendentry{$n = 5$}
+          \addplot[wosm-accent, thick, domain=0:1, samples=200] {40*x*exp(-20*x^2)};
+          \addlegendentry{$n = 20$}
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.43\textwidth}
+      $f_n(x) = 2nx\, e^{-nx^2}$ on $[0, 1]$.
+      \begin{itemize}
+        \item $f_n(0) = 0$, and for $x > 0$, $f_n(x) \to 0$: the limit is $f = 0$.
+        \item But $\int_0^1 f_n(x)\dx = 1 - e^{-n} \to 1$, \
+          as $-e^{-nx^2}$ is an antiderivative.
+      \end{itemize}
+      So $\lim \int_0^1 f_n = 1 \ne 0 = \int_0^1 \lim f_n$.
+      \small The bump gets narrower and taller; its area stays near $1$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Derivatives can be lost}
+  \begin{example}
+    $f_n(x) = \dfrac{\sin(nx)}{n}$ on $\R$. \ Since $|f_n(x)| \le \frac1n$, $f_n \to 0$.
+    \begin{itemize}
+      \item $f_n'(x) = \cos(nx)$, so $f_n'(0) = 1$ for every $n$, but the limit $0$ has
+        derivative $0$.
+      \item At $x = \pi$: $f_n'(\pi) = (-1)^n$ does not converge at all.
+    \end{itemize}
+  \end{example}
+  \pause
+  \begin{block}{The common cause}
+    In each example $N$ depends on $x$, and near some point it grows without bound.
+    Two limits are being swapped --- $n \to \infty$ and $x \to x_0$, or $n \to \infty$ and
+    an integral --- and pointwise convergence does not allow that.
+  \end{block}
+\end{frame}
+
+% =============================================================
+\section{Uniform convergence}
+
+\begin{frame}{Uniform convergence}
+  \begin{definition}
+    $(f_n)$ \textbf{converges uniformly} to $f$ on $D$ if for every $\varepsilon > 0$
+    there is an $N$ such that
+    \[ |f_n(x) - f(x)| < \varepsilon \qquad\text{for all } n \ge N \text{ and all } x \in D. \]
+    Equivalently: $\displaystyle\sup_{x \in D} |f_n(x) - f(x)| \to 0$.
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item Pointwise: \ for every $x$ and every $\varepsilon$ there is an $N$.
+      \\ Uniform: \ for every $\varepsilon$ there is an $N$ that works for \emph{all} $x$.
+    \item Uniform convergence implies pointwise convergence, to the same limit.
+    \item It depends on the domain $D$: shrinking $D$ can only help.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{A picture}
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.2cm,
+            xmin=-1.05, xmax=1.05, ymin=-0.3, ymax=1.3, xlabel={$x$},
+            xtick={-1,0,1}, ytick={0,1}]
+          \fill[wosm-accent!14] (axis cs:-1,1.25) -- (axis cs:0,0.25) -- (axis cs:1,1.25)
+            -- (axis cs:1,0.75) -- (axis cs:0,-0.25) -- (axis cs:-1,0.75) -- cycle;
+          \addplot[wosm-text, thick, domain=-1:1, samples=3] {abs(x)};
+          \addplot[wosm-brick, thick, domain=-1:1, samples=101] {sqrt(x^2 + 0.04)};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.43\textwidth}
+      $f(x) = |x|$, the band $f \pm \varepsilon$ with $\varepsilon = \frac14$, and
+      {\color{wosm-brick}$f_5(x) = \sqrt{x^2 + \frac1{25}}$}.
+      \vskip0.5em
+      \small
+      Uniform convergence: from some $N$ on, the \emph{whole graph} of $f_n$ lies inside
+      the band, however narrow the band is.
+      \vskip0.4em
+      Here $0 \le \sqrt{x^2 + \frac1{n^2}} - |x| \le \frac1n$ for all $x$, so
+      $f_n \to |x|$ uniformly on $\R$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Computing the supremum}
+  \begin{itemize}
+    \item $\frac{x}{n}$: \ on $[0, 1]$, $\sup = \frac1n \to 0$: uniform.
+      On $\R$, $\sup = \infty$: not uniform.
+    \item $x^n$: \ on $[0, a]$ with $a < 1$, $\sup = a^n \to 0$: uniform.
+      On $[0, 1)$, $\sup = 1$ for every $n$: not uniform.
+    \item $2nx\,e^{-nx^2}$: \ the maximum is at $x = \frac{1}{\sqrt{2n}}$, with value
+      $\sqrt{2n}\, e^{-1/2} \to \infty$: not uniform on $[0, 1]$.
+    \item $\frac{\sin(nx)}{n}$: \ $\sup = \frac1n \to 0$: uniform on $\R$.
+  \end{itemize}
+  \pause
+  \begin{remark}[Method]
+    Find $\sup_x |f_n(x) - f(x)|$ (derivative $= 0$, or a bound); does it tend to $0$?
+    To show convergence is \emph{not} uniform, points $x_n$ with
+    $|f_n(x_n) - f(x_n)| \not\to 0$ are enough.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{The uniform Cauchy criterion}
+  \begin{theorem}
+    $(f_n)$ converges uniformly on $D$ if and only if for every $\varepsilon > 0$ there is
+    an $N$ such that $|f_n(x) - f_m(x)| < \varepsilon$ for all $n, m \ge N$ and all $x \in D$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    ($\Leftarrow$) For each $x$, $(f_n(x))$ is a Cauchy sequence of numbers, so it has a limit;
+    call it $f(x)$. Let $m \to \infty$ in $|f_n(x) - f_m(x)| < \varepsilon$:
+    $|f_n(x) - f(x)| \le \varepsilon$ for all $n \ge N$ and all $x$.
+    \ ($\Rightarrow$) $|f_n - f_m| \le |f_n - f| + |f - f_m|$.
+  \end{proof}
+  It proves uniform convergence without knowing the limit. The M-test (Section 5) uses it.
+\end{frame}
+
+% =============================================================
+\section{What uniform convergence preserves}
+
+\begin{frame}{Continuity}
+  \begin{theorem}
+    If every $f_n$ is continuous on $D$ and $f_n \to f$ uniformly on $D$,
+    then $f$ is continuous on $D$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    Let $x_0 \in D$ and $\varepsilon > 0$. Choose $N$ with $|f_N(x) - f(x)| < \frac\varepsilon3$
+    for all $x \in D$, then $\delta > 0$ with $|f_N(x) - f_N(x_0)| < \frac\varepsilon3$ for
+    $|x - x_0| < \delta$. For such $x$:
+    \[ |f(x) - f(x_0)| \le |f(x) - f_N(x)| + |f_N(x) - f_N(x_0)| + |f_N(x_0) - f(x_0)|
+       < \varepsilon . \qedhere \]
+  \end{proof}
+  \pause
+  {\small So $x^n$ cannot converge uniformly on $[0, 1]$: its limit is not continuous.\par}
+\end{frame}
+
+\begin{frame}{Integrals}
+  \begin{theorem}
+    If every $f_n$ is continuous on $[a, b]$ and $f_n \to f$ uniformly on $[a, b]$, then
+    $\int_a^b f_n(x)\dx \to \int_a^b f(x)\dx$.
+  \end{theorem}
+  {\small Proof: $f$ is continuous, hence integrable, and
+  $\bigl|\int_a^b f_n - \int_a^b f\bigr| \le (b - a) \sup_{[a,b]} |f_n - f| \to 0$.\par}
+  \pause
+  \begin{warning}[The interval must be bounded]
+    $f_n(x) = \frac1n e^{-x/n} \to 0$ uniformly on $[0, \infty)$, as $\sup |f_n| = \frac1n$.
+    But $\int_0^\infty f_n(x)\dx = 1$ for every $n$.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{Derivatives}
+  \begin{theorem}
+    Let every $f_n$ be continuously differentiable on $[a, b]$. If $f_n' \to g$ uniformly on
+    $[a, b]$ and $(f_n(x_0))$ converges for some $x_0 \in [a, b]$, then $(f_n)$ converges
+    uniformly to a function $f$, and $f' = g$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    By the Fundamental Theorem of Calculus,
+    $f_n(x) = f_n(x_0) + \int_{x_0}^{x} f_n'(t)\dt$.
+    With $c = \lim f_n(x_0)$ and $f(x) = c + \int_{x_0}^x g(t)\dt$:
+    $|f_n(x) - f(x)| \le |f_n(x_0) - c| + (b - a) \sup |f_n' - g| \to 0$ for all $x$.
+    $g$ is continuous (a uniform limit), so $f' = g$.
+  \end{proof}
+  {\small The condition is on the \emph{derivatives}: $\frac{\sin(nx)}{n} \to 0$ uniformly is
+  not enough.\par}
+\end{frame}
+
+% =============================================================
+\section{Series of functions}
+
+\begin{frame}{Series of functions}
+  $\sum f_k$ converges pointwise or uniformly on $D$ if its partial sums
+  $S_n(x) = \sum_{k=1}^n f_k(x)$ do. Applied to $S_n$, Section 4 gives:
+  \begin{itemize}
+    \item \textbf{Continuity}: if every $f_k$ is continuous and $\sum f_k$ converges uniformly,
+      then $\sum f_k$ is continuous.
+    \item \textbf{Integration term by term}: under the same conditions on $[a, b]$,
+      \[ \int_a^b \sum_{k=1}^\infty f_k(x)\dx = \sum_{k=1}^\infty \int_a^b f_k(x)\dx . \]
+    \item \textbf{Differentiation term by term}: if $\sum f_k'$ converges uniformly on
+      $[a, b]$ and $\sum f_k(x_0)$ converges, then
+      $\bigl(\sum f_k\bigr)' = \sum f_k'$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The Weierstrass M-test}
+  \begin{theorem}[Weierstrass M-test]
+    If $|f_k(x)| \le M_k$ for all $x \in D$ and all $k$, and $\sum M_k$ converges, then
+    $\sum f_k$ converges absolutely and uniformly on $D$.
+  \end{theorem}
+  \pause
+  \begin{proof}
+    For $n > m$ and every $x \in D$:
+    $|S_n(x) - S_m(x)| \le \sum_{k=m+1}^{n} |f_k(x)| \le \sum_{k=m+1}^{n} M_k$,
+    which is below $\varepsilon$ for $m \ge N$ (Cauchy criterion for $\sum M_k$), for all $x$
+    at once. Apply the uniform Cauchy criterion.
+  \end{proof}
+  It is the comparison test, made uniform: the bounds $M_k$ do not depend on $x$.
+\end{frame}
+
+\begin{frame}{Example: $\sum \frac{\sin(kx)}{k^2}$}
+  \begin{itemize}
+    \item $\bigl|\frac{\sin(kx)}{k^2}\bigr| \le \frac{1}{k^2} = M_k$ and $\sum \frac{1}{k^2}$
+      converges. So the series converges uniformly on $\R$, and its sum is a continuous function.
+    \item We may integrate term by term:
+      \[ \int_0^\pi \sum_{k=1}^\infty \frac{\sin(kx)}{k^2}\dx
+         = \sum_{k=1}^\infty \frac{1 - \cos(k\pi)}{k^3}
+         = \sum_{j=1}^\infty \frac{2}{(2j-1)^3} . \]
+    \item May we differentiate term by term? The derivative series is
+      $\sum \frac{\cos(kx)}{k}$. At $x = 0$ it is the harmonic series, so it does not even
+      converge everywhere. The theorem does not apply.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Pointwise but not uniform}
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.2cm,
+            xmin=0, xmax=6.4, ymin=-2, ymax=2, xlabel={$x$},
+            xtick={0,3.1416,6.2832}, xticklabels={$0$,$\pi$,$2\pi$},
+            ytick={-1.5708,0,1.5708}, yticklabels={$-\frac\pi2$,$0$,$\frac\pi2$}]
+          \addplot[wosm-text, thick, domain=0.01:6.27, samples=2] {(pi - x)/2};
+          \addplot[wosm-brick, thin] coordinates {
+            (0.0000,0.0000) (0.0262,0.5151) (0.0524,0.9809) (0.0785,1.3563) (0.1047,1.6153) (0.1309,1.7504) (0.1571,1.7727) (0.1833,1.7088)
+            (0.2094,1.5941) (0.2356,1.4658) (0.2618,1.3558) (0.2880,1.2854) (0.3142,1.2624) (0.3403,1.2818) (0.3665,1.3290) (0.3927,1.3843)
+            (0.4189,1.4287) (0.4451,1.4483) (0.4712,1.4372) (0.4974,1.3981) (0.5236,1.3409) (0.5498,1.2790) (0.5760,1.2260) (0.6021,1.1918)
+            (0.6283,1.1806) (0.6545,1.1901) (0.6807,1.2125) (0.7069,1.2373) (0.7330,1.2541) (0.7592,1.2553) (0.7854,1.2380) (0.8116,1.2045)
+            (0.8378,1.1613) (0.8639,1.1173) (0.8901,1.0809) (0.9163,1.0581) (0.9425,1.0508) (0.9687,1.0566) (0.9948,1.0698) (1.0210,1.0827)
+            (1.0472,1.0883) (1.0734,1.0816) (1.0996,1.0616) (1.1257,1.0307) (1.1519,0.9942) (1.1781,0.9588) (1.2043,0.9306) (1.2305,0.9135)
+            (1.2566,0.9082) (1.2828,0.9121) (1.3090,0.9203) (1.3352,0.9266) (1.3614,0.9258) (1.3875,0.9147) (1.4137,0.8931) (1.4399,0.8637)
+            (1.4661,0.8312) (1.4923,0.8010) (1.5184,0.7779) (1.5446,0.7645) (1.5708,0.7605) (1.5970,0.7632) (1.6232,0.7680) (1.6493,0.7700)
+            (1.6755,0.7649) (1.7017,0.7508) (1.7279,0.7282) (1.7541,0.6998) (1.7802,0.6700) (1.8064,0.6436) (1.8326,0.6241) (1.8588,0.6133)
+            (1.8850,0.6102) (1.9111,0.6120) (1.9373,0.6144) (1.9635,0.6131) (1.9897,0.6049) (2.0159,0.5886) (2.0420,0.5651) (2.0682,0.5375)
+            (2.0944,0.5099) (2.1206,0.4863) (2.1468,0.4697) (2.1729,0.4609) (2.1991,0.4585) (2.2253,0.4596) (2.2515,0.4601) (2.2777,0.4562)
+            (2.3038,0.4454) (2.3300,0.4272) (2.3562,0.4030) (2.3824,0.3761) (2.4086,0.3503) (2.4347,0.3291) (2.4609,0.3149) (2.4871,0.3078)
+            (2.5133,0.3060) (2.5395,0.3065) (2.5656,0.3053) (2.5918,0.2992) (2.6180,0.2862) (2.6442,0.2664) (2.6704,0.2416) (2.6965,0.2153)
+            (2.7227,0.1910) (2.7489,0.1720) (2.7751,0.1599) (2.8013,0.1543) (2.8274,0.1531) (2.8536,0.1530) (2.8798,0.1504) (2.9060,0.1422)
+            (2.9322,0.1271) (2.9583,0.1058) (2.9845,0.0805) (3.0107,0.0547) (3.0369,0.0319) (3.0631,0.0149) (3.0892,0.0047) (3.1154,0.0006)
+            (3.1416,-0.0000) (3.1678,-0.0006) (3.1940,-0.0047) (3.2201,-0.0149) (3.2463,-0.0319) (3.2725,-0.0547) (3.2987,-0.0805) (3.3249,-0.1058)
+            (3.3510,-0.1271) (3.3772,-0.1422) (3.4034,-0.1504) (3.4296,-0.1530) (3.4558,-0.1531) (3.4819,-0.1543) (3.5081,-0.1599) (3.5343,-0.1720)
+            (3.5605,-0.1910) (3.5867,-0.2153) (3.6128,-0.2416) (3.6390,-0.2664) (3.6652,-0.2862) (3.6914,-0.2992) (3.7176,-0.3053) (3.7437,-0.3065)
+            (3.7699,-0.3060) (3.7961,-0.3078) (3.8223,-0.3149) (3.8485,-0.3291) (3.8746,-0.3503) (3.9008,-0.3761) (3.9270,-0.4030) (3.9532,-0.4272)
+            (3.9794,-0.4454) (4.0055,-0.4562) (4.0317,-0.4601) (4.0579,-0.4596) (4.0841,-0.4585) (4.1103,-0.4609) (4.1364,-0.4697) (4.1626,-0.4863)
+            (4.1888,-0.5099) (4.2150,-0.5375) (4.2412,-0.5651) (4.2673,-0.5886) (4.2935,-0.6049) (4.3197,-0.6131) (4.3459,-0.6144) (4.3720,-0.6120)
+            (4.3982,-0.6102) (4.4244,-0.6133) (4.4506,-0.6241) (4.4768,-0.6436) (4.5029,-0.6700) (4.5291,-0.6998) (4.5553,-0.7282) (4.5815,-0.7508)
+            (4.6077,-0.7649) (4.6338,-0.7700) (4.6600,-0.7680) (4.6862,-0.7632) (4.7124,-0.7605) (4.7386,-0.7645) (4.7647,-0.7779) (4.7909,-0.8010)
+            (4.8171,-0.8312) (4.8433,-0.8637) (4.8695,-0.8931) (4.8956,-0.9147) (4.9218,-0.9258) (4.9480,-0.9266) (4.9742,-0.9203) (5.0004,-0.9121)
+            (5.0265,-0.9082) (5.0527,-0.9135) (5.0789,-0.9306) (5.1051,-0.9588) (5.1313,-0.9942) (5.1574,-1.0307) (5.1836,-1.0616) (5.2098,-1.0816)
+            (5.2360,-1.0883) (5.2622,-1.0827) (5.2883,-1.0698) (5.3145,-1.0566) (5.3407,-1.0508) (5.3669,-1.0581) (5.3931,-1.0809) (5.4192,-1.1173)
+            (5.4454,-1.1613) (5.4716,-1.2045) (5.4978,-1.2380) (5.5240,-1.2553) (5.5501,-1.2541) (5.5763,-1.2373) (5.6025,-1.2125) (5.6287,-1.1901)
+            (5.6549,-1.1806) (5.6810,-1.1918) (5.7072,-1.2260) (5.7334,-1.2790) (5.7596,-1.3409) (5.7858,-1.3981) (5.8119,-1.4372) (5.8381,-1.4483)
+            (5.8643,-1.4287) (5.8905,-1.3843) (5.9167,-1.3290) (5.9428,-1.2818) (5.9690,-1.2624) (5.9952,-1.2854) (6.0214,-1.3558) (6.0476,-1.4658)
+            (6.0737,-1.5941) (6.0999,-1.7088) (6.1261,-1.7727) (6.1523,-1.7504) (6.1785,-1.6153) (6.2046,-1.3563) (6.2308,-0.9809) (6.2570,-0.5151)
+            (6.2832,-0.0000)};
+          \addplot[wosm-text, only marks, mark=*, mark size=1.4pt] coordinates {(0,0) (6.2832,0)};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.43\textwidth}
+      $\displaystyle\sum_{k=1}^\infty \frac{\sin(kx)}{k}$ converges for every $x$, to
+      $\frac{\pi - x}{2}$ for $0 < x < 2\pi$ and to $0$ at $x = 0$ and $x = 2\pi$.
+      \ (A Fourier series; we do not prove this here.)
+      \vskip0.5em
+      \small
+      Each partial sum is continuous, the sum jumps at $0$: so the convergence is
+      \emph{not} uniform on $[0, 2\pi]$. In {\color{wosm-brick}red}: the partial sum with
+      $20$ terms, which overshoots near the jumps.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Geometric series as functions}
+  For $|x| < 1$: \ $\displaystyle\sum_{k=0}^\infty x^k = \frac{1}{1-x}$.
+  \begin{itemize}
+    \item On $[-a, a]$ with $0 < a < 1$: \ $|x^k| \le a^k = M_k$ and $\sum a^k$ converges.
+      So the convergence is uniform on $[-a, a]$.
+    \item On $(-1, 1)$ it is not uniform: for each $n$ the remainder
+      $\sum_{k > n} x^k = \frac{x^{n+1}}{1-x}$ is unbounded as $x \to 1$.
+  \end{itemize}
+  \pause
+  \begin{remark}
+    That is enough. Every $x$ in $(-1, 1)$ lies in some $[-a, a]$ with $a < 1$, and continuity,
+    integrals over $[0, x]$ and derivatives at $x$ only need uniform convergence on such an
+    interval. The same holds for every power series inside its interval of convergence (Unit 5).
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Integrating term by term}
+  For $|t| \le |x| < 1$:\quad $\dfrac{1}{1+t} = \sum_{k=0}^\infty (-t)^k$, uniformly
+  between $0$ and $x$ (M-test with $M_k = |x|^k$). Integrate from $0$ to $x$:
+  \[ \ln(1 + x) = \sum_{k=0}^\infty (-1)^k \frac{x^{k+1}}{k+1}
+     = x - \frac{x^2}{2} + \frac{x^3}{3} - \frac{x^4}{4} + \cdots \qquad (|x| < 1) . \]
+  \pause
+  \begin{itemize}
+    \item A power series for $\ln(1 + x)$, from a geometric series and one theorem.
+    \item At $x = 1$ the right-hand side is $1 - \frac12 + \frac13 - \cdots$, which converges
+      (Lecture 3). That its sum is $\ln 2$ needs one more argument: Unit 6.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Differentiating term by term}
+  On $[-a, a]$, $a < 1$: \ $|k x^{k-1}| \le k a^{k-1} = M_k$, and $\sum k a^{k-1}$ converges
+  (ratio $\to a < 1$). So for $|x| < 1$:
+  \[ \sum_{k=1}^\infty k x^{k-1} = \frac{\mathrm{d}}{\mathrm{d}x}\,\frac{1}{1-x} = \frac{1}{(1-x)^2} . \]
+  \pause
+  \begin{example}[Earlier series, now summed]
+    \begin{itemize}
+      \item Lecture 1, expected number of trials until the first success:
+        $\sum_{k=1}^\infty k (1-p)^{k-1} p = \frac{p}{p^2} = \frac1p$.
+      \item Lecture 2, where we only knew it converges:
+        $\sum_{k=1}^\infty \frac{k}{2^k} = \frac12 \sum_{k=1}^\infty k \bigl(\frac12\bigr)^{k-1}
+        = \frac12 \cdot 4 = 2$.
+    \end{itemize}
+  \end{example}
+\end{frame}
+
+\begin{frame}{Continuous, but nowhere differentiable}
+  For $0 < a < 1$ and $b > 0$ let \
+  $W(x) = \sum_{k=0}^\infty a^k \cos(b^k \pi x)$.
+  \begin{itemize}
+    \item $|a^k \cos(b^k \pi x)| \le a^k$: by the M-test the series converges uniformly on
+      $\R$, so $W$ is continuous.
+    \item Weierstrass showed in 1872 that if $b$ is an odd integer and
+      $ab > 1 + \frac{3\pi}{2}$, then $W$ is differentiable at no point at all.
+    \item The derivative series $-\sum a^k b^k \pi \sin(b^k \pi x)$ has coefficients
+      $(ab)^k \pi \to \infty$ when $ab > 1$: no M-test applies, and term-by-term
+      differentiation fails.
+  \end{itemize}
+  \pause
+  Uniform limits of smooth functions are continuous --- and that is all they are
+  guaranteed to be.
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item \textbf{Pointwise}: $f_n(x) \to f(x)$ for each $x$; $N$ may depend on $x$.
+      It can lose continuity, integrals and derivatives.
+    \item \textbf{Uniform}: $\sup_{x \in D} |f_n(x) - f(x)| \to 0$; one $N$ for all $x$.
+    \item Uniform limits of continuous functions are continuous; on $[a, b]$ we may swap
+      $\lim$ and $\int$.
+    \item Derivatives: if $f_n' \to g$ uniformly and $f_n(x_0)$ converges, then
+      $(\lim f_n)' = g$.
+    \item \textbf{M-test}: $|f_k(x)| \le M_k$ with $\sum M_k < \infty$ gives uniform and
+      absolute convergence of $\sum f_k$.
+    \item The geometric series converges uniformly on every $[-a, a]$ with $a < 1$; we can
+      integrate and differentiate it term by term inside $(-1, 1)$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find the pointwise limit, and decide whether the convergence is uniform:
+      \begin{enumerate}[(a)]
+        \item $f_n(x) = \dfrac{x}{1 + nx}$ on $[0, \infty)$
+        \item $f_n(x) = \dfrac{nx}{1 + n^2x^2}$ on $[0, 1]$
+        \item $f_n(x) = x^n (1 - x)$ on $[0, 1]$
+        \item $f_n(x) = e^{-nx}$ on $[0, \infty)$, and on $[1, \infty)$
+      \end{enumerate}
+    \item Compute $\lim_{n\to\infty} \int_0^1 n^2 x\, e^{-nx} \dx$ and
+      $\int_0^1 \lim_{n\to\infty} n^2 x\, e^{-nx} \dx$. What does this tell you?
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Practice, continued}
+  \small
+  \begin{enumerate}
+    \setcounter{enumi}{2}
+    \item Show that $f(x) = \sum_{k=1}^\infty \frac{\cos(kx)}{k^3}$ is differentiable on $\R$,
+      and find $f'$.
+    \item Show that $\sum_{k=1}^\infty \frac{x^k}{k} = -\ln(1 - x)$ for $|x| < 1$.
+      What does this give at $x = \frac12$?
+    \item Find $\sum_{k=1}^\infty \frac{k^2}{2^k}$. \ Hint: differentiate
+      $\sum_{k=1}^\infty k x^k = \frac{x}{(1-x)^2}$.
+    \item True or false: if every $f_n$ is continuous, $f_n \to f$ pointwise, and $f$ is
+      continuous, then the convergence is uniform.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item (a) $0$; uniform: $0 \le \frac{x}{1+nx} < \frac1n$. \
+      (b) $0$; not uniform: $f_n(\frac1n) = \frac12$. \
+      (c) $0$; uniform: the maximum, at $x = \frac{n}{n+1}$, is at most $\frac{1}{n+1}$. \
+      (d) $1$ at $x = 0$ and $0$ for $x > 0$: not uniform on $[0, \infty)$ (the limit is not
+      continuous); uniform on $[1, \infty)$, where $\sup = e^{-n}$.
+    \item With $u = nx$ the integral is $\int_0^n u e^{-u}\,\mathrm{d}u = 1 - (n+1)e^{-n} \to 1$,
+      while the pointwise limit is $0$. So the convergence is not uniform on $[0, 1]$
+      (indeed $f_n(\frac1n) = \frac ne$).
+    \item The derivative series $-\sum \frac{\sin(kx)}{k^2}$ converges uniformly on $\R$
+      ($M_k = \frac1{k^2}$), and the series converges at $x = 0$. So
+      $f'(x) = -\sum_{k=1}^\infty \frac{\sin(kx)}{k^2}$.
+    \item Integrate $\sum_{k \ge 0} t^k = \frac{1}{1-t}$ from $0$ to $x$. At $x = \frac12$:
+      $\sum \frac{1}{k\, 2^k} = \ln 2$.
+    \item $\sum k^2 x^{k-1} = \frac{1+x}{(1-x)^3}$, so $\sum \frac{k^2}{2^k} = \frac12 \cdot 12 = 6$.
+    \item False: $2nx\, e^{-nx^2} \to 0$ on $[0, 1]$, but not uniformly.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 05 --- Power series} (Unit 5)
+  \begin{itemize}
+    \item Series $\sum c_k (x - a)^k$ and their radius of convergence
+    \item Uniform convergence inside the interval of convergence
+    \item Differentiating and integrating power series term by term
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 2}, Sections 6.1 and 6.2.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

@@ -149,7 +149,7 @@ draft?: false
 
 | Slug | Title | Courses |
 |---|---|---|
-| `computer-science` | Computer Science | CS101, CS102, CS201 |
+| `computer-science` | Computer Science | CS101, CS102, CS201-S27 |
 | `mathematics` | Mathematics | MATH101 |
 
 ### Courses
@@ -161,19 +161,21 @@ One course per Foundation programme module that has a module description (Octobe
 | CS101-F26 | Introduction to Informatics | CS | 1 | open |
 | CS102-F26 | Digital Design and Computer Architecture I | CS | 1 | open |
 | M101-F26 | Discrete Structures | Math | 1 | open (replaced CS103-F26; old URL redirects) |
-| CS201 | Data Structures and Algorithms I | CS | 2 | planned |
+| CS201-S27 | Data Structures and Algorithms I | CS | 2 | planned |
 | M102-S27 | Calculus I | Math | 2 | planned |
 | M103-S27 | Linear Algebra | Math | 2 | planned |
-| CS302 | Data Structures and Algorithms II | CS | 3 | planned |
+| CS302-F26 | Data Structures and Algorithms II | CS | 3 | planned |
 | M201-F27 | Calculus II | Math | 3 | planned |
-| CS401 | Theory of Computation | CS | 4 | planned |
-| CS402 | Operating Systems | CS | 4 | planned |
+| CS401-S27 | Theory of Computation | CS | 4 | planned |
+| CS402-S27 | Operating Systems | CS | 4 | planned |
 | M202-S28 | Probability Theory and Statistics | Math | 4 | planned |
-| CS501 | Networks | CS | 5 | planned |
-| CS502 | Databases | CS | 5 | planned |
-| CS503 | Software Engineering | CS | 5 | planned |
+| CS501-F26 | Networks | CS | 5 | planned |
+| CS502-F26 | Databases | CS | 5 | planned |
+| CS503-F26 | Software Engineering | CS | 5 | planned |
 
-Digital Design and Computer Architecture II (Semester 3) has no module description yet and is shown in the plan only.
+Computer science codes: `CSxxx-F26` in odd (Fall) semesters, `CSxxx-S27` in even (Spring) semesters; the old
+unsuffixed addresses (e.g. `/courses/computer-science/cs201/`) redirect. Digital Design and Computer Architecture II
+(Semester 3) has no module description yet and is shown in the plan only.
 Course pages and lists show the semester (`\Level` in the module description) instead of a level; the catalogue
 filters by Subject, Semester and Status.
 

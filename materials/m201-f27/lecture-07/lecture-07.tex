@@ -1,0 +1,550 @@
+% =============================================================
+%  M201-F27 Calculus II — Lecture 07
+%  Unit 7: Generating functions; solving recurrences
+%
+%  Build from the repository root:   npm run materials -- lecture-07
+%  This writes lecture-07.pdf (slides, with overlays) and
+%  lecture-07-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\newcommand{\coef}[1]{[x^{#1}]\,}
+
+\course{M201-F27}{Calculus II}
+\title[L07 \textperiodcentered\ Generating functions]{Generating functions}
+\subtitle{Counting and solving recurrences}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 07\enspace\textperiodcentered\enspace Unit 7\enspace\textperiodcentered\enspace Fall 2027}
+
+% A small binary tree node.
+\tikzset{bt/.style={circle, fill=wosm-accent, inner sep=0pt, minimum size=5pt},
+         be/.style={draw=wosm-text, thin}}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item The Taylor series of $f$ at $a$ is $\sum \frac{f^{(k)}(a)}{k!} (x - a)^k$; it equals $f$
+      when the remainder tends to $0$.
+    \item Series for $\frac{1}{1-x}$, $e^x$, $\sin$, $\cos$, $\ln(1+x)$, $\arctan$, and the
+      binomial series $(1 + x)^\alpha = \sum \binom{\alpha}{k} x^k$.
+    \item One function held a whole sequence:
+      $\dfrac{1}{\sqrt{1 - 4x}} = \sum_{k=0}^\infty \binom{2k}{k} x^k$.
+  \end{itemize}
+  \vskip0.6em
+  Today we turn that around: start from a sequence, and study it through one function.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: H.~S.~Wilf, \emph{generatingfunctionology}, Chapter 1.\par}
+\end{frame}
+
+% =============================================================
+\section{Generating functions}
+
+\begin{frame}{A sequence in one function}
+  \begin{quote}
+    ``A generating function is a clothesline on which we hang up a sequence of numbers
+    for display.'' \\ \hfill {\small\color{wosm-muted} --- H.~S.~Wilf, \emph{generatingfunctionology}}
+  \end{quote}
+  \pause
+  \begin{itemize}
+    \item Encode a sequence $a_0, a_1, a_2, \dots$ as one function
+      $A(x) = \sum_{n \ge 0} a_n x^n$.
+    \item Operations on sequences --- shifting, summing, combining --- become algebra on
+      functions.
+    \item This connects Discrete Structures (counting, recurrences, trees) with the power
+      series of this module.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Ordinary generating functions}
+  \begin{definition}
+    The \textbf{(ordinary) generating function} of a sequence $(a_n)_{n \ge 0}$ is
+    $A(x) = \sum_{n=0}^\infty a_n x^n = a_0 + a_1 x + a_2 x^2 + \cdots$.
+    We write $\coef{n} A(x) = a_n$ for the coefficient of $x^n$.
+  \end{definition}
+  \pause
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Sequence} & $a_n$ & \textbf{Generating function} \\
+    \midrule
+    constant      & $1$              & $\frac{1}{1-x}$ \\
+    geometric     & $r^n$            & $\frac{1}{1-rx}$ \\
+    binomial      & $\binom{m}{n}$ \ ($m$ fixed) & $(1 + x)^m$ \\
+    one more      & $n + 1$          & $\frac{1}{(1-x)^2}$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+\begin{frame}{A formula we will use often}
+  \begin{lemma}
+    For every integer $k \ge 0$: \quad
+    $\displaystyle \frac{1}{(1-x)^{k+1}} = \sum_{n=0}^\infty \binom{n + k}{k} x^n$.
+  \end{lemma}
+  {\small Proof: the binomial series (Lecture 6) with $\alpha = -(k+1)$ and $x$ replaced by
+  $-x$: \ $\binom{-(k+1)}{n} (-1)^n = \frac{(k+1)(k+2)\cdots(k+n)}{n!} = \binom{n+k}{k}$.\par}
+  \pause
+  \begin{example}
+    $k = 0$: coefficients $1$. \quad $k = 1$: coefficients $n + 1$. \quad
+    $k = 2$: coefficients $\binom{n+2}{2}$.
+  \end{example}
+  With $x \to rx$: \ $\frac{1}{(1 - rx)^{k+1}} = \sum \binom{n+k}{k} r^n x^n$.
+  After partial fractions, this reads off any rational generating function.
+\end{frame}
+
+\begin{frame}{Formal power series}
+  \begin{itemize}
+    \item We may treat $A(x)$ as a \textbf{formal power series}: a sequence written with a
+      placeholder $x$, added and multiplied by the usual rules. No convergence is needed for the
+      algebra.
+    \item Convergence matters only when we \emph{evaluate} $A$ at a number, or use analysis:
+      derivatives as limits, or the growth of $a_n$ (Section 6).
+    \item The series in this lecture have radius $R > 0$. Then $A$ is a genuine function near
+      $0$, and by uniqueness (Lecture 5) it determines its coefficients.
+  \end{itemize}
+  \pause
+  \begin{example}
+    $\sum n!\, x^n$ has $R = 0$: useless as a function, but a perfectly good formal series.
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{Operations on generating functions}
+
+\begin{frame}{A dictionary}
+  Let $A(x) \leftrightarrow (a_n)$ and $B(x) \leftrightarrow (b_n)$.
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.22}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Operation} & \textbf{Sequence} & \textbf{Generating function} \\
+    \midrule
+    sum            & $\alpha a_n + \beta b_n$ & $\alpha A(x) + \beta B(x)$ \\
+    shift right    & $0, a_0, a_1, \dots$ \ (i.e.\ $a_{n-1}$) & $x A(x)$ \\
+    shift left     & $a_{n+1}$                & $\frac{A(x) - a_0}{x}$ \\
+    scale          & $c^n a_n$                & $A(cx)$ \\
+    multiply by $n$ & $n\, a_n$               & $x A'(x)$ \\
+    partial sums   & $a_0 + a_1 + \dots + a_n$ & $\frac{A(x)}{1 - x}$ \\
+    convolution    & $\sum_{k=0}^n a_k b_{n-k}$ & $A(x)\, B(x)$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  {\small Each line is a short check of coefficients. Partial sums: convolution with $\frac{1}{1-x}$.\par}
+\end{frame}
+
+\begin{frame}{Using the dictionary}
+  \begin{itemize}
+    \item $n \leftrightarrow x \cdot \frac{\mathrm{d}}{\mathrm{d}x} \frac{1}{1-x} = \frac{x}{(1-x)^2}$,
+      \quad $n^2 \leftrightarrow \frac{x(1+x)}{(1-x)^3}$ \quad (Lecture 5)
+  \end{itemize}
+  \pause
+  \begin{example}[Sums of powers, without guessing]
+    \begin{itemize}
+      \item Partial sums of $n$: \
+        $\frac{x}{(1-x)^3} = x \sum_m \binom{m+2}{2} x^m$, so
+        $\sum_{k=0}^n k = \binom{n+1}{2} = \frac{n(n+1)}{2}$.
+      \item Partial sums of $n^2$: \ $\frac{x(1+x)}{(1-x)^4}$, so
+        \[ \sum_{k=0}^n k^2 = \binom{n+2}{3} + \binom{n+1}{3} = \frac{n(n+1)(2n+1)}{6} . \]
+    \end{itemize}
+  \end{example}
+  {\small In Discrete Structures you proved such formulas by induction, once you knew them.
+  Here the formula comes out of the algebra.\par}
+\end{frame}
+
+\begin{frame}{Products count combined choices}
+  If $a_n$ counts the objects of one kind with size $n$, and $b_n$ those of another kind, then
+  \[ c_n = \sum_{k=0}^{n} a_k\, b_{n-k} \]
+  counts the \emph{pairs} with total size $n$: choose sizes $k$ and $n - k$, then one object of each.
+  So $C(x) = A(x)\, B(x)$.
+  \pause
+  \begin{example}[Apples and bananas]
+    Bags of $n$ fruits, using any number of apples and any number of bananas:
+    $\frac{1}{1-x} \cdot \frac{1}{1-x} = \frac{1}{(1-x)^2}$, so there are $n + 1$ bags.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Identities for free}
+  \begin{example}[Vandermonde's identity]
+    $(1+x)^m (1+x)^p = (1+x)^{m+p}$. Comparing coefficients of $x^n$:
+    \[ \sum_{k=0}^{n} \binom{m}{k}\binom{p}{n-k} = \binom{m+p}{n} . \]
+  \end{example}
+  {\small In words: choose $n$ people from $m$ women and $p$ men, sorted by the number of women.\par}
+  \pause
+  \begin{example}[Partial sums]
+    $\frac{(1+x)^m}{1-x}$ has coefficients $\sum_{k=0}^n \binom{m}{k}$; for $n \ge m$ this is
+    $(1 + 1)^m = 2^m$.
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{Counting with generating functions}
+
+\begin{frame}{Making change}
+  In how many ways can we pay $n$ with coins worth $1$, $2$ and $5$?
+  \pause
+  \begin{itemize}
+    \item Use the $2$-coin $0, 1, 2, \dots$ times: \
+      $1 + x^2 + x^4 + \cdots = \frac{1}{1 - x^2}$. Likewise for the others.
+    \item A payment is a choice for each coin, and the amounts add up:
+      \[ \sum_{n \ge 0} w_n x^n = \frac{1}{1-x} \cdot \frac{1}{1-x^2} \cdot \frac{1}{1-x^5} . \]
+  \end{itemize}
+  \pause
+  \begin{center}
+  \small
+  \begin{tabular}{l*{13}{c}}
+    \toprule
+    $n$   & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\
+    $w_n$ & 1 & 1 & 2 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 10 & 11 & 13 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Making change: the algorithm}
+  How do we get the coefficients? Multiply in one factor at a time.
+  \begin{itemize}
+    \item If $B(x) = \frac{A(x)}{1 - x^c}$, then $B(x) = A(x) + x^c B(x)$, that is
+      \[ b_n = a_n + b_{n-c} . \]
+  \end{itemize}
+  \pause
+  {\small
+\begin{verbatim}
+ways = [1] + [0] * N          # the generating function 1
+for c in (1, 2, 5):           # multiply by 1 / (1 - x^c)
+    for n in range(c, N + 1):
+        ways[n] += ways[n - c]
+\end{verbatim}
+  }
+  \vskip-0.3em
+  This is the standard dynamic-programming solution of the coin-change problem.
+  The generating function explains \emph{why} it is correct.
+\end{frame}
+
+\begin{frame}{Solutions of $x_1 + x_2 + x_3 = n$}
+  Each variable contributes a factor listing its allowed values.
+  \begin{itemize}
+    \item $x_i \ge 0$: \quad $\frac{1}{(1-x)^3}$, \ so $\binom{n+2}{2}$ solutions.
+    \item $x_i \ge 1$: \quad $\frac{x^3}{(1-x)^3}$, \ so $\binom{n-1}{2}$ solutions.
+  \end{itemize}
+  Both agree with the stars-and-bars count of Discrete Structures.
+  \pause
+  \begin{example}[$x_1 \in \{0, 1\}$, \ $x_2$ even, \ $x_3 \ge 0$]
+    \[ (1 + x) \cdot \frac{1}{1 - x^2} \cdot \frac{1}{1 - x} = \frac{1}{(1-x)^2}
+       \quad\Longrightarrow\quad n + 1 \text{ solutions.} \]
+  \end{example}
+  {\small The constraints make a direct count awkward; the generating function handles them
+  mechanically --- and here it even simplifies.\par}
+\end{frame}
+
+\begin{frame}{Sequences of choices}
+  In how many ways can you climb $n$ stairs, taking $1$ or $2$ steps at a time?
+  \pause
+  \begin{itemize}
+    \item One move: $x + x^2$. \ A climb is a sequence of $k$ moves, for some $k \ge 0$:
+      \[ \sum_{k \ge 0} (x + x^2)^k = \frac{1}{1 - x - x^2} = 1 + x + 2x^2 + 3x^3 + 5x^4 + 8x^5 + \cdots \]
+    \item The Fibonacci numbers appear. Why --- and what is a formula for them?
+      That is the next section.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Solving linear recurrences}
+
+\begin{frame}{The method}
+  \begin{enumerate}
+    \item Write the recurrence, the values of $n$ for which it holds, and the initial values.
+    \item Multiply by $x^n$ and sum over those $n$.
+    \item Write each sum in terms of $A(x)$ (shifts!), and solve for $A(x)$.
+    \item Decompose into partial fractions (Calculus I, Unit 22).
+    \item Read off the coefficients:
+      \[ \frac{1}{1 - rx} \leftrightarrow r^n, \qquad
+         \frac{1}{(1 - rx)^{k+1}} \leftrightarrow \binom{n + k}{k} r^n . \]
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Fibonacci numbers}
+  $F_0 = 0$, \ $F_1 = 1$, \ $F_n = F_{n-1} + F_{n-2}$ for $n \ge 2$. \ Let $F(x) = \sum F_n x^n$.
+  \pause
+  \begin{align*}
+    \sum_{n \ge 2} F_n x^n &= \sum_{n \ge 2} F_{n-1} x^n + \sum_{n \ge 2} F_{n-2} x^n \\
+    F(x) - F_0 - F_1 x &= x \bigl(F(x) - F_0\bigr) + x^2 F(x) \\
+    F(x) - x &= x F(x) + x^2 F(x)
+  \end{align*}
+  \pause
+  \[ F(x) = \frac{x}{1 - x - x^2} . \]
+  {\small The stairs of the last section: $\frac{1}{1 - x - x^2} = \frac{F(x)}{x}$, so there are
+  $F_{n+1}$ ways to climb $n$ stairs.\par}
+\end{frame}
+
+\begin{frame}{Binet's formula}
+  Factor: $1 - x - x^2 = (1 - \varphi x)(1 - \psi x)$ with
+  $\varphi = \frac{1 + \sqrt5}{2}$, \ $\psi = \frac{1 - \sqrt5}{2}$ \
+  (check: $\varphi + \psi = 1$, \ $\varphi\psi = -1$).
+  \pause
+  Partial fractions, with $\varphi - \psi = \sqrt5$:
+  \[ \frac{x}{(1 - \varphi x)(1 - \psi x)}
+     = \frac{1}{\sqrt5}\Bigl( \frac{1}{1 - \varphi x} - \frac{1}{1 - \psi x} \Bigr) . \]
+  \pause
+  \begin{theorem}[Binet's formula]
+    $\displaystyle F_n = \frac{\varphi^n - \psi^n}{\sqrt5}$ \ for all $n \ge 0$.
+  \end{theorem}
+  {\small As $|\psi| < 1$, the second term is below $\frac12$: \ $F_n$ is $\frac{\varphi^n}{\sqrt5}$
+  rounded to the nearest integer.\par}
+\end{frame}
+
+\begin{frame}{The same answer from Linear Algebra}
+  In Linear Algebra (Unit 18) you wrote the recurrence with a matrix:
+  \[ \begin{pmatrix} F_{n+1} \\ F_n \end{pmatrix}
+     = M^n \begin{pmatrix} 1 \\ 0 \end{pmatrix}, \qquad
+     M = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}, \]
+  and diagonalised $M$. Its eigenvalues are the roots of $\lambda^2 - \lambda - 1$: \ $\varphi$ and $\psi$.
+  \pause
+  \begin{itemize}
+    \item The denominator $1 - x - x^2 = x^2 \bigl(\frac{1}{x^2} - \frac1x - 1\bigr)$ has the
+      roots $\frac{1}{\varphi}$ and $\frac{1}{\psi}$: the \emph{reciprocals} of the eigenvalues.
+    \item Two routes to one formula. Generating functions need no matrices, and handle extra
+      terms in the recurrence easily (next).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{A non-homogeneous recurrence: the Tower of Hanoi}
+  Moving $n$ discs: move $n - 1$ to the spare peg, the largest to the target, then the $n - 1$
+  on top. So $a_0 = 0$ and $a_n = 2a_{n-1} + 1$ for $n \ge 1$.
+  \pause
+  \[ \sum_{n \ge 1} a_n x^n = 2x \sum_{n \ge 1} a_{n-1} x^{n-1} + \sum_{n \ge 1} x^n
+     \quad\Longrightarrow\quad A(x) = 2x A(x) + \frac{x}{1-x} . \]
+  \pause
+  \[ A(x) = \frac{x}{(1 - x)(1 - 2x)} = \frac{1}{1 - 2x} - \frac{1}{1 - x}
+     \quad\Longrightarrow\quad a_n = 2^n - 1 . \]
+  {\small Check by induction (Discrete Structures, Unit 5):
+  $2(2^{n-1} - 1) + 1 = 2^n - 1$.\par}
+\end{frame}
+
+\begin{frame}{Repeated roots}
+  $a_0 = 1$, \ $a_1 = 6$, \ $a_n = 4a_{n-1} - 4a_{n-2}$ for $n \ge 2$.
+  \pause
+  \begin{itemize}
+    \item As before: $A(x)\,(1 - 4x + 4x^2) = a_0 + (a_1 - 4a_0)\,x = 1 + 2x$, and
+      $1 - 4x + 4x^2 = (1 - 2x)^2$.
+    \item Partial fractions:
+      $\dfrac{1 + 2x}{(1 - 2x)^2} = \dfrac{-1}{1 - 2x} + \dfrac{2}{(1 - 2x)^2}$.
+    \item So $a_n = -2^n + 2(n + 1) 2^n = (2n + 1)\, 2^n$: \ $1, 6, 20, 56, 144, \dots$
+  \end{itemize}
+  \pause
+  \begin{remark}[In general]
+    For $a_n = c_1 a_{n-1} + \dots + c_d a_{n-d}$, \ $A(x) = \frac{P(x)}{Q(x)}$ with
+    $Q(x) = 1 - c_1 x - \dots - c_d x^d$ and $\deg P < d$. If
+    $Q(x) = \prod_i (1 - r_i x)^{m_i}$, then $a_n = \sum_i p_i(n)\, r_i^n$ with each $p_i$ a
+    polynomial of degree less than $m_i$. A double root gives terms $n\, r^n$.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Catalan numbers}
+
+\begin{frame}{Binary trees}
+  A \textbf{binary tree} is empty, or a root with a left and a right subtree, both binary trees
+  (Discrete Structures, Unit 15: trees). Let $b_n$ be the number with $n$ nodes.
+  \vskip0.4em
+  \begin{center}
+  \begin{tikzpicture}[x=0.42cm, y=0.5cm]
+    % 1: left-left
+    \node[bt] (a) at (0,0) {}; \node[bt] (b) at (-1,-1) {}; \node[bt] (c) at (-2,-2) {};
+    \draw[be] (a) -- (b) -- (c);
+    % 2: left-right
+    \begin{scope}[xshift=2.6cm]
+      \node[bt] (a) at (0,0) {}; \node[bt] (b) at (-1,-1) {}; \node[bt] (c) at (0,-2) {};
+      \draw[be] (a) -- (b) -- (c);
+    \end{scope}
+    % 3: both children
+    \begin{scope}[xshift=5.3cm]
+      \node[bt] (a) at (0,0) {}; \node[bt] (b) at (-1,-1) {}; \node[bt] (c) at (1,-1) {};
+      \draw[be] (b) -- (a) -- (c);
+    \end{scope}
+    % 4: right-left
+    \begin{scope}[xshift=7.9cm]
+      \node[bt] (a) at (0,0) {}; \node[bt] (b) at (1,-1) {}; \node[bt] (c) at (0,-2) {};
+      \draw[be] (a) -- (b) -- (c);
+    \end{scope}
+    % 5: right-right
+    \begin{scope}[xshift=10.5cm]
+      \node[bt] (a) at (0,0) {}; \node[bt] (b) at (1,-1) {}; \node[bt] (c) at (2,-2) {};
+      \draw[be] (a) -- (b) -- (c);
+    \end{scope}
+  \end{tikzpicture}
+  \par\small\color{wosm-muted} The $b_3 = 5$ binary trees with $3$ nodes.
+  \end{center}
+  \pause
+  For $n \ge 1$: a root, a left subtree with $k$ nodes and a right subtree with $n - 1 - k$:
+  \[ b_0 = 1, \qquad b_n = \sum_{k=0}^{n-1} b_k\, b_{n-1-k} \quad (n \ge 1) .
+     \qquad 1, 1, 2, 5, 14, 42, \dots \]
+\end{frame}
+
+\begin{frame}{A quadratic equation}
+  The sum is a convolution: $b_n$ is the coefficient of $x^{n-1}$ in $C(x)^2$, where
+  $C(x) = \sum b_n x^n$. Multiply by $x^n$ and sum over $n \ge 1$:
+  \[ C(x) - 1 = x\, C(x)^2 . \]
+  \pause
+  Solve $x C^2 - C + 1 = 0$ for $C$:
+  \[ C(x) = \frac{1 \pm \sqrt{1 - 4x}}{2x} . \]
+  \pause
+  Which sign? We need $C(0) = b_0 = 1$. With $+$, the numerator tends to $2$ as $x \to 0$ and
+  $C$ blows up. With $-$, the limit is $1$ (one step of L'H\^opital, or the series below). So
+  \[ C(x) = \frac{1 - \sqrt{1 - 4x}}{2x} . \]
+\end{frame}
+
+\begin{frame}{Expanding $\sqrt{1 - 4x}$}
+  Lecture 6: $\frac{1}{\sqrt{1 - 4x}} = \sum_{k \ge 0} \binom{2k}{k} x^k$ for $|x| < \frac14$.
+  As $\bigl(\sqrt{1 - 4x}\bigr)' = \frac{-2}{\sqrt{1-4x}}$, integrate term by term (Lecture 5):
+  \[ \sqrt{1 - 4x} = 1 - 2 \sum_{k \ge 0} \binom{2k}{k} \frac{x^{k+1}}{k+1} . \]
+  \pause
+  So $C(x) = \frac{1 - \sqrt{1 - 4x}}{2x} = \sum_{n \ge 0} \frac{1}{n+1}\binom{2n}{n} x^n$.
+  \pause
+  \begin{theorem}[Catalan numbers]
+    \raggedright The number of binary trees with $n$ nodes is
+    $C_n = \frac{1}{n+1}\binom{2n}{n}$: \ $1, 1, 2, 5, 14, 42, 132, 429, \dots$
+  \end{theorem}
+\end{frame}
+
+\begin{frame}{Catalan numbers everywhere}
+  The same recurrence $C_n = \sum_{k} C_k C_{n-1-k}$ counts, for example:
+  \begin{itemize}
+    \item \textbf{balanced bracket sequences} with $n$ pairs. Each one is $(A)B$ with $A$ and $B$
+      balanced: the first bracket and its partner split it, like a root and two subtrees.
+      \[ n = 3: \quad \texttt{((()))} \quad \texttt{(()())} \quad \texttt{(())()} \quad
+         \texttt{()(())} \quad \texttt{()()()} \]
+    \item ways to fully parenthesise a product $a_0 a_1 \cdots a_n$ of $n + 1$ factors;
+    \item triangulations of a convex polygon with $n + 2$ vertices;
+    \item lattice paths from $(0, 0)$ to $(n, n)$ with unit steps right and up that never go
+      above the diagonal.
+  \end{itemize}
+  {\small Same recurrence, same initial value, same numbers: one generating function solves them all.\par}
+\end{frame}
+
+% =============================================================
+\section{Asymptotics from generating functions (optional)}
+
+\begin{frame}{The radius predicts the growth}
+  \begin{itemize}
+    \item Informally: the growth of $a_n$ is decided by the singularity of $A(x)$ \emph{closest
+      to $0$}. Its distance is the radius $R$, and $a_n$ grows like $\bigl(\frac1R\bigr)^n$,
+      up to a slower factor.
+    \item Precisely: $\limsup_n \sqrt[n]{|a_n|} = \frac1R$ \ (Cauchy--Hadamard, Lecture 5).
+  \end{itemize}
+  \pause
+  \begin{example}[Fibonacci]
+    $\frac{x}{1 - x - x^2}$ is singular at $\frac1\varphi \approx 0.618$ and
+    $\frac1\psi \approx -1.618$. The closer one gives $R = \frac1\varphi$, so $F_n$ grows like
+    $\varphi^n$ --- as Binet's formula says.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Catalan numbers grow like $4^n$}
+  $C(x) = \frac{1 - \sqrt{1 - 4x}}{2x}$ is singular where $1 - 4x = 0$: \ $R = \frac14$.
+  So $C_n$ grows like $4^n$, up to a slower factor. In fact
+  $C_n \sim \dfrac{4^n}{\sqrt\pi\, n^{3/2}}$:
+  \begin{center}
+  \small
+  \begin{tabular}{rrr}
+    \toprule
+    $n$ & $C_n$ & $C_n \big/ \frac{4^n}{\sqrt\pi\, n^{3/2}}$ \\
+    \midrule
+    $10$  & $16\,796$             & $0.898$ \\
+    $20$  & $6\,564\,120\,420$    & $0.946$ \\
+    $50$  & $\approx 1.98 \cdot 10^{27}$ & $0.978$ \\
+    $100$ & $\approx 8.97 \cdot 10^{56}$ & $0.989$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  {\small The factor $n^{-3/2}$ comes from the \emph{type} of singularity, a square root.
+  This is the subject of analytic combinatorics (P.~Flajolet, R.~Sedgewick,
+  \emph{Analytic Combinatorics}, 2009). Stirling's formula, next lecture, proves the
+  $\binom{2n}{n}$ part.\par}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item The generating function of $(a_n)$ is $A(x) = \sum a_n x^n$; as a formal power series it
+      needs no convergence.
+    \item Shifts, scaling, $x \frac{\mathrm{d}}{\mathrm{d}x}$, partial sums ($\div (1 - x)$) and
+      convolution (product) translate operations on sequences.
+    \item Products count combined choices: change-making, solutions of $x_1 + x_2 + x_3 = n$.
+    \item Linear recurrences: multiply by $x^n$, sum, solve for $A$, partial fractions, read off
+      coefficients. A double root gives $n\, r^n$.
+    \item Catalan numbers from $C = 1 + x C^2$: \ $C_n = \frac{1}{n+1}\binom{2n}{n}$.
+    \item The radius of $A$ predicts the exponential growth of $a_n$.
+  \end{itemize}
+  \vskip0.4em
+  {\small Project 1 (series and generating functions) builds on this lecture.\par}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find the generating function: \
+      (a) $3^n + (-1)^n$ \quad (b) $n\, 2^n$ \quad (c) $1, 0, 1, 0, 1, \dots$ \quad
+      (d) $\binom{n+3}{3}$
+    \item Find $a_n$: \
+      (a) $\frac{1}{(1 - 3x)^2}$ \quad (b) $\frac{x^2}{(1 - x)^4}$ \quad (c) $\frac{1 + x}{1 - x}$
+    \item In how many ways can you pay $20$ with coins worth $1$, $2$, $5$ and $10$?
+    \item How many solutions does $x_1 + x_2 + x_3 = n$ have with $x_1 \ge 1$, $x_2 \ge 2$,
+      $x_3 \ge 0$?
+    \item Solve $a_0 = 2$, $a_1 = 5$, $a_n = 5a_{n-1} - 6a_{n-2}$ for $n \ge 2$.
+    \item Solve $a_0 = 1$, $a_n = 3a_{n-1} + 2^n$ for $n \ge 1$.
+    \item Show that $\sum_{k=0}^{n} \binom{n}{k}^2 = \binom{2n}{n}$.
+    \item Show that the balanced bracket sequences with $n$ pairs satisfy the Catalan recurrence.
+    \item (Optional) Predict the growth of $a_n$ if $A(x) = \frac{1}{1 - 2x - x^2}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item (a) $\frac{1}{1-3x} + \frac{1}{1+x}$ \quad (b) $\frac{2x}{(1-2x)^2}$ \quad
+      (c) $\frac{1}{1-x^2}$ \quad (d) $\frac{1}{(1-x)^4}$
+    \item (a) $(n+1)\,3^n$ \quad (b) $\binom{n+1}{3}$ \quad (c) $a_0 = 1$, and $a_n = 2$ for $n \ge 1$
+    \item $40$: the coefficient of $x^{20}$ in
+      $\frac{1}{(1-x)(1-x^2)(1-x^5)(1-x^{10})}$.
+    \item $\frac{x \cdot x^2}{(1-x)^3}$, so $\binom{n-1}{2}$.
+    \item $A(x) = \frac{2 - 5x}{(1-2x)(1-3x)} = \frac{1}{1-2x} + \frac{1}{1-3x}$, so
+      $a_n = 2^n + 3^n$.
+    \item $A(x)(1 - 3x) = \frac{1}{1-2x}$, \ $A(x) = \frac{3}{1-3x} - \frac{2}{1-2x}$, so
+      $a_n = 3^{n+1} - 2^{n+1}$.
+    \item Compare the coefficients of $x^n$ in $(1+x)^n (1+x)^n = (1+x)^{2n}$, using
+      $\binom{n}{k} = \binom{n}{n-k}$.
+    \item A non-empty sequence is $(A)B$, where the first bracket closes after $A$; if $A$ has
+      $k$ pairs, $B$ has $n - 1 - k$.
+    \item The root of $1 - 2x - x^2$ closest to $0$ is $\sqrt2 - 1$, so $a_n$ grows like
+      $(1 + \sqrt2)^n$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 08 --- Stirling's approximation} (Unit 8)
+  \begin{itemize}
+    \item $n! \approx \sqrt{2\pi n}\,\bigl(\frac{n}{e}\bigr)^n$, from the sum $\ln n! = \sum_{k=1}^n \ln k$
+    \item How good the approximation is
+    \item Uses: $\log_2 n! \approx n \log_2 n$ in sorting, and $\binom{2n}{n} \approx \frac{4^n}{\sqrt{\pi n}}$
+  \end{itemize}
+  \vskip1em
+  {\small
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

@@ -7,7 +7,8 @@ order: 1
 # Each module links to its course page once `course` is set (a file name in
 # src/content/courses/ without .md). Credits and hours then come from the
 # course's module description (src/content/module-descriptions/*.tex).
-# `subject` marks modules that are not offered yet with their subject colour.
+# `subject` marks modules that are not offered yet with their subject colour, and
+# `code` shows their code before a course page exists.
 semesters:
   - title: Semester 1
     modules:
@@ -16,39 +17,40 @@ semesters:
       - title: Digital Design and Computer Architecture I
         course: cs102-f26
       - title: Discrete Structures
-        course: m101-f26
+        course: mat101-f26
   - title: Semester 2
     modules:
       - title: Data Structures and Algorithms I
-        course: cs201-s27
+        course: cs103-s27
       - title: Linear Algebra
-        course: m103-s27
+        course: mat102-s27
       - title: Calculus I
-        course: m102-s27
+        course: mat103-s27
   - title: Semester 3
     modules:
       - title: Digital Design and Computer Architecture II
+        code: CS221-F27
         subject: computer-science
       - title: Data Structures and Algorithms II
-        course: cs302-f26
+        course: cs232-f27
       - title: Calculus II
-        course: m201-f27
+        course: mat231-f27
   - title: Semester 4
     modules:
       - title: Theory of Computation
-        course: cs401-s27
+        course: cs203-s28
       - title: Operating Systems
-        course: cs402-s27
+        course: cs204-s28
       - title: Probability Theory and Statistics
-        course: m202-s28
+        course: mat202-s28
   - title: Semester 5
     modules:
       - title: Networks
-        course: cs501-f26
+        course: cs301-f28
       - title: Databases
-        course: cs502-f26
+        course: cs302-f28
       - title: Software Engineering
-        course: cs503-f26
+        course: cs303-f28
   - title: After Semester 5
     optional: true
     modules:

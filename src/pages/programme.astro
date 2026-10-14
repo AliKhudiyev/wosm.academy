@@ -38,7 +38,8 @@ const plans = await Promise.all(
         const rows: Row[] = await Promise.all(
           semester.modules.map(async (module) => {
             const course = module.course ? await getEntry(module.course) : undefined;
-            if (!course) return { title: module.title, offered: false, style: subjectColor(module.subject?.id) };
+            if (!course)
+              return { title: module.title, code: module.code, offered: false, style: subjectColor(module.subject?.id) };
             const description = (await getModuleDescription(course))?.data;
             return {
               title: module.title,

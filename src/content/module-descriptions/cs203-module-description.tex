@@ -1,0 +1,191 @@
+% =============================================================
+%  Module Description — Theory of Computation (CS203-S28)
+%  DRAFT for a planned module (Semester 4 of the Foundation programme).
+%  The code CS203-S28 is a proposal (semester digit + position in the
+%  semester); add the term suffix (e.g. -S27) once the term is known and
+%  make it equal the course's `code` in src/content/courses/.
+%  Compile with: pdflatex cs203-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Theory of Computation}
+\newcommand{\ModuleCode}{CS203-S28}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 4}
+\newcommand{\Semester}{Spring 2028}
+\newcommand{\Credits}{7 ECTS}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{MAT101-F26 Discrete Structures; CS232-F27 Data Structures and Algorithms II}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+Theory of Computation asks what computers can do in principle and what they can do
+efficiently. It studies abstract models of computation, from finite automata to
+Turing machines, and the classes of languages they recognise. Finite automata, met
+briefly in Digital Design and Computer Architecture I, are treated here in full.
+
+The module has three parts. \emph{Automata and formal languages} covers regular and
+context-free languages, which underlie pattern matching, lexing and parsing.
+\emph{Computability} shows that some problems, such as the halting problem, cannot
+be solved by any program. \emph{Complexity} makes precise the distinction between
+tractable and intractable problems introduced in Data Structures and Algorithms II.
+
+\section{Aims}
+\begin{itemize}
+  \item Introduce the standard mathematical models of computation and the relationships between them.
+  \item Show the limits of computation through rigorous proofs of undecidability.
+  \item Give a precise foundation for complexity classes and NP-completeness.
+  \item Develop your ability to write careful proofs about formal objects.
+\end{itemize}
+
+\section{Learning Outcomes}
+After completing this course, you will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Construct deterministic and nondeterministic finite automata and regular expressions, convert between them, and minimise automata.
+  \item Prove that languages are not regular using the pumping lemma and the Myhill--Nerode theorem.
+  \item Construct context-free grammars and pushdown automata, transform grammars into Chomsky normal form, parse with the CYK algorithm, and prove that languages are not context-free.
+  \item Describe Turing machines and equivalent models, explain the Church--Turing thesis, and prove problems undecidable by diagonalisation and reduction.
+  \item Place problems in complexity classes such as P, NP and PSPACE, and prove that problems are NP-complete by reduction.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Alphabets, words and languages; proof techniques revisited \\
+2  & Deterministic finite automata \\
+3  & Nondeterminism and the subset construction \\
+4  & Regular expressions and Kleene's theorem \\
+5  & Non-regular languages: pumping lemma, Myhill--Nerode, minimisation \\
+6  & Context-free grammars, derivations and ambiguity \\
+7  & Chomsky normal form and the CYK algorithm \\
+8  & Pushdown automata and their equivalence with context-free grammars \\
+9  & Non-context-free languages; closure properties \\
+10 & Turing machines and their variants \\
+11 & The Church--Turing thesis; universal Turing machines \\
+12 & Decidability and the halting problem \\
+13 & Reductions; Rice's theorem; the Post correspondence problem \\
+14 & Time complexity and the class P \\
+15 & The class NP and the Cook--Levin theorem \\
+16 & NP-complete problems and reductions \\
+17 & Space complexity: PSPACE and Savitch's theorem \\
+18 & Course Review \& Exam \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle.
+Each unit has a lecture and exercise sheets with constructions and proofs.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 36 \\
+Labs / Tutorials    & 24 \\
+Independent study   & 140 \\
+\midrule
+\textbf{Total}      & \textbf{200} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Your knowledge will be assessed throughout the course with quizzes, exercise sheets
+and the final exam. The exam checks whether you can build automata and grammars for
+given languages, and whether you can write correct proofs of non-regularity,
+undecidability and NP-completeness.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Quizzes & 20\% & Throughout & LO1--LO5 \\
+Exercise sheets & 30\% & Throughout & LO1--LO5 \\
+Final exam & 50\% & End of module & LO1--LO5 \\
+\midrule
+\textbf{Total} & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item M.\ Sipser: \textit{Introduction to the Theory of Computation}, 3rd ed., Cengage Learning, 2012.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item J.\ E.\ Hopcroft, R.\ Motwani, J.\ D.\ Ullman: \textit{Introduction to Automata Theory, Languages, and Computation}, 3rd ed., Pearson, 2006.
+  \item D.\ C.\ Kozen: \textit{Automata and Computability}, Springer, 1997.
+  \item S.\ Arora, B.\ Barak: \textit{Computational Complexity: A Modern Approach}, Cambridge University Press, 2009.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

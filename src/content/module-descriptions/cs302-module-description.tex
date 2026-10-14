@@ -1,7 +1,7 @@
 % =============================================================
-%  Module Description — Data Structures and Algorithms II (CS302-F26)
-%  DRAFT for a planned module (Semester 3 of the Foundation programme).
-%  The code CS302-F26 is a proposal (semester digit + position in the
+%  Module Description — Databases (CS302-F28)
+%  DRAFT for a planned module (Semester 5 of the Foundation programme).
+%  The code CS302-F28 is a proposal (semester digit + position in the
 %  semester); add the term suffix (e.g. -S27) once the term is known and
 %  make it equal the course's `code` in src/content/courses/.
 %  Compile with: pdflatex cs302-module-description.tex
@@ -25,16 +25,16 @@
 
 % ---------- Module details (edit these) ----------------------
 % \ModuleCode must equal the course's `code` in src/content/courses/.
-\newcommand{\ModuleTitle}{Data Structures and Algorithms II}
-\newcommand{\ModuleCode}{CS302-F26}
+\newcommand{\ModuleTitle}{Databases}
+\newcommand{\ModuleCode}{CS302-F28}
 \newcommand{\Programme}{Foundation programme}
-\newcommand{\Level}{Semester 3}
-\newcommand{\Semester}{Fall 2026}
-\newcommand{\Credits}{TODO(owner)}
+\newcommand{\Level}{Semester 5}
+\newcommand{\Semester}{Fall 2028}
+\newcommand{\Credits}{7 ECTS}
 \newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
 \newcommand{\Email}{ali.khudiyev@wosm.academy}
 \newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
-\newcommand{\Prerequisites}{CS201-S27 Data Structures and Algorithms I}
+\newcommand{\Prerequisites}{MAT101-F26 Discrete Structures; CS103-S27 Data Structures and Algorithms I}
 
 % ---------- Styling ------------------------------------------
 \definecolor{accent}{RGB}{0,70,130}
@@ -74,33 +74,36 @@ Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
 
 % ---------- Sections (shown on the website) ------------------
 \section{Module Overview}
-Data Structures and Algorithms II continues from Data Structures and Algorithms I.
-Where the first module concentrated on data structures and sorting, this module
-concentrates on \emph{algorithm design}: graph algorithms, and the general techniques
-of divide and conquer, greedy algorithms, dynamic programming and network flow.
+Almost every application stores data that must outlive the program, be shared by
+many users and stay consistent when things go wrong. This module teaches how to
+design, query and build such databases, with the emphasis on relational databases
+and SQL.
 
-The last part of the module looks at problems for which no efficient algorithm is
-known. You will learn to recognise NP-hard problems through reductions and to cope
-with them using approximation, randomisation and systematic search. This prepares
-you for Theory of Computation in Semester 4. Programming is done in C, as in Data
-Structures and Algorithms I.
+The first part is about \emph{using} databases: the relational model, relational
+algebra, SQL, conceptual design with entity--relationship models, and normalisation.
+The second part is about how a database system \emph{works inside}: storage,
+indexing, query processing and optimisation, transactions, concurrency control and
+recovery. It draws on the data structures from Data Structures and Algorithms I and
+the systems ideas from Operating Systems. The module ends with a look at distributed
+and non-relational data stores.
 
 \section{Aims}
 \begin{itemize}
-  \item Teach the main paradigms of algorithm design and how to justify algorithms built with them.
-  \item Give you the standard algorithms on graphs and networks and practice in modelling problems as graphs.
-  \item Introduce amortised analysis and advanced data structures used inside efficient algorithms.
-  \item Introduce intractability and practical strategies for hard problems.
+  \item Teach the relational model and SQL as the standard way to describe and query data.
+  \item Develop your ability to design sound database schemas.
+  \item Explain how a database system stores, indexes and queries data efficiently.
+  \item Explain how transactions keep data consistent under concurrency and failures.
 \end{itemize}
 
 \section{Learning Outcomes}
 After completing this course, you will be able to:
 \begin{enumerate}[label=LO\arabic*.]
-  \item Model problems as graphs and apply and analyse algorithms for traversal, topological sorting, connectivity, shortest paths and minimum spanning trees.
-  \item Design algorithms with divide and conquer, greedy choice and dynamic programming, and justify them with recurrences, exchange arguments and optimal substructure.
-  \item Formulate problems as network flow and bipartite matching problems and solve them.
-  \item Analyse algorithms and data structures, such as union--find, with aggregate, accounting and potential-method amortised analysis.
-  \item Prove problems NP-complete by polynomial-time reduction and choose a suitable strategy for them: approximation, randomisation, or exact search.
+  \item Design database schemas with entity--relationship modelling and translate them into relational schemas with keys and integrity constraints.
+  \item Express queries in relational algebra and SQL, including joins, aggregation, subqueries and views.
+  \item Use functional dependencies to evaluate schemas and normalise them into 3NF and BCNF.
+  \item Explain storage and index structures such as B+ trees and hash indexes, and how queries are evaluated and optimised.
+  \item Explain transactions, the ACID properties, serialisability, locking-based concurrency control and log-based recovery.
+  \item Build an application in Java that uses a relational database through JDBC.
 \end{enumerate}
 
 \section{Syllabus}
@@ -108,30 +111,30 @@ After completing this course, you will be able to:
 \toprule
 \textbf{Unit} & \textbf{Topic} \\
 \midrule
-1  & Graphs: representations, breadth-first and depth-first search \\
-2  & Applications of DFS: topological sorting, strongly connected components \\
-3  & Shortest paths I: Dijkstra's algorithm \\
-4  & Shortest paths II: Bellman--Ford; all-pairs shortest paths \\
-5  & Minimum spanning trees: Prim and Kruskal; union--find \\
-6  & Amortised analysis: aggregate, accounting and potential methods \\
-7  & Divide and conquer: Karatsuba, Strassen, closest pair of points \\
-8  & Greedy algorithms: exchange arguments, scheduling, Huffman coding \\
-9  & Dynamic programming I: principles; sequence problems \\
-10 & Dynamic programming II: knapsack, edit distance, shortest paths revisited \\
-11 & Network flow: Ford--Fulkerson, Edmonds--Karp, max-flow min-cut theorem \\
-12 & Applications of flow: bipartite matching and related problems \\
-13 & String algorithms: Knuth--Morris--Pratt, Rabin--Karp, suffix arrays \\
-14 & Reductions, P, NP and NP-completeness \\
-15 & Approximation algorithms \\
-16 & Randomised algorithms; backtracking and branch and bound \\
+1  & Introduction: data, databases and database management systems \\
+2  & The relational model; keys and integrity constraints \\
+3  & Relational algebra \\
+4  & SQL I: data definition and basic queries \\
+5  & SQL II: joins, aggregation, subqueries and NULL values \\
+6  & SQL III: views, constraints and triggers; databases from Java with JDBC \\
+7  & Conceptual design: entity--relationship modelling \\
+8  & From entity--relationship diagrams to relational schemas \\
+9  & Functional dependencies and normal forms: 3NF and BCNF \\
+10 & Storage: disks, pages, files and records \\
+11 & Indexing: B+ trees and hash indexes \\
+12 & Query processing: sorting and join algorithms \\
+13 & Query optimisation \\
+14 & Transactions and concurrency control: serialisability, two-phase locking \\
+15 & Recovery: logging and the write-ahead log \\
+16 & Beyond relational databases: distributed and NoSQL data stores \\
 17 & Course Review \& Exam \\
 \bottomrule
 \end{tabularx}
 
 \section{Teaching and Learning Methods}
 The module is self-paced. All materials are provided on Moodle.
-Each unit has a lecture, exercises on designing and proving algorithms, and
-programming tasks in C.
+Each unit has a lecture and exercises. Practical work uses a relational database
+system to write SQL queries and to build a small database-backed Java application.
 
 \begin{tabularx}{0.6\textwidth}{X r}
 \toprule
@@ -146,17 +149,17 @@ Independent study   & 130 \\
 \end{tabularx}
 
 \section{Assessment}
-Your knowledge will be assessed throughout the course with quizzes, programming
-assignments and the final exam. The exam checks whether you can choose a suitable
-design technique for an unfamiliar problem, develop an algorithm with it, and argue
-its correctness and running time.
+Your knowledge will be assessed throughout the course with quizzes, a database
+project and the final exam. The project checks whether you can design a schema,
+query it in SQL and use it from an application. The exam also covers how database
+systems work internally.
 
 \begin{tabularx}{\textwidth}{X c c c}
 \toprule
 \textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
 \midrule
 Quizzes & 20\% & Throughout & LO1--LO5 \\
-Programming assignments & 40\% & Throughout & LO1--LO3 \\
+Database project & 40\% & Throughout & LO1, LO2, LO3, LO6 \\
 Final exam & 40\% & End of module & LO1--LO5 \\
 \midrule
 \textbf{Total} & \textbf{100\%} & & \\
@@ -166,13 +169,13 @@ Final exam & 40\% & End of module & LO1--LO5 \\
 \section{Reading List}
 \textbf{Essential}
 \begin{itemize}
-  \item T.\ H.\ Cormen, C.\ E.\ Leiserson, R.\ L.\ Rivest, C.\ Stein: \textit{Introduction to Algorithms}, 4th ed., MIT Press, 2022.
-  \item J.\ Kleinberg, \'E.\ Tardos: \textit{Algorithm Design}, Addison-Wesley, 2005.
+  \item A.\ Silberschatz, H.\ F.\ Korth, S.\ Sudarshan: \textit{Database System Concepts}, 7th ed., McGraw-Hill, 2019.
 \end{itemize}
 \textbf{Recommended}
 \begin{itemize}
-  \item S.\ Dasgupta, C.\ H.\ Papadimitriou, U.\ V.\ Vazirani: \textit{Algorithms}, McGraw-Hill, 2006.
-  \item S.\ S.\ Skiena: \textit{The Algorithm Design Manual}, 3rd ed., Springer, 2020.
+  \item H.\ Garcia-Molina, J.\ D.\ Ullman, J.\ Widom: \textit{Database Systems: The Complete Book}, 2nd ed., Pearson, 2008.
+  \item R.\ Ramakrishnan, J.\ Gehrke: \textit{Database Management Systems}, 3rd ed., McGraw-Hill, 2003.
+  \item M.\ Kleppmann: \textit{Designing Data-Intensive Applications}, O'Reilly, 2017.
 \end{itemize}
 
 \section{Materials and Licence}

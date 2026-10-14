@@ -1,0 +1,197 @@
+% =============================================================
+%  Module Description — Data Structures and Algorithms I (CS103-S27)
+%  DRAFT for a planned module (Semester 2 of the Foundation programme).
+%  The code CS103-S27 is a proposal (semester digit + position in the
+%  semester); add the term suffix (e.g. -S27) once the term is known and
+%  make it equal the course's `code` in src/content/courses/.
+%  Compile with: pdflatex cs103-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Data Structures and Algorithms I}
+\newcommand{\ModuleCode}{CS103-S27}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 2}
+\newcommand{\Semester}{Spring 2027}
+\newcommand{\Credits}{7 ECTS}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{CS101-F26 Introduction to Informatics; MAT101-F26 Discrete Structures}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+Data Structures and Algorithms I is the first of two modules on the design and
+analysis of algorithms. It teaches you to reason precisely about two questions that
+every program raises: \emph{is it correct?} and \emph{how much time and memory does
+it need?} You will study the fundamental data structures and the classic algorithms
+for sorting and searching, and learn to choose between them by comparing the cost of
+their operations.
+
+The module builds directly on Semester 1. Programming is done in C. C exposes how
+data structures are laid out in memory, which makes the cost of each operation
+visible; the first units introduce C to students who learnt to program in Java in
+Introduction to Informatics. Proofs by induction, asymptotic reasoning and basic
+combinatorics come from Discrete Structures. Data Structures and Algorithms II
+(Semester 3) continues with graph algorithms and general design techniques.
+
+\section{Aims}
+\begin{itemize}
+  \item Introduce rigorous methods for proving algorithms correct and for analysing their running time and memory use.
+  \item Give you a working toolkit of standard data structures and algorithms, and the judgement to choose between them.
+  \item Develop the habit of thinking about data structures as abstract data types with separately analysed implementations.
+  \item Introduce programming in C, and strengthen your programming by implementing, testing and measuring the data structures you study, with explicit control over memory.
+\end{itemize}
+
+\section{Learning Outcomes}
+After completing this course, you will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Analyse the running time and memory use of iterative and recursive algorithms using asymptotic notation, and solve recurrences by substitution, recursion trees and the master theorem.
+  \item Prove the correctness of algorithms using loop invariants and induction.
+  \item Implement and use the standard abstract data types (lists, stacks, queues, priority queues, sets and maps) in C with array-based and linked representations, managing memory explicitly, and analyse dynamic arrays with amortised analysis.
+  \item Explain, implement and compare comparison-based and linear-time sorting algorithms, and explain the $\Omega(n \log n)$ lower bound for comparison sorting.
+  \item Design, implement and analyse hash tables and balanced search trees, and choose an appropriate data structure for a given problem.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Introduction: algorithms, problems and the RAM model \\
+2  & C for Java programmers I: types, control flow, functions, pointers and arrays \\
+3  & C for Java programmers II: strings, structs, dynamic memory and the toolchain \\
+4  & Asymptotic notation and the growth of functions \\
+5  & Correctness: loop invariants and proofs by induction \\
+6  & Recursion and recurrences: substitution, recursion trees, master theorem \\
+7  & Arrays, dynamic arrays and amortised analysis \\
+8  & Linked lists, stacks and queues \\
+9  & Abstract data types in C: header files, opaque types and function pointers \\
+10 & Elementary sorting; merge sort \\
+11 & Quicksort and randomised analysis \\
+12 & Heaps, heapsort and priority queues \\
+13 & Sorting lower bound; counting sort, radix sort and bucket sort \\
+14 & Searching: binary search; selection and order statistics \\
+15 & Hashing: hash functions, chaining and open addressing \\
+16 & Binary search trees \\
+17 & Balanced search trees: AVL and red-black trees \\
+18 & Course Review \& Exam \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle.
+Each unit has a lecture, exercises on analysis and proofs, and a programming task in
+C in which you implement and test the data structure or algorithm of the unit.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 34 \\
+Labs / Tutorials    & 40 \\
+Independent study   & 126 \\
+\midrule
+\textbf{Total}      & \textbf{200} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Your knowledge will be assessed throughout the course with quizzes, programming
+assignments and the final exam. The quizzes and the exam check whether you can
+analyse algorithms, prove them correct and select suitable data structures. The
+programming assignments check whether you can implement data structures and
+algorithms correctly and efficiently.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Quizzes & 20\% & Throughout & LO1--LO5 \\
+Programming assignments & 40\% & Throughout & LO3--LO5 \\
+Final exam & 40\% & End of module & LO1--LO5 \\
+\midrule
+\textbf{Total} & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item T.\ H.\ Cormen, C.\ E.\ Leiserson, R.\ L.\ Rivest, C.\ Stein: \textit{Introduction to Algorithms}, 4th ed., MIT Press, 2022.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item R.\ Sedgewick: \textit{Algorithms in C, Parts 1--4: Fundamentals, Data Structures, Sorting, Searching}, 3rd ed., Addison-Wesley, 1998.
+  \item B.\ W.\ Kernighan, D.\ M.\ Ritchie: \textit{The C Programming Language}, 2nd ed., Prentice Hall, 1988.
+  \item K.\ N.\ King: \textit{C Programming: A Modern Approach}, 2nd ed., W.\ W.\ Norton, 2008.
+  \item S.\ S.\ Skiena: \textit{The Algorithm Design Manual}, 3rd ed., Springer, 2020.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

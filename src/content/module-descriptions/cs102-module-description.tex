@@ -71,32 +71,59 @@ Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
 
 % ---------- Sections (shown on the website) ------------------
 \section{Module Overview}
-This course is for people who are curious about inner working principles of
-computers. You will learn about computer systems (e.g.\ basic architecture and
-organization, Von-Neumann-Computer, machine-instruction cycle, hardware-software
-interface), instruction set architecture (ISA), fundamental methods of circuit
-design, structural organization of processor using circuit elements, processor
-design variants and their implications, some advanced aspects of description and
-implementation and verification of digital circuits, and other things such as
-microprocessor architectures and systems, parallel and distributed systems, memory
-systems, and input/output (I/O) systems.
+This module shows how a computer is built, starting from nothing more than
+switches that are on or off. It follows the module leader's book
+\textit{A Student's Computer Architecture Book I}: you first learn the
+fundamentals of digital design, and then use them to build a working 8-bit
+computer, the DX8, piece by piece.
+
+The first part covers the foundations: numeral systems, Boolean algebra and
+Boolean functions, logic gates, combinational circuits and sequential circuits,
+including finite state machines, latches, flip-flops, counters and timing. The
+second part puts these building blocks together. You design an instruction set
+architecture, build an arithmetic logic unit, registers and random access memory,
+and connect them with a stepper and a controller into a multi-cycle processor that
+fetches, decodes and executes instructions.
+
+The module is for anyone who is curious about how computers really work, and no
+prior knowledge of electronics is needed. Digital Design and Computer Architecture
+II (Semester 3) continues with real instruction set architectures, memory systems,
+input/output and processor performance.
 
 \section{Aims}
 \begin{itemize}
-  \item TODO(owner): aims of the module.
+  \item Show how a working computer is built up from logic gates, one layer of
+        abstraction at a time.
+  \item Give a mathematical foundation in Boolean algebra for describing,
+        designing and simplifying digital circuits.
+  \item Develop practical skill in designing, simulating and testing combinational
+        and sequential circuits.
+  \item Give you the understanding and confidence to design and build computing
+        devices of your own.
 \end{itemize}
 
 \section{Learning Outcomes}
 After completing this course, you will be able to:
 \begin{enumerate}[label=LO\arabic*.]
-  \item Understand computer systems and layered abstract machines.
-  \item Gain an introductory overview of computer architecture and fundamental
-        knowledge of low-level programming, digital circuits, and processor design.
-  \item Apply basic concepts of computer architecture and explain machine
-        instruction cycles based on the underlying hardware at the
-        register-transfer level.
-  \item Classify different types of computer architectures and understand the
-        basic principles of modern computer architecture.
+  \item Represent numbers in positional numeral systems, in particular binary,
+        octal and hexadecimal, and convert between them.
+  \item Manipulate Boolean expressions with the laws and theorems of Boolean
+        algebra, derive canonical sum-of-products and product-of-sums forms from
+        truth tables, and simplify Boolean functions with Karnaugh maps.
+  \item Implement Boolean functions with logic gates, including universal gate
+        sets, and design and analyse combinational circuits such as multiplexers,
+        decoders, encoders, adders and comparators, including their propagation
+        and contamination delays.
+  \item Model sequential behaviour with Moore and Mealy finite state machines,
+        build latches, flip-flops, registers and counters, and explain the setup
+        and hold time constraints of sequential circuits.
+  \item Explain the Von Neumann architecture and the role of an instruction set
+        architecture, and design an arithmetic logic unit, a register file and
+        byte-addressable memory from basic components.
+  \item Explain how a processor executes instructions in fetch, decode, execute and
+        load stages, compare single-cycle, multi-cycle and pipelined designs, and
+        build and program a working multi-cycle 8-bit computer in a circuit
+        simulator.
 \end{enumerate}
 
 \section{Syllabus}
@@ -104,63 +131,92 @@ After completing this course, you will be able to:
 \toprule
 \textbf{Unit} & \textbf{Topic} \\
 \midrule
-1  & Introduction \& Data Representation \\
-2  & Assembly Languages \\
-3  & Von Neumann Architecture \\
-4  & Other ISAs \\
-5  & System Architecture \\
-6  & Memory Management \& Cache \\
-7  & Boolean Algebra \\
-8  & Adders \\
-9  & Multiplication \\
-10 & Memory \\
-11 & Processor Architecture \\
-12 & Finite Automata \\
-13 & Multi-cycle Processor \\
-14 & Modern Systems \& Parallelism \\
-15 & The I/O System \\
-16 & Physical Layer Implementation \\
-17 & Pipelining \\
-18 & K-Maps \\
-19 & Binary Decision Diagrams \\
-20 & SAT \\
-21 & Physical Design \\
-22 & Review \\
+1  & The essence of computing: computation as change of state; a short history of computing tools \\
+2  & Numeral systems: additive and positional systems; binary, octal and hexadecimal \\
+3  & Boolean algebra: laws and theorems \\
+4  & Boolean functions: truth tables; canonical sum-of-products and product-of-sums forms \\
+5  & Simplifying Boolean functions with Karnaugh maps \\
+6  & Logic gates and universal gate sets \\
+7  & Combinational circuits I: multiplexers and demultiplexers \\
+8  & Combinational circuits II: encoders, priority encoders and decoders \\
+9  & Timing of combinational circuits: propagation and contamination delays, glitches \\
+10 & Finite state machines: Moore and Mealy machines; FSM simplification \\
+11 & The clock; memory: SR latch and D latch \\
+12 & Flip-flops: D (master--slave, asynchronous reset), T and JK flip-flops \\
+13 & Counters: synchronous up counter and asynchronous ripple counter \\
+14 & Timing of sequential circuits: setup and hold time constraints \\
+15 & Instruction set architecture: Von Neumann architecture; the DX8 instruction format and instruction set \\
+16 & Arithmetic: half adder, full adder, multi-bit adders; two's complement \\
+17 & Logic and comparison: bitwise operations and comparators \\
+18 & The arithmetic logic unit: shifts and rotations; selecting the operation \\
+19 & Memory: registers, addressing, byte-addressable RAM and the register file \\
+20 & Processor design: fetch, decode, execute and load; single-cycle, multi-cycle and pipelined designs \\
+21 & The stepper, the data path and the controller \\
+22 & Putting it all together: building and programming the DX8 computer \\
+23 & Course Review \& Exam \\
 \bottomrule
 \end{tabularx}
 
 \section{Teaching and Learning Methods}
-The module is self-paced. All materials are provided on Moodle.
+The module is self-paced. All materials are provided on Moodle. The module follows
+the module leader's book \textit{A Student's Computer Architecture Book I}. Each
+unit has a lecture and exercises in which you build and test the circuits of the
+unit in the Logisim-evolution circuit simulator; circuit files for the examples in
+the book are provided. Verilog models of many of the circuits are also available
+for students who want to go further.
+Each week has two lectures, a central exercise with worked examples, and a tutorial
+in which the solutions of the week's exercise sheet are discussed.
 
 \begin{tabularx}{0.6\textwidth}{X r}
 \toprule
 \textbf{Activity} & \textbf{Hours} \\
 \midrule
-Lectures            & TODO(owner) \\
-Labs / Tutorials    & TODO(owner) \\
-Independent study   & TODO(owner) \\
+Lectures            & 34 \\
+Labs / Tutorials    & 36 \\
+Independent study   & 130 \\
 \midrule
-\textbf{Total}      & \textbf{TODO(owner)} \\
+\textbf{Total}      & \textbf{200} \\
 \bottomrule
 \end{tabularx}
 
 \section{Assessment}
 Your understanding and knowledge of the concepts presented will be assessed
-through quizzes, projects, and challenges. Any permitted support materials will be
-provided during the examination; no additional aids or resources are allowed.
+through quizzes, a circuit-design project and the final exam. In the project you
+build the DX8 computer, or an extension of it, in Logisim-evolution and run your
+own programs on it. Any permitted support materials will be provided during the
+examination; no additional aids or resources are allowed.
 
-TODO(owner): weight of each assessment component and the learning outcomes it covers.
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Quizzes & 20\% & Throughout & LO1--LO5 \\
+Circuit-design project: the DX8 computer & 40\% & Throughout & LO3--LO6 \\
+Final exam & 40\% & End of module & LO1--LO6 \\
+\midrule
+\textbf{Total} & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
 
 \section{Reading List}
+\textbf{Essential}
 \begin{itemize}
-  \item David A.\ Patterson, John L.\ Hennessy. \textit{Computer Organization and
-        Design: The Hardware/Software Interface}.
+  \item A.\ Khudiyev: \textit{A Student's Computer Architecture Book I}, 2026.
+        Free online at
+        \href{https://alikhudiyev.com/courses/self-study/computer-architecture/tutorial/book/2026/05/12/computer-architecture-1.html}{alikhudiyev.com}.
+        Circuit files and Verilog models:
+        \href{https://github.com/AliKhudiyev/alikhudiyev.github.io/tree/main/assets/courses/comp-arch}{DX8 course material}.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item N.\ Nisan, S.\ Schocken: \textit{The Elements of Computing Systems:
+        Building a Modern Computer from First Principles}, 2nd ed., MIT Press, 2021.
   \item Sarah L.\ Harris, David Harris. 2022. \textit{Digital Design and Computer
         Architecture: RISC-V Edition}. Elsevier.
-  \item Andrew B.\ Kahng, Jens Lienig, Igor L.\ Markov, Jin Hu. 2022. \textit{VLSI
-        Physical Design: From Graph Partitioning to Timing Closure}. Springer
-        International Publishing.
-  \item \href{https://docs.riscv.org/reference/isa/_attachments/riscv-privileged.pdf}{RISC-V ISA}
+  \item David A.\ Patterson, John L.\ Hennessy. \textit{Computer Organization and
+        Design: The Hardware/Software Interface}.
+  \item C.\ Petzold: \textit{Code: The Hidden Language of Computer Hardware and
+        Software}, 2nd ed., Microsoft Press, 2022.
 \end{itemize}
 
 \section{Materials and Licence}
@@ -170,8 +226,8 @@ licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.a
 
 \section{Policies}
 \begin{itemize}
-  \item \textbf{Attendance:} TODO(owner)
-  \item \textbf{Late submissions:} TODO(owner)
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
   \item \textbf{Academic integrity:} All submitted work must be your own.
         See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
 \end{itemize}

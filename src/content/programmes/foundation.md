@@ -29,8 +29,7 @@ semesters:
   - title: Semester 3
     modules:
       - title: Digital Design and Computer Architecture II
-        code: CS221-F27
-        subject: computer-science
+        course: cs221-f27
       - title: Data Structures and Algorithms II
         course: cs232-f27
       - title: Calculus II

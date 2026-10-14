@@ -1,0 +1,226 @@
+% =============================================================
+%  Module Description — Digital Design and Computer Architecture II (CS221-F27)
+%  Shown on https://wosm.academy as the course page for CS221-F27.
+%  Compile with: pdflatex cs221-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Digital Design and Computer Architecture II}
+\newcommand{\ModuleCode}{CS221-F27}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 3}
+\newcommand{\Semester}{Fall 2027}
+\newcommand{\Credits}{7 ECTS}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{CS102-F26 Digital Design and Computer Architecture I}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+This module introduces the organisation and design of modern computer systems,
+from the instruction set architecture to the processor implementation, the memory
+hierarchy and input/output. It continues Digital Design and Computer Architecture I
+(CS102-F26), where you built the 8-bit DX8 computer from logic gates, and moves to
+the scale of a real processor: the RISC-V instruction set.
+
+The first part looks at the computer from the programmer's side: data
+representation, assembly-language programming in RISC-V, the Von Neumann
+architecture, other instruction set architectures, system architecture, and memory
+management with caches. The second part goes down to the hardware: Boolean algebra,
+adders and multipliers, memory elements and finite automata, and the design of
+single-cycle, multi-cycle and pipelined processors, together with modern parallel
+systems and the I/O system. The last part treats the design process itself: logic
+minimisation with Karnaugh maps and binary decision diagrams, satisfiability (SAT)
+as a tool for circuit design and verification, and the physical design of chips.
+
+\section{Aims}
+\begin{itemize}
+  \item To explain how software instructions are executed by hardware.
+  \item To develop an understanding of processor design and performance.
+  \item To give practical experience of programming a real instruction set
+        architecture (RISC-V) in assembly language, including its calling convention.
+  \item To explain how the memory hierarchy, caches, parallelism and input/output
+        shape the performance of a computer system.
+  \item To introduce the methods and tools used to design, optimise, verify and
+        physically implement digital circuits.
+\end{itemize}
+
+\section{Learning Outcomes}
+On successful completion of this module, students will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Describe the main components of a computer system and how they interact.
+  \item Write and analyse programs at the assembly-language level.
+  \item Explain datapath and control design, including pipelining and hazards.
+  \item Evaluate the effect of cache and memory hierarchy on performance.
+  \item Design and analyse combinational and sequential circuits, including adders,
+        multipliers, memory elements and finite automata.
+  \item Apply logic minimisation (Karnaugh maps, binary decision diagrams) and SAT
+        solving to circuit design, and describe the main steps of physical design.
+\end{enumerate}
+
+\section{Indicative Content}
+\begin{itemize}
+  \item Performance metrics and Amdahl's law
+  \item Data representation and computer arithmetic
+  \item Instruction set architecture (RISC-V, compared with other ISAs such as MIPS,
+        ARM and x86)
+  \item Assembly-language programming, calling conventions and recursion
+  \item Von Neumann architecture and system architecture
+  \item Memory hierarchy: caches, virtual memory
+  \item Boolean algebra; adders and multipliers; memory elements; finite automata
+  \item Single-cycle and multi-cycle datapath; control unit
+  \item Pipelining, hazards and branch prediction
+  \item I/O, buses and interrupts; implementation at the physical layer
+  \item Introduction to parallel and multicore architectures
+  \item Logic minimisation: Karnaugh maps and binary decision diagrams
+  \item Satisfiability (SAT) in circuit design and verification
+  \item Physical design: partitioning, placement, routing and timing
+\end{itemize}
+
+\section{Weekly Schedule}
+Each week has two lectures, a central exercise with worked examples and a tutorial
+in which the solutions of the week's exercise sheet are discussed.
+
+\begin{tabularx}{\textwidth}{c X l}
+\toprule
+\textbf{Week} & \textbf{Topic} & \textbf{Activity} \\
+\midrule
+1  & Introduction and Data Representation & Lectures + Exercise 1 \\
+2  & Assembly Languages I and II & Lectures + Exercise 2 \\
+3  & Assembly Example; Von Neumann Architecture & Lectures + Exercise 3 \\
+4  & Other ISAs; System Architecture & Lectures + Exercise 4 \\
+5  & Memory Management and Caches I and II & Lectures + Exercise 5 \\
+6  & Boolean Algebra; Adders & Lectures + Exercise 6 \\
+7  & Multiplication; Memory & Lectures + Midterm exam \\
+8  & Processor Architecture I and II & Lectures + Exercise 7 \\
+9  & Finite Automata; Multi-cycle Processor & Lectures + Exercise 8 \\
+10 & Modern Systems and Parallelism I and II & Lectures + Exercise 9 \\
+11 & The I/O System; Physical Layer Implementation & Lectures + Exercise 10 \\
+12 & Pipelining I and II & Lectures + Exercise 11 \\
+13 & Karnaugh Maps; Binary Decision Diagrams & Lectures + Exercise 12 \\
+14 & SAT; Physical Design & Lectures + Exercise 13 \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle: recorded lectures
+with slides, central exercises with worked examples, weekly exercise sheets with
+tutorial sessions, and lab assignments. Assembly programs are written and run in a
+RISC-V simulator, and circuits are built in the Logisim-evolution circuit simulator.
+Questions are discussed in the module channel on Discord and in office hours.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 41 \\
+Labs / Tutorials    & 39 \\
+Independent study   & 120 \\
+\midrule
+\textbf{Total}      & \textbf{200} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+The lab assignments are RISC-V assembly programs and circuit designs, submitted
+weekly. The midterm exam covers Weeks 1--6; the final exam covers the whole module.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Lab assignments     & 20\% & Weekly  & LO2, LO3, LO5 \\
+Midterm exam        & 30\% & Week 7  & LO1, LO2, LO4, LO5 \\
+Final exam          & 50\% & End of module & LO1--LO6 \\
+\midrule
+\textbf{Total}      & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item D.\ A.\ Patterson, J.\ L.\ Hennessy: \textit{Computer Organization and
+        Design: The Hardware/Software Interface, RISC-V Edition}, 2nd ed.,
+        Morgan Kaufmann, 2020.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item J.\ L.\ Hennessy, D.\ A.\ Patterson: \textit{Computer Architecture:
+        A Quantitative Approach}, 6th ed., Morgan Kaufmann, 2017.
+  \item W.\ Stallings: \textit{Computer Organization and Architecture}, 11th ed.,
+        Pearson, 2019.
+  \item S.\ L.\ Harris, D.\ Harris: \textit{Digital Design and Computer
+        Architecture: RISC-V Edition}, Morgan Kaufmann, 2021.
+  \item A.\ B.\ Kahng, J.\ Lienig, I.\ L.\ Markov, J.\ Hu: \textit{VLSI Physical
+        Design: From Graph Partitioning to Timing Closure}, 2nd ed., Springer, 2022.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

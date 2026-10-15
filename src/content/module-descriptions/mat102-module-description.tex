@@ -1,0 +1,222 @@
+% =============================================================
+%  Module Description — Linear Algebra (MAT102-S27)
+%  Shown on https://wosm.academy as the course page for MAT102-S27.
+%  Compile with: pdflatex mat102-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Linear Algebra}
+\newcommand{\ModuleCode}{MAT102-S27}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 2}
+\newcommand{\Semester}{Spring 2027}
+\newcommand{\Credits}{7 ECTS}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{MAT101-F26 Discrete Structures}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+Linear Algebra is the study of vectors, linear maps and the matrices that
+represent them. It is one of the most widely used areas of mathematics in computer
+science: graphics, machine learning, data analysis, search engines, coding theory
+and scientific computing all rest on it.
+
+The module covers:
+\begin{itemize}
+  \item Systems of linear equations, Gaussian elimination and matrix algebra
+        (first 4--5 weeks)
+  \item Vector spaces, linear maps, bases and dimension, determinants
+  \item Inner products, orthogonality and least squares
+  \item Eigenvalues, diagonalisation, the spectral theorem and the singular value
+        decomposition
+\end{itemize}
+
+The module balances the abstract view (vector spaces and linear maps) with
+computation (matrices and algorithms). Students implement the core algorithms in
+short programming exercises and meet applications such as PageRank, image
+compression and linear regression. It builds on the sets, functions and algebraic
+structures of Discrete Structures and is required for Probability Theory and
+Statistics.
+
+\section{Aims}
+\begin{itemize}
+  \item Introduce vector spaces and linear maps as the common language for many problems in computing and science.
+  \item Develop fluency with matrix computations and the algorithms behind them, including their cost and numerical behaviour.
+  \item Build geometric intuition for subspaces, projections, orthogonality and eigenvectors.
+  \item Prepare students for probability, statistics, machine learning, graphics and numerical methods.
+\end{itemize}
+
+\section{Learning Outcomes}
+On successful completion of this module, students will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item Solve systems of linear equations with Gaussian elimination and LU factorisation, and describe the solution set in terms of rank and null space.
+  \item Work with abstract vector spaces: decide linear independence, find bases and dimensions, and apply the rank--nullity theorem.
+  \item Represent linear maps by matrices, change basis, and compute and interpret determinants.
+  \item Use inner products to compute orthogonal projections, apply Gram--Schmidt and QR factorisation, and solve least-squares problems.
+  \item Compute eigenvalues and eigenvectors, diagonalise matrices where possible, and apply the spectral theorem to symmetric matrices.
+  \item Compute and interpret the singular value decomposition and apply it to low-rank approximation and data analysis.
+  \item Implement core linear algebra algorithms in code and estimate their computational cost.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & Vectors in $\mathbb{R}^n$: linear combinations, dot product, length, angle \\
+2  & Systems of linear equations; Gaussian and Gauss--Jordan elimination \\
+3  & Matrix operations; matrix multiplication as composition \\
+4  & Inverse matrices; elementary matrices; LU factorisation \\
+5  & Cost of elimination; pivoting and numerical stability \\
+6  & Vector spaces and subspaces; fields beyond $\mathbb{R}$ (e.g.\ $\mathbb{F}_2$) \\
+7  & Span, linear independence, basis, dimension \\
+8  & The four fundamental subspaces; rank; rank--nullity theorem \\
+9  & Linear maps: kernel, image, injectivity and surjectivity \\
+10 & Matrix of a linear map; change of basis; similarity \\
+11 & Determinants: definition, properties, cofactor expansion \\
+12 & Determinants: volume, invertibility, Cramer's rule \\
+13 & Inner product spaces; norms; Cauchy--Schwarz inequality \\
+14 & Orthogonality; orthogonal complements; orthogonal projections \\
+15 & Gram--Schmidt process; QR factorisation \\
+16 & Least squares and linear regression \\
+17 & Eigenvalues and eigenvectors; characteristic polynomial \\
+18 & Diagonalisation; powers of matrices; linear recurrences (Fibonacci) \\
+19 & Markov chains and PageRank \\
+20 & Symmetric matrices; the spectral theorem \\
+21 & Quadratic forms; positive definite matrices \\
+22 & Singular value decomposition \\
+23 & Low-rank approximation; principal component analysis \\
+24 & Iterative methods: power iteration; introduction to Jordan form \\
+25 & Applications: computer graphics transforms, linear codes over $\mathbb{F}_2$ \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle: lecture notes and
+recorded lectures for each unit, tutorial problem sheets with worked solutions,
+short quizzes, and the briefs for the two projects. Problem sheets are for practice
+and are not marked. Questions are discussed in the module channel on Discord and in
+office hours. Independent study includes reading, problem sheets and project work.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 50 \\
+Labs / Tutorials    & 40 \\
+Independent study   & 120 \\
+\midrule
+\textbf{Total}      & \textbf{210} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Knowledge is assessed with weekly unit quizzes, two programming projects
+and a final exam. Labs are used for the programming work.
+\begin{itemize}
+  \item \textbf{Project 1 -- Solving linear systems:} implement Gaussian elimination
+        with partial pivoting and LU factorisation, measure cost and numerical error,
+        and fit a model to data by least squares.
+  \item \textbf{Project 2 -- Eigenvectors and the SVD:} rank web pages with
+        PageRank by power iteration, and compress images with a truncated SVD,
+        explaining the trade-off between rank and error.
+\end{itemize}
+The final exam tests the standard computations, the choice of method for a problem
+and short proofs about vector spaces and linear maps.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Unit quizzes (best 10 of 12) & 20\% & Weekly & LO1--LO6 \\
+Project 1: Solving linear systems & 20\% & Week 6 & LO1, LO4, LO7 \\
+Project 2: Eigenvectors and the SVD & 20\% & Week 12 & LO5--LO7 \\
+Final exam (3 hours, written) & 40\% & End of term & LO1--LO6 \\
+\midrule
+\textbf{Total}      & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item G.\ Strang: \textit{Introduction to Linear Algebra}, 6th ed., Wellesley-Cambridge Press, 2023.
+  \item J.\ Hefferon: \textit{Linear Algebra}, 4th ed., 2020. Free online at \href{https://hefferon.net/linearalgebra/}{hefferon.net/linearalgebra}.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item S.\ Axler: \textit{Linear Algebra Done Right}, 4th ed., Springer, 2024 (open access).
+  \item S.\ Boyd, L.\ Vandenberghe: \textit{Introduction to Applied Linear Algebra: Vectors, Matrices, and Least Squares}, Cambridge University Press, 2018.
+  \item L.\ N.\ Trefethen, D.\ Bau: \textit{Numerical Linear Algebra}, SIAM, 1997.
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

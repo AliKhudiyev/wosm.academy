@@ -144,8 +144,10 @@ const programmes = defineCollection({
           modules: z.array(
             z.object({
               title: z.string(),
-              /** Course id once the module is offered, e.g. cs101-f26. */
+              /** Course id once the module has a course page, e.g. cs101-f26. */
               course: reference('courses').optional(),
+              /** Module code before a course page exists, e.g. CS221-F27. */
+              code: z.string().optional(),
               subject: reference('subjects').optional(),
             }),
           ),

@@ -15,23 +15,22 @@ To find them all in the source: `grep -rn "TODO(owner)\|<Todo" src`.
       the outlined SVGs in `src/assets/brand/`), and **delete `src/pages/brand-preview.astro`**. A is in use until then.
 
 ### Courses (`src/content/courses/*.md`)
-Offered now (`status: open`): CS101-F26, CS102-F26, M101-F26. Planned (`status: planned`, no enrol button): CS201,
-CS302, CS401, CS402, CS501, CS502, CS503, M102-S27, M103-S27, M201-F27, M202-S28.
-- [ ] `durationWeeks: 12` and `effortHoursPerWeek: 4–6` are identical for CS101, CS102 and M101 — the same values as the
-      examples in the original file comments. Confirm they are real (CS102 has 22 syllabus units, M101 has 27).
+Offered now (`status: open`): CS101-F26, CS102-F26, MAT101-F26. Planned (`status: planned`, no enrol button): CS103-S27,
+CS232-F27, CS203-S28, CS204-S28, CS301-F28, CS302-F28, CS303-F28, MAT102-S27, MAT103-S27, MAT231-F27, MAT202-S28.
+Codes follow the convention in CLAUDE.md (“Course codes”).
+- [ ] `durationWeeks: 12` and `effortHoursPerWeek: 4–6` are identical for CS101, CS102 and MAT101 — the same values as
+      the examples in the original file comments. Confirm they are real (CS102 has 22 syllabus units, MAT101 has 27).
 - [ ] Confirm the one-line `summary` of every course. The planned modules' summaries were drafted from the first
       paragraph of their module descriptions.
 - [ ] When a planned module opens: set `status: open`, `moodleUrl`, `durationWeeks` and `effortHoursPerWeek`.
-- [ ] Course codes: CS2xx–CS5xx have no term suffix (`CS201`), the maths modules do (`M102-S27`). The code is also the
-      page address (`/courses/computer-science/cs201/`), so pick one convention before the links are shared.
 
 ### Module descriptions (`src/content/module-descriptions/*.tex`)
 Each course page shows its .tex file; `npm run pdfs` recompiles the PDFs offered for download (run it after every edit).
-- [ ] `\Credits` for all computer science modules (CS101–CS503). The maths modules have them (7 or 8 ECTS);
-      semester totals on /programme/ appear once every module in the semester has a number.
+- [ ] Computer science credits were set from the study hours at 30 hours per credit, rounded, as in the maths modules
+      (CS103/CS232/CS203/CS302: 7, CS204/CS303: 8, CS301: 6). CS101 and CS102 have no hours yet and were given 7 ECTS,
+      like MAT101 — confirm, and fill in their hours tables.
 - [ ] CS101, CS102: hours table, *Aims*, assessment weights, *Policies* → Attendance and Late submissions
-- [ ] `\Semester` is just “Spring” or “Fall” in the CS2xx–CS5xx files; the maths files give the year (e.g. “Spring 2027”)
-- [ ] **Digital Design and Computer Architecture II** (Semester 3) has no module description yet
+- [ ] **Digital Design and Computer Architecture II** (CS221-F27, Semester 3) has no module description yet
 - [ ] Obvious typos were fixed when the course texts were merged — check you agree: “respondible”, “trasfer”,
       “relvant”, “sicnece”, “grpah”, “Preidates”, “Propostional”, “Davind Harris”, “SPringer”, Gries & Schneider
       publisher “Spring” → Springer, the RISC-V link `httsp://` → `https://`; CS101: “help them learn” → “help you learn”;
@@ -43,8 +42,9 @@ Each course page shows its .tex file; `npm run pdfs` recompiles the PDFs offered
       formally transferable credits.”)
 - [ ] Credits/hours for the thesis (after Semester 5)
 - [ ] Advanced programme (3–4 semesters): structure and modules when ready — set `status: available` and add semesters
-- [ ] New module: add its course `.md`, its `…-module-description.tex` (copy `_template.tex`), run `npm run pdfs`, and
-      set `course:` on the module in `src/content/programmes/foundation.md`
+- [ ] New module: give it a code (CLAUDE.md, “Course codes”), add its course `.md` and its
+      `<code>-module-description.tex` (copy `_template.tex`), run `npm run pdfs`, and set `course:` on the module in
+      `src/content/programmes/foundation.md`
 
 ### Subjects (`src/content/subjects/`)
 - [ ] Confirm the summaries and body text for Computer Science and Mathematics (rewritten from the module descriptions

@@ -1,0 +1,221 @@
+% =============================================================
+%  Module Description — Calculus I (MAT103-S27)
+%  Shown on https://wosm.academy as the course page for MAT103-S27.
+%  Compile with: pdflatex mat103-module-description.tex
+%  Write "TODO(owner): ..." where information is still missing;
+%  the website highlights it.
+% =============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+% ---------- Module details (edit these) ----------------------
+% \ModuleCode must equal the course's `code` in src/content/courses/.
+\newcommand{\ModuleTitle}{Calculus I}
+\newcommand{\ModuleCode}{MAT103-S27}
+\newcommand{\Programme}{Foundation programme}
+\newcommand{\Level}{Semester 2}
+\newcommand{\Semester}{Spring 2027}
+\newcommand{\Credits}{7 ECTS}
+\newcommand{\ModuleLeader}{Dr. Ali Khudiyev}
+\newcommand{\Email}{ali.khudiyev@wosm.academy}
+\newcommand{\OfficeHours}{Monday--Friday, 10:00--17:00 (Baku time, UTC+4)}
+\newcommand{\Prerequisites}{MAT101-F26 Discrete Structures}
+
+% ---------- Styling ------------------------------------------
+\definecolor{accent}{RGB}{0,70,130}
+\titleformat{\section}{\large\bfseries\color{accent}}{\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\setlist{itemsep=2pt, topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small \ModuleCode\ -- \ModuleTitle}
+\rhead{\small Module Description}
+\cfoot{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{accent} \ModuleTitle}\\[4pt]
+  {\large Module Description}
+\end{center}
+\vspace{6pt}
+
+% ---------- Summary table (not shown on the website: the course page
+% shows these details from the macros above) --------------------------
+\begin{tabularx}{\textwidth}{>{\bfseries}l X >{\bfseries}l X}
+\toprule
+Module code   & \ModuleCode    & Credits      & \Credits \\
+Programme     & \Programme     & Level        & \Level \\
+Semester      & \Semester      & Prerequisites & \Prerequisites \\
+Module leader & \ModuleLeader  & Email        & \href{mailto:\Email}{\Email} \\
+Office hours  & \multicolumn{3}{l}{\OfficeHours} \\
+\bottomrule
+\end{tabularx}
+
+% ---------- Sections (shown on the website) ------------------
+\section{Module Overview}
+Calculus I is the first module of analysis in the curriculum. It builds the
+calculus of functions of one real variable on a precise footing: the real numbers,
+limits and continuity come first, and differentiation and integration are then
+developed from them rather than taken as a set of rules.
+
+The module covers:
+\begin{itemize}
+  \item The real numbers, sequences and limits (first 4--5 weeks)
+  \item Continuity, differentiation and its applications: optimisation,
+        approximation and Newton's method
+  \item The Riemann integral, the Fundamental Theorem of Calculus and techniques of
+        integration
+\end{itemize}
+
+Throughout, the module links the theory to computer science: convergence of
+iterative algorithms, asymptotic growth of functions, numerical approximation and
+floating-point error. It prepares students for Calculus II and for Probability
+Theory and Statistics.
+
+\section{Aims}
+\begin{itemize}
+  \item Give a rigorous understanding of limits, continuity, derivatives and integrals of functions of one real variable.
+  \item Develop fluency in computing derivatives and integrals and in using them to model and solve problems.
+  \item Train students to read and write short, correct proofs in analysis using $\varepsilon$--$\delta$ arguments.
+  \item Show how calculus underpins algorithms and numerical methods used in computer science.
+\end{itemize}
+
+\section{Learning Outcomes}
+On successful completion of this module, students will be able to:
+\begin{enumerate}[label=LO\arabic*.]
+  \item State the completeness property of the real numbers and use it to reason about suprema, infima and convergence of sequences.
+  \item Compute limits of sequences and functions, and prove simple limit and continuity statements with $\varepsilon$--$\delta$ arguments.
+  \item Differentiate elementary functions and apply the Mean Value Theorem, L'H\^opital's rule and Taylor polynomials to analyse and approximate functions.
+  \item Solve optimisation and related-rates problems and use Newton's method and bisection to approximate roots, estimating the error.
+  \item Evaluate definite and indefinite integrals using the Fundamental Theorem of Calculus, substitution, integration by parts and partial fractions.
+  \item Use integrals to compute areas, volumes and averages, and compare the growth of functions as used in asymptotic analysis of algorithms.
+\end{enumerate}
+
+\section{Syllabus}
+\begin{tabularx}{\textwidth}{c X}
+\toprule
+\textbf{Unit} & \textbf{Topic} \\
+\midrule
+1  & The real numbers: ordered fields, absolute value, inequalities \\
+2  & Completeness: supremum, infimum, the Archimedean property \\
+3  & Sequences: convergence, limit laws, bounded and monotone sequences \\
+4  & Subsequences, the Bolzano--Weierstrass theorem, Cauchy sequences \\
+5  & Functions: elementary functions, inverses, exponential and logarithm \\
+6  & Limits of functions: $\varepsilon$--$\delta$ definition, one-sided limits \\
+7  & Continuity and its algebra \\
+8  & Intermediate Value Theorem, Extreme Value Theorem; the bisection method \\
+9  & Uniform continuity \\
+10 & The derivative: definition, rules, chain rule \\
+11 & Derivatives of inverse, exponential, logarithmic and trigonometric functions \\
+12 & Mean Value Theorem, Rolle's theorem, monotonicity \\
+13 & L'H\^opital's rule; growth rates and comparison with $O$-notation \\
+14 & Higher derivatives, convexity, curve sketching \\
+15 & Optimisation and related rates \\
+16 & Newton's method and its convergence \\
+17 & Taylor polynomials and Taylor's theorem with remainder \\
+18 & The Riemann integral: partitions, upper and lower sums \\
+19 & Integrability of continuous and monotone functions; properties of the integral \\
+20 & The Fundamental Theorem of Calculus \\
+21 & Integration by substitution and by parts \\
+22 & Partial fractions and trigonometric integrals \\
+23 & Improper integrals \\
+24 & Applications: area, volume, arc length, average value \\
+25 & Numerical integration: trapezoidal and Simpson's rules, error bounds \\
+26 & Sums and integrals: bounding $\sum f(k)$ by $\int f$, harmonic numbers \\
+\bottomrule
+\end{tabularx}
+
+\section{Teaching and Learning Methods}
+The module is self-paced. All materials are provided on Moodle: lecture notes and
+recorded lectures for each unit, tutorial problem sheets with worked solutions,
+short quizzes, and the briefs for the two projects. Problem sheets are for practice
+and are not marked. Questions are discussed in the module channel on Discord and in
+office hours. Independent study includes reading, problem sheets and project work.
+
+\begin{tabularx}{0.6\textwidth}{X r}
+\toprule
+\textbf{Activity} & \textbf{Hours} \\
+\midrule
+Lectures            & 52 \\
+Labs / Tutorials    & 28 \\
+Independent study   & 130 \\
+\midrule
+\textbf{Total}      & \textbf{210} \\
+\bottomrule
+\end{tabularx}
+
+\section{Assessment}
+Knowledge is assessed with weekly unit quizzes, two projects and a final
+exam. Quizzes check computational fluency. The projects combine short proofs,
+calculation and a small amount of code:
+\begin{itemize}
+  \item \textbf{Project 1 -- Roots and approximation:} implement bisection and
+        Newton's method, compare their convergence, and use Taylor polynomials to
+        approximate functions with proven error bounds.
+  \item \textbf{Project 2 -- Integrals and asymptotics:} implement the trapezoidal
+        and Simpson's rules with error bounds, and use integrals to bound sums such as
+        harmonic numbers that appear in the analysis of algorithms.
+\end{itemize}
+The final exam tests whether students can choose and apply the right technique and
+justify each step.
+
+\begin{tabularx}{\textwidth}{X c c c}
+\toprule
+\textbf{Component} & \textbf{Weight} & \textbf{Due} & \textbf{LOs} \\
+\midrule
+Unit quizzes (best 10 of 12) & 20\% & Weekly & LO1--LO3, LO5 \\
+Project 1: Roots and approximation & 20\% & Week 7 & LO2--LO4 \\
+Project 2: Integrals and asymptotics & 20\% & Week 12 & LO5, LO6 \\
+Final exam (3 hours, written) & 40\% & End of term & LO1--LO6 \\
+\midrule
+\textbf{Total}      & \textbf{100\%} & & \\
+\bottomrule
+\end{tabularx}
+
+\section{Reading List}
+\textbf{Essential}
+\begin{itemize}
+  \item M.\ Spivak: \textit{Calculus}, 4th ed., Publish or Perish, 2008.
+  \item G.\ Strang, E.\ Herman: \textit{Calculus, Volume 1}, OpenStax, 2016. Free online at \url{https://openstax.org/details/books/calculus-volume-1}.
+\end{itemize}
+\textbf{Recommended}
+\begin{itemize}
+  \item J.\ Stewart, D.\ Clegg, S.\ Watson: \textit{Calculus: Early Transcendentals}, 9th ed., Cengage, 2020.
+  \item T.\ M.\ Apostol: \textit{Calculus, Volume 1}, 2nd ed., Wiley, 1967.
+  \item S.\ Abbott: \textit{Understanding Analysis}, 2nd ed., Springer, 2015.
+  \item R.\ L.\ Graham, D.\ E.\ Knuth, O.\ Patashnik: \textit{Concrete Mathematics}, 2nd ed., Addison-Wesley, 1994 (Chapter 9, asymptotics).
+\end{itemize}
+
+\section{Materials and Licence}
+Course materials are published under the
+\href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons Attribution-ShareAlike 4.0}
+licence unless stated otherwise. See \href{https://wosm.academy/licence/}{wosm.academy/licence} for details.
+
+\section{Policies}
+\begin{itemize}
+  \item \textbf{Attendance:} Attendance is not mandatory. The module is self-paced, so you can study the materials when it suits you.
+  \item \textbf{Late submissions:} Work submitted after the deadline is penalised.
+  \item \textbf{Academic integrity:} All submitted work must be your own.
+        See the \href{https://wosm.academy/code-of-conduct/}{Code of Conduct}.
+\end{itemize}
+
+\end{document}

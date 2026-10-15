@@ -9,7 +9,7 @@ materials/
 │   ├── wosm.sty               # colours, fonts, glider mark and logo, \course, box style
 │   ├── wosm-slides.cls        # Beamer class for lecture slides
 │   └── wosm-article.cls       # A4 class for exercise sheets and project briefs
-└── <course code>/             # e.g. m201-f27
+└── <course code>/             # e.g. mat231-f27
     └── lecture-01/            # one folder per lecture
         ├── lecture-01.tex
         ├── lecture-01.pdf           # slides, with overlays
@@ -23,7 +23,7 @@ Needs `pdflatex` (TeX Live or MacTeX) with Beamer, TikZ/pgfplots and tcolorbox.
 ```sh
 npm run materials                  # everything
 npm run materials -- lecture-02    # only paths containing "lecture-02"
-npm run materials -- m201-f27      # one course
+npm run materials -- mat231-f27     # one course
 ```
 
 Slides give `<name>.pdf` and `<name>-handout.pdf`; sheets (`wosm-article`) give `<name>.pdf` and
@@ -32,7 +32,7 @@ Slides give `<name>.pdf` and `<name>-handout.pdf`; sheets (`wosm-article`) give 
 To compile by hand, point TeX at the templates (the trailing `:` keeps the default search path):
 
 ```sh
-cd materials/m201-f27/lecture-01
+cd materials/mat231-f27/lecture-01
 TEXINPUTS=../../templates//: pdflatex lecture-01.tex     # twice, for the outline and frame numbers
 ```
 
@@ -42,7 +42,7 @@ Copy an existing lecture folder, rename the `.tex` file, and change the title bl
 
 ```latex
 \documentclass{wosm-slides}
-\course{M201-F27}{Calculus II}
+\course{MAT231-F27}{Calculus II}
 \title[L03 \textperiodcentered\ Short title]{Title}
 \subtitle{Subtitle}
 \author{Dr.\ Ali Khudiyev}

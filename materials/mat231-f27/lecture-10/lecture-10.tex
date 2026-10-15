@@ -1,0 +1,376 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 10
+%  Unit 10: Partial derivatives; differentiability; the total
+%  derivative
+%
+%  Build from the repository root:   npm run materials -- lecture-10
+%  This writes lecture-10.pdf (slides, with overlays) and
+%  lecture-10-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\va}{\mathbf{a}}
+\newcommand{\vh}{\mathbf{h}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L10 \textperiodcentered\ Partial derivatives and differentiability]{Partial derivatives and differentiability}
+\subtitle{Partial derivatives; differentiability; the total derivative}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 10\enspace\textperiodcentered\enspace Unit 10\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item Norms on $\R^n$; all of them give the same limits.
+    \item Open sets, closed sets, compact (closed and bounded) sets.
+    \item Limits must agree along every path: $\frac{xy}{x^2+y^2}$ has no limit at $(0, 0)$, and
+      $\frac{x^2 y}{x^4 + y^2}$ fools every straight line.
+    \item Continuous in each variable separately does not mean continuous.
+  \end{itemize}
+  \vskip0.6em
+  Today: derivatives in $\R^n$. The obvious idea --- differentiate in one variable at a time ---
+  is useful, but not enough. The right notion is a \emph{linear approximation}.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 3} (OpenStax), Sections 4.3 and 4.4.\par}
+\end{frame}
+
+% =============================================================
+\section{Partial derivatives}
+
+\begin{frame}{Freeze all variables but one}
+  \begin{definition}
+    Let $f\colon U \to \R$, $U \subseteq \R^n$ open, $\va \in U$, and $\mathbf{e}_i$ the $i$-th unit
+    vector. The \textbf{partial derivative} of $f$ with respect to $x_i$ at $\va$ is
+    \[ \pd{f}{x_i}(\va) = \lim_{t \to 0} \frac{f(\va + t\,\mathbf{e}_i) - f(\va)}{t} , \]
+    if the limit exists. Other notations: $f_{x_i}(\va)$, \ $\partial_i f(\va)$, \ $D_i f(\va)$.
+  \end{definition}
+  \pause
+  For $f(x, y)$: \ $f_x(a, b)$ is the ordinary derivative of the one-variable function
+  $x \mapsto f(x, b)$ at $x = a$. All other variables are constants.
+\end{frame}
+
+\begin{frame}{A picture}
+  \begin{columns}[c]
+    \begin{column}{0.54\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[width=\linewidth, height=6cm, view={-35}{25},
+            axis lines=center, axis line style={wosm-muted},
+            ticks=none, xlabel={$x$}, ylabel={$y$}, zlabel={$z$},
+            label style={font=\scriptsize, text=wosm-muted},
+            xmin=-1.8, xmax=1.8, ymin=-1.8, ymax=1.8, zmin=0, zmax=4.5]
+          \addplot3[mesh, draw=wosm-accent!40, domain=-1.4:1.4, y domain=-1.4:1.4,
+            samples=13, samples y=13] {4 - x^2 - 0.5*y^2};
+          \addplot3[wosm-brick, very thick, domain=-1.4:1.4, samples=40, samples y=0]
+            ({x}, {1}, {3.5 - x^2});
+          \addplot3[wosm-text, thick, domain=-0.45:0.45, samples=2, samples y=0]
+            ({1 + x}, {1}, {2.5 - 2*x});
+          \addplot3[only marks, mark=*, mark size=1.5pt, wosm-text] coordinates {(1,1,2.5)};
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \small
+      $f(x, y) = 4 - x^2 - \frac12 y^2$.
+      \begin{itemize}
+        \item Cut the surface with the plane $y = 1$: the curve
+          {\color{wosm-brick}$z = 3.5 - x^2$}.
+        \item $f_x(1, 1)$ is the slope of this curve at $x = 1$: \ $-2$.
+        \item Likewise $f_y(1, 1) = -1$ is the slope along the cut $x = 1$.
+      \end{itemize}
+      Partial derivatives see only the directions of the coordinate axes.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Computing partial derivatives}
+  Use the rules of one-variable calculus, treating the other variables as constants.
+  \begin{itemize}
+    \item $f(x, y) = x^2 y + \sin(xy)$:
+      \uncover<2->{\ $f_x = 2xy + y\cos(xy)$, \quad $f_y = x^2 + x\cos(xy)$.}
+    \item $f(x, y, z) = x\, e^{yz}$:
+      \uncover<3->{\ $f_x = e^{yz}$, \quad $f_y = xz\, e^{yz}$, \quad $f_z = xy\, e^{yz}$.}
+    \item $f(\vx) = \norm{\vx} = \sqrt{x_1^2 + \dots + x_n^2}$, \ $\vx \ne \mathbf{0}$:
+      \uncover<4->{\ $\pd{f}{x_i} = \dfrac{2x_i}{2\sqrt{x_1^2 + \dots + x_n^2}} = \dfrac{x_i}{\norm{\vx}}$.}
+  \end{itemize}
+  \uncover<5->{
+  \begin{remark}[A function of many weights]
+    For a loss $L(w_1, \dots, w_n)$, \ $\pd{L}{w_i}$ says how much the loss changes when only the
+    weight $w_i$ moves. Training a model needs all $n$ of them at once (Units 11 and 15).
+  \end{remark}}
+\end{frame}
+
+\begin{frame}{Higher partial derivatives}
+  Differentiate again: $f_{xx} = (f_x)_x$, \ $f_{xy} = (f_x)_y$, \ $f_{yx}$, \ $f_{yy}$; also written
+  $\frac{\partial^2 f}{\partial x^2}$, \ $\frac{\partial^2 f}{\partial y\, \partial x}$, \dots
+  \pause
+  \begin{example}
+    $f = x^2 y + \sin(xy)$: \
+    $f_{xy} = 2x + \cos(xy) - xy\sin(xy) = f_{yx}$.
+  \end{example}
+  \pause
+  \begin{theorem}[Schwarz, or Clairaut]
+    If $f_{xy}$ and $f_{yx}$ exist near $\va$ and are continuous at $\va$, then
+    $f_{xy}(\va) = f_{yx}(\va)$.
+  \end{theorem}
+  {\small Without continuity it can fail: for $f = \frac{xy(x^2 - y^2)}{x^2 + y^2}$, $f(0,0) = 0$, one
+  finds $f_{xy}(0, 0) = -1$ but $f_{yx}(0, 0) = 1$. The Hessian (Unit 13) is symmetric thanks to
+  this theorem.\par}
+\end{frame}
+
+% =============================================================
+\section{Partial derivatives are not enough}
+
+\begin{frame}{A warning from Lecture 9}
+  \begin{example}
+    $f(x, y) = \frac{xy}{x^2 + y^2}$ for $(x, y) \ne (0, 0)$, \ $f(0, 0) = 0$.
+    \begin{itemize}
+      \item $f(x, 0) = 0$ and $f(0, y) = 0$, so $f_x(0, 0) = 0$ and $f_y(0, 0) = 0$.
+      \item But $f$ is not even continuous at $(0, 0)$.
+    \end{itemize}
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item In one variable, a differentiable function is continuous. So ``all partial derivatives
+      exist'' cannot be the right meaning of ``differentiable'' in $\R^n$.
+    \item The partial derivatives only look along two lines through the point. A good
+      derivative must describe $f$ near $\va$ in \emph{all} directions at once.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{The total derivative}
+
+\begin{frame}{Back to one variable}
+  $f\colon \R \to \R$ is differentiable at $a$ if and only if there is a number $f'(a)$ with
+  \[ f(a + h) = f(a) + f'(a)\, h + r(h), \qquad \frac{r(h)}{h} \to 0 . \]
+  \pause
+  \begin{itemize}
+    \item $h \mapsto f'(a)\, h$ is a \emph{linear map} $\R \to \R$: the best linear approximation of
+      $f(a + h) - f(a)$.
+    \item The error $r(h)$ is small \emph{compared with $h$}: we write $r(h) = o(h)$.
+    \item This version generalises: replace the number $f'(a)$ by a linear map $\R^n \to \R^m$,
+      that is, by a matrix.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Differentiability in $\R^n$}
+  \begin{definition}
+    Let $U \subseteq \R^n$ be open. $f\colon U \to \R^m$ is \textbf{differentiable at} $\va \in U$
+    if there is a linear map $L\colon \R^n \to \R^m$ (an $m \times n$ matrix) such that
+    \[ \lim_{\vh \to \mathbf{0}} \frac{\norm{f(\va + \vh) - f(\va) - L\vh}}{\norm{\vh}} = 0 . \]
+    $L$ is the \textbf{total derivative} of $f$ at $\va$, written $Df(\va)$.
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item In words: $f(\va + \vh) = f(\va) + Df(\va)\,\vh + o(\norm{\vh})$.
+    \item $\vh \to \mathbf{0}$ in every way at once --- this is where the paths of Lecture 9 come in.
+    \item $f$ is differentiable on $U$ if it is differentiable at every point of $U$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What the derivative must be}
+  \begin{theorem}
+    If $f$ is differentiable at $\va$, then
+    \begin{enumerate}
+      \item $f$ is continuous at $\va$;
+      \item all partial derivatives $\partial f_i / \partial x_j\,(\va)$ exist, and $Df(\va)$ is the
+        $m \times n$ matrix of them: row $i$, column $j$ holds $\partial f_i / \partial x_j\,(\va)$.
+    \end{enumerate}
+  \end{theorem}
+  \pause
+  \begin{proof}
+    1. $f(\va + \vh) - f(\va) = L\vh + o(\norm{\vh}) \to \mathbf{0}$.
+    \ 2. With $\vh = t\,\mathbf{e}_j$:
+    $\frac{f(\va + t\mathbf{e}_j) - f(\va)}{t} \to L\mathbf{e}_j$, the $j$-th column of $L$;
+    so that column is $\partial f / \partial x_j\,(\va)$.
+  \end{proof}
+  {\small So $Df(\va)$ is unique, and we compute it with partial derivatives --- once it exists.\par}
+\end{frame}
+
+\begin{frame}{The case $m = 1$: tangent planes}
+  For $f\colon \R^2 \to \R$, \ $Df(a, b) = \bigl(f_x(a, b) \ \ f_y(a, b)\bigr)$, a $1 \times 2$ matrix, and
+  \[ f(a + h, b + k) \approx f(a, b) + f_x(a, b)\, h + f_y(a, b)\, k . \]
+  The graph of the right-hand side is the \textbf{tangent plane}
+  $z = f(a, b) + f_x(a, b)(x - a) + f_y(a, b)(y - b)$.
+  \pause
+  \begin{example}[$f(x, y) = x^2 + y^2$ at $(1, 2)$]
+    $f = 5$, \ $f_x = 2$, \ $f_y = 4$: \ tangent plane $z = 5 + 2(x - 1) + 4(y - 2)$. \
+    Then $f(1.1, 1.9) \approx 5 + 0.2 - 0.4 = 4.8$; the exact value is $4.82$.
+  \end{example}
+  {\small For general $n$, \ $Df(\va)$ is the row of partial derivatives. Its transpose is the
+  \emph{gradient} $\nabla f(\va)$: next lecture.\par}
+\end{frame}
+
+\begin{frame}{Checking the definition}
+  \begin{example}[$f(x, y) = xy$ is differentiable at every $(a, b)$]
+    $f(a + h, b + k) = ab + bh + ak + hk$. With $L(h, k) = bh + ak$ the remainder is $hk$, and as
+    $|hk| \le \frac12(h^2 + k^2)$: \ $\frac{|hk|}{\norm{(h, k)}} \le \frac12 \norm{(h, k)} \to 0$.
+  \end{example}
+  \pause
+  \begin{example}[$g(x, y) = \sqrt{|xy|}$ is not differentiable at $(0, 0)$]
+    $g$ is continuous, and $g_x(0, 0) = g_y(0, 0) = 0$, so the only candidate is $L = 0$.
+    But along the diagonal: $\frac{g(t, t) - 0}{\norm{(t, t)}} = \frac{|t|}{\sqrt2\, |t|} = \frac{1}{\sqrt2}
+    \not\to 0$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{A practical test}
+  \begin{theorem}
+    If all partial derivatives of $f$ exist near $\va$ and are continuous at $\va$, then $f$ is
+    differentiable at $\va$.
+  \end{theorem}
+  \pause
+  \begin{proof}[Proof for $n = 2$]
+    Change one variable at a time, with the mean value theorem in each:
+    $f(a + h, b + k) - f(a, b) = f_x(\xi, b + k)\, h + f_y(a, \eta)\, k$,
+    with $\xi$ between $a$ and $a + h$, $\eta$ between $b$ and $b + k$. By continuity
+    $f_x(\xi, b + k) = f_x(a, b) + o(1)$ and $f_y(a, \eta) = f_y(a, b) + o(1)$ as $(h, k) \to 0$.
+    So the remainder is $o(1)\, h + o(1)\, k = o(\norm{(h, k)})$.
+  \end{proof}
+  {\small Such functions are called $C^1$: polynomials, $e^{xy}$, $\sin(x^2 + y)$, $\norm{\vx}$ away
+  from $\mathbf 0$.\par}
+\end{frame}
+
+\begin{frame}{How the notions fit together}
+  \begin{center}
+  \begin{tikzpicture}[box/.style={draw=wosm-rule, fill=wosm-box, rounded corners=1pt,
+      inner sep=5pt, font=\small, align=center}, arr/.style={-latex, thick, wosm-accent}]
+    \node[box] (c1) at (0,0) {$C^1$\\[-1pt]{\scriptsize partials exist and are continuous}};
+    \node[box] (d) at (5,0) {differentiable};
+    \node[box] (c) at (9.2,0.8) {continuous};
+    \node[box] (p) at (9.2,-0.8) {partials exist};
+    \draw[arr] (c1) -- (d);
+    \draw[arr] (d) -- (c);
+    \draw[arr] (d) -- (p);
+  \end{tikzpicture}
+  \end{center}
+  \pause
+  No arrow can be reversed:
+  \begin{itemize}
+    \item partials exist, not continuous: \ $\frac{xy}{x^2 + y^2}$;
+    \item continuous and partials exist, not differentiable: \ $\sqrt{|xy|}$;
+    \item differentiable, not $C^1$: \ $(x^2 + y^2)\sin\frac{1}{\sqrt{x^2 + y^2}}$ at $(0, 0)$
+      (practice).
+  \end{itemize}
+  In practice: compute the partial derivatives, check that they are continuous, and conclude.
+\end{frame}
+
+% =============================================================
+\section{The Jacobian matrix}
+
+\begin{frame}{The Jacobian matrix}
+  For $f = (f_1, \dots, f_m)\colon \R^n \to \R^m$ the matrix of partial derivatives is the
+  \textbf{Jacobian matrix}
+  \[ J_f(\va) = \begin{pmatrix}
+       \pd{f_1}{x_1} & \cdots & \pd{f_1}{x_n} \\
+       \vdots & & \vdots \\
+       \pd{f_m}{x_1} & \cdots & \pd{f_m}{x_n}
+     \end{pmatrix}(\va) , \qquad
+     f(\va + \vh) \approx f(\va) + J_f(\va)\,\vh . \]
+  Row $i$: the derivative of the component $f_i$. Column $j$: how $f$ moves when $x_j$ moves.
+  \pause
+  \begin{example}[Polar coordinates]
+    $P(r, \theta) = (r\cos\theta, r\sin\theta)$: \quad
+    $J_P = \begin{pmatrix} \cos\theta & -r\sin\theta \\ \sin\theta & r\cos\theta \end{pmatrix}$, \quad
+    $\det J_P = r$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Why Jacobians matter}
+  \begin{itemize}
+    \item \textbf{Linear approximation}: near $\va$, $f$ acts like the matrix $J_f(\va)$. Small
+      changes $\vh$ in the input become $J_f(\va)\,\vh$ in the output.
+    \item \textbf{Chain rule} (Unit 12): $J_{g \circ f}(\va) = J_g\bigl(f(\va)\bigr)\, J_f(\va)$ ---
+      derivatives of compositions are products of matrices. Backpropagation in neural networks
+      is this rule, applied layer by layer.
+    \item \textbf{Change of variables} (Unit 20): $|\det J|$ measures how areas and volumes are
+      stretched. For polar coordinates, $\mathrm{d}x\,\mathrm{d}y = r\,\mathrm{d}r\,\mathrm{d}\theta$.
+    \item \textbf{Inverse function theorem} (Unit 17): if $\det J_f(\va) \ne 0$, then $f$ can be
+      inverted near $\va$.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item \textbf{Partial derivative} $\pd{f}{x_i}$: differentiate in $x_i$, keep the other variables
+      fixed. Mixed partials agree if they are continuous (Schwarz).
+    \item Partial derivatives can exist where $f$ is not even continuous.
+    \item \textbf{Differentiable} at $\va$: $f(\va + \vh) = f(\va) + Df(\va)\,\vh + o(\norm{\vh})$
+      for a linear map $Df(\va)$.
+    \item Then $f$ is continuous at $\va$, and $Df(\va)$ is the \textbf{Jacobian matrix} of partial
+      derivatives; for $m = 1$ it gives the tangent plane.
+    \item Continuous partial derivatives ($C^1$) imply differentiability --- the usual way to check it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Compute all first partial derivatives: \
+      (a) $x^3 y^2 - 4xy$ \quad (b) $\ln(x^2 + y^2 + 1)$ \quad
+      (c) $x^y$ \ ($x > 0$) \quad (d) $\frac{xyz}{x + y + z}$
+    \item Check that $f_{xy} = f_{yx}$ for $f(x, y) = e^{xy} \sin y$.
+    \item Find the tangent plane to $z = e^x \cos y$ at $(0, 0)$, and use it to estimate
+      $e^{0.1}\cos 0.2$. Compare with the true value.
+    \item Show from the definition that $f(x, y) = x^2 + y^2$ is differentiable at every point.
+    \item Is $f(x, y) = |x| + |y|$ differentiable at $(0, 0)$?
+    \item Find the Jacobian matrix and its determinant for $F(x, y) = (x^2 - y^2,\ 2xy)$.
+    \item Let $f(x, y) = (x^2 + y^2)\sin\frac{1}{\sqrt{x^2 + y^2}}$ for $(x, y) \ne (0, 0)$ and
+      $f(0, 0) = 0$. Show that $f$ is differentiable at $(0, 0)$ with $Df(0, 0) = 0$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item (a) $f_x = 3x^2y^2 - 4y$, \ $f_y = 2x^3 y - 4x$. \
+      (b) $\frac{2x}{x^2 + y^2 + 1}$, \ $\frac{2y}{x^2 + y^2 + 1}$. \
+      (c) $f_x = y\, x^{y-1}$, \ $f_y = x^y \ln x$. \
+      (d) with $s = x + y + z$: \ $f_x = \frac{yz(y + z)}{s^2}$, and similarly for $f_y$, $f_z$.
+    \item Both equal $e^{xy}\bigl((1 + xy)\sin y + y\cos y\bigr)$.
+    \item $z = 1 + x$; the estimate is $1.1$, the true value $1.0831$. (The tangent plane ignores
+      the second-order terms: Unit 13.)
+    \item $f(a + h, b + k) - f(a, b) - (2ah + 2bk) = h^2 + k^2 = \norm{(h, k)}^2 = o(\norm{(h, k)})$.
+    \item No: $f_x(0, 0)$ does not exist, since $x \mapsto |x|$ is not differentiable at $0$.
+    \item $J_F = \begin{pmatrix} 2x & -2y \\ 2y & 2x \end{pmatrix}$, \ $\det J_F = 4(x^2 + y^2)$.
+    \item $|f(\vh) - 0 - 0| \le \norm{\vh}^2$, so $\frac{|f(\vh)|}{\norm{\vh}} \le \norm{\vh} \to 0$.
+      (Its partial derivatives are not continuous at $\mathbf 0$, so it is not $C^1$.)
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 11 --- The gradient} (Unit 11)
+  \begin{itemize}
+    \item Directional derivatives: the rate of change in any direction
+    \item The gradient $\nabla f$: direction of steepest ascent
+    \item The gradient is perpendicular to level sets
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Section 4.6.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

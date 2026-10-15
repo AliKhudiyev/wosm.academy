@@ -1,0 +1,348 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 08
+%  Unit 8: Stirling's approximation
+%
+%  Build from the repository root:   npm run materials -- lecture-08
+%  This writes lecture-08.pdf (slides, with overlays) and
+%  lecture-08-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\newcommand{\dx}{\,\mathrm{d}x}
+
+\course{MAT231-F27}{Calculus II}
+\title[L08 \textperiodcentered\ Stirling's approximation]{Stirling's approximation}
+\subtitle{How large is $n!$?}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 08\enspace\textperiodcentered\enspace Unit 8\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item A generating function $A(x) = \sum a_n x^n$ holds a whole sequence.
+    \item Products count combined choices; linear recurrences become rational functions.
+    \item Catalan numbers: $C_n = \frac{1}{n+1}\binom{2n}{n}$, growing like $4^n$.
+  \end{itemize}
+  \vskip0.6em
+  Two promises are still open: why $\binom{2n}{n} \approx \frac{4^n}{\sqrt{\pi n}}$, and where the
+  factor $n^{-3/2}$ in $C_n$ comes from. Both follow from one formula for $n!$.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: \alert{TODO(owner): choose a text for this unit --- the books on the module's
+  reading list do not cover Stirling's formula.}\par}
+\end{frame}
+
+% =============================================================
+\section{How large is $n!$?}
+
+\begin{frame}{Factorials grow fast}
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{rl}
+    \toprule
+    $n$ & $n!$ \\
+    \midrule
+    $10$  & $3\,628\,800$ \\
+    $20$  & $\approx 2.43 \cdot 10^{18}$ \\
+    $52$  & $\approx 8.07 \cdot 10^{67}$ \quad (orderings of a deck of cards) \\
+    $100$ & $\approx 9.33 \cdot 10^{157}$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \pause
+  \begin{itemize}
+    \item $n!$ counts the orderings of $n$ objects: trying them all is hopeless beyond $n \approx 15$.
+    \item A comparison sort must tell apart all $n!$ orderings, so it needs at least
+      $\log_2 n!$ comparisons in the worst case (Section 4).
+  \end{itemize}
+  We want a simple formula for $n!$, or at least for $\ln n!$, that is accurate for large $n$.
+\end{frame}
+
+\begin{frame}{First, crude bounds}
+  \begin{itemize}
+    \item \textbf{Above}: $n! = 1 \cdot 2 \cdots n \le n \cdot n \cdots n = n^n$.
+    \item \textbf{Below}: $e^n = \sum_{k \ge 0} \frac{n^k}{k!} \ge \frac{n^n}{n!}$, \ so
+      $n! \ge \bigl(\frac{n}{e}\bigr)^n$.
+  \end{itemize}
+  \pause
+  Taking logarithms:
+  \[ n \ln n - n \;\le\; \ln n! \;\le\; n \ln n , \]
+  so $\ln n! = n \ln n + O(n)$, \ and in $O$-notation $\log n! = \Theta(n \log n)$.
+  \pause
+  \begin{remark}
+    That is enough for many uses in computer science. But $n!$ itself is still only known up to a
+    factor of $e^n$. Today: $n!$ up to a factor that tends to $1$.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{$\ln n!$ as a sum}
+
+\begin{frame}{Sum against integral}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \begin{tikzpicture}[x=0.9cm, y=1.35cm]
+        \foreach \k in {2,...,6}
+          \filldraw[fill=wosm-accent!16, draw=wosm-accent] (\k-1,0) rectangle (\k,{ln(\k)});
+        \draw[wosm-text, thick, domain=1:6.3, samples=60] plot (\x,{ln(\x)});
+        \draw[wosm-muted] (0.7,0) -- (6.5,0);
+        \foreach \k in {1,...,6}
+          \node[below, font=\scriptsize, text=wosm-muted] at (\k,0) {$\k$};
+        \node[font=\scriptsize, text=wosm-accent] at (4.5,0.65) {$\ln 5$};
+        \node[font=\scriptsize, text=wosm-text, anchor=west] at (6.3,1.84) {$\ln x$};
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      $\ln n! = \sum_{k=1}^{n} \ln k$, and $\ln$ is increasing.
+      \vskip0.4em
+      \small
+      On $[k-1, k]$, \ $\ln x \le \ln k$: the rectangles lie above the graph. On $[k, k+1]$,
+      $\ln x \ge \ln k$. So (as in Lecture 2 and Calculus I, Unit 26)
+      \[ \int_1^n \ln x \dx \le \ln n! \le \int_1^{n+1} \ln x \dx . \]
+    \end{column}
+  \end{columns}
+  \pause
+  With $\int \ln x \dx = x \ln x - x$:
+  \[ n \ln n - n + 1 \;\le\; \ln n! \;\le\; (n+1)\ln(n+1) - n . \]
+  The two sides differ by about $\ln n$: so $\ln n! = n \ln n - n + O(\ln n)$.
+\end{frame}
+
+\begin{frame}{Trapezoids do better}
+  The trapezoidal rule (Calculus I, Unit 25) on $[k, k+1]$ uses the chord from $(k, \ln k)$ to
+  $(k+1, \ln(k+1))$:
+  \[ \int_k^{k+1} \ln x \dx = \frac{\ln k + \ln(k+1)}{2} + E_k . \]
+  \pause
+  \begin{itemize}
+    \item $\ln$ is concave, so the chord lies below the graph: $E_k > 0$.
+    \item The error bound for the trapezoidal rule, with $|(\ln x)''| = \frac{1}{x^2} \le \frac{1}{k^2}$:
+      \ $E_k \le \frac{1}{12 k^2}$.
+  \end{itemize}
+  \pause
+  Add up for $k = 1, \dots, n - 1$. The chords give $\ln n! - \frac12 \ln n$, so
+  \[ n \ln n - n + 1 = \ln n! - \tfrac12 \ln n + \sum_{k=1}^{n-1} E_k . \]
+\end{frame}
+
+\begin{frame}{A constant appears}
+  Rearranged:
+  \[ \ln n! - \Bigl(n + \frac12\Bigr)\ln n + n = 1 - \sum_{k=1}^{n-1} E_k . \]
+  \pause
+  \begin{itemize}
+    \item $0 < E_k \le \frac{1}{12k^2}$, so $\sum E_k$ converges (comparison test, Lecture 2).
+      Call its sum $E$.
+    \item So the left-hand side tends to $c = 1 - E$, and
+      \[ n! \;\sim\; e^c \sqrt{n}\, \Bigl(\frac{n}{e}\Bigr)^n , \]
+      where $a_n \sim b_n$ means $\frac{a_n}{b_n} \to 1$.
+  \end{itemize}
+  \pause
+  {\small A convergent series gave us the shape of the answer. What is the constant $e^c$?\par}
+\end{frame}
+
+% =============================================================
+\section{The constant $\sqrt{2\pi}$}
+
+\begin{frame}{Wallis's integrals}
+  Let $I_n = \int_0^{\pi/2} \sin^n x \dx$. Integration by parts gives
+  $I_n = \frac{n-1}{n} I_{n-2}$, with $I_0 = \frac\pi2$, $I_1 = 1$, so
+  \[ I_{2m} = \frac\pi2 \cdot \frac{1 \cdot 3 \cdots (2m-1)}{2 \cdot 4 \cdots (2m)}
+     = \frac\pi2 \cdot \frac{\binom{2m}{m}}{4^m}, \qquad
+     I_{2m+1} = \frac{2 \cdot 4 \cdots (2m)}{3 \cdot 5 \cdots (2m+1)} . \]
+  \pause
+  As $0 \le \sin x \le 1$, the $I_n$ decrease: $I_{2m+1} \le I_{2m} \le I_{2m-1}$. And
+  $\frac{I_{2m+1}}{I_{2m-1}} = \frac{2m}{2m+1} \to 1$, so $\frac{I_{2m}}{I_{2m+1}} \to 1$. Multiplying out:
+  \[ \frac{\pi}{2}\,(2m+1) \Bigl(\frac{\binom{2m}{m}}{4^m}\Bigr)^2 \to 1 ,
+     \qquad\text{so}\qquad
+     \binom{2m}{m} \sim \frac{4^m}{\sqrt{\pi m}} . \]
+  {\small The first promise of Lecture 7.\par}
+\end{frame}
+
+\begin{frame}{The constant}
+  Now compute $\binom{2m}{m} = \frac{(2m)!}{(m!)^2}$ with $n! \sim e^c \sqrt n\,(n/e)^n$:
+  \[ \binom{2m}{m} \sim \frac{e^c \sqrt{2m}\,(2m/e)^{2m}}{e^{2c}\, m\,(m/e)^{2m}}
+     = \frac{\sqrt2}{e^c} \cdot \frac{4^m}{\sqrt m} . \]
+  \pause
+  Compare with $\frac{4^m}{\sqrt{\pi m}}$: \ $\frac{\sqrt 2}{e^c} = \frac{1}{\sqrt\pi}$, so
+  $e^c = \sqrt{2\pi}$.
+  \pause
+  \begin{theorem}[Stirling's formula]
+    \[ n! \;\sim\; \sqrt{2\pi n}\, \Bigl(\frac{n}{e}\Bigr)^n . \]
+    More precisely, for every $n \ge 1$:
+    \ $1 < \dfrac{n!}{\sqrt{2\pi n}\,(n/e)^n} < e^{\frac{1}{12}\left(\frac1n + \frac{1}{n^2}\right)}$.
+  \end{theorem}
+\end{frame}
+
+\begin{frame}{Where the error bound comes from}
+  From the two previous frames,
+  \[ \ln \frac{n!}{\sqrt{2\pi n}\,(n/e)^n} = \sum_{k \ge n} E_k , \]
+  the tail of the convergent series $\sum E_k$. \pause With $0 < E_k \le \frac{1}{12k^2}$ and the
+  integral test bound (Lecture 2):
+  \[ 0 < \sum_{k \ge n} E_k \le \frac{1}{12}\sum_{k \ge n} \frac{1}{k^2}
+     \le \frac{1}{12}\Bigl(\frac{1}{n^2} + \int_n^\infty \frac{\mathrm{d}x}{x^2}\Bigr)
+     = \frac{1}{12}\Bigl(\frac1n + \frac{1}{n^2}\Bigr) . \]
+  \pause
+  {\small A sharper argument (H.~Robbins, 1955) gives the upper bound $e^{1/(12n)}$.\par}
+\end{frame}
+
+\begin{frame}{How good is it?}
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.2}
+  \begin{tabular}{rrrc}
+    \toprule
+    $n$ & $n!$ & $\sqrt{2\pi n}\,(n/e)^n$ & ratio \\
+    \midrule
+    $1$   & $1$                 & $0.922$                & $1.0844$ \\
+    $5$   & $120$               & $118.02$               & $1.0168$ \\
+    $10$  & $3\,628\,800$       & $3\,598\,696$          & $1.0084$ \\
+    $20$  & $2.4329 \cdot 10^{18}$ & $2.4228 \cdot 10^{18}$ & $1.0042$ \\
+    $100$ & $9.3326 \cdot 10^{157}$ & $9.3248 \cdot 10^{157}$ & $1.00083$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \begin{itemize}
+    \item The \emph{relative} error is about $\frac{1}{12n}$: below $1\%$ from $n = 10$ on.
+    \item The \emph{absolute} error grows without bound. ``$\sim$'' is a statement about ratios.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Using Stirling's formula}
+
+\begin{frame}{Which precision do you need?}
+  For $n = 10$, \ $\ln 10! = 15.104$:
+  \begin{center}
+  \small\renewcommand{\arraystretch}{1.25}
+  \begin{tabular}{@{}llr@{}}
+    \toprule
+    \textbf{Approximation of $\ln n!$} & \textbf{Error term} & $n = 10$ \\
+    \midrule
+    $n \ln n$                                 & $O(n)$       & $23.026$ \\
+    $n \ln n - n$                             & $O(\ln n)$   & $13.026$ \\
+    $(n + \frac12)\ln n - n + \ln\sqrt{2\pi}$ & $O(\frac1n)$ & $15.096$ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \begin{itemize}
+    \item For growth rates, $\Theta(n \log n)$ is enough.
+    \item For counting, probabilities and constants, use the full formula.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Binomial coefficients and Catalan numbers}
+  \begin{itemize}
+    \item $\displaystyle\binom{2n}{n} \sim \frac{4^n}{\sqrt{\pi n}}$, \ and therefore
+      $\displaystyle C_n = \frac{1}{n+1}\binom{2n}{n} \sim \frac{4^n}{\sqrt\pi\, n^{3/2}}$:
+      the second promise of Lecture 7.
+  \end{itemize}
+  \pause
+  \begin{example}[Fair coins]
+    The probability of exactly $n$ heads in $2n$ tosses of a fair coin is
+    $\binom{2n}{n} / 4^n \approx \frac{1}{\sqrt{\pi n}}$. For $100$ tosses:
+    $\frac{1}{\sqrt{50\pi}} \approx 0.0798$ (exact: $0.0796$). The most likely outcome is unlikely.
+  \end{example}
+  {\small The $\sqrt{2\pi}$ here is the same as in the Gaussian integral
+  $\int_{-\infty}^\infty e^{-x^2/2}\dx = \sqrt{2\pi}$ (Unit 21) --- and in the normal distribution
+  of Probability Theory and Statistics.\par}
+\end{frame}
+
+\begin{frame}{Sorting needs $n \log_2 n$ comparisons}
+  \begin{itemize}
+    \item A comparison sort is a binary decision tree: each comparison has two outcomes.
+      Its leaves must include all $n!$ orderings, and a binary tree of height $h$ has at most
+      $2^h$ leaves. So the worst case needs $h \ge \log_2 n!$ comparisons.
+  \end{itemize}
+  \pause
+  By Stirling's formula,
+  \[ \log_2 n! = n \log_2 n - n \log_2 e + \tfrac12 \log_2(2\pi n) + o(1)
+     \approx n \log_2 n - 1.443\, n . \]
+  \pause
+  \begin{example}[$n = 1000$]
+    $\log_2 1000! \approx 8529.4$: every comparison sort needs at least $8530$ comparisons in the
+    worst case. Merge sort uses at most $n \lceil \log_2 n \rceil = 10\,000$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Counting digits}
+  The number of decimal digits of $n!$ is $\lfloor \log_{10} n! \rfloor + 1$, and
+  \[ \log_{10} n! \approx \Bigl(n + \frac12\Bigr)\log_{10} n - n \log_{10} e + \log_{10}\sqrt{2\pi} . \]
+  \pause
+  \begin{itemize}
+    \item $52!$ has $68$ digits.
+    \item $1000!$ has $2568$ digits.
+  \end{itemize}
+  \pause
+  {\small No need to compute $1000!$ itself: Stirling's error factor $e^{1/12000}$ changes
+  $\log_{10} 1000!$ by less than $10^{-4}$.\par}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Crude: $(n/e)^n \le n! \le n^n$, so $\log n! = \Theta(n \log n)$.
+    \item $\ln n! = \sum \ln k$, compared with $\int \ln x \dx$: \ $\ln n! = n \ln n - n + O(\ln n)$.
+    \item Trapezoids: the errors $E_k \le \frac{1}{12k^2}$ form a convergent series, so
+      $n! \sim e^c \sqrt n\,(n/e)^n$ for some constant $c$.
+    \item Wallis's integrals give $\binom{2n}{n} \sim \frac{4^n}{\sqrt{\pi n}}$ and $e^c = \sqrt{2\pi}$.
+    \item \textbf{Stirling}: $n! \sim \sqrt{2\pi n}\,(n/e)^n$, with relative error about $\frac{1}{12n}$.
+    \item Uses: central binomial and Catalan numbers, coin tosses, the sorting lower bound,
+      sizes of huge numbers.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Estimate $30!$ with Stirling's formula and compare with $30! \approx 2.6525 \cdot 10^{32}$.
+    \item Show that $\binom{2n}{n} \sim \frac{4^n}{\sqrt{\pi n}}$ follows from Stirling's formula.
+    \item Estimate $\binom{100}{50}$.
+    \item How many decimal digits does $100!$ have?
+    \item Find $\displaystyle\lim_{n\to\infty} \frac{\sqrt[n]{n!}}{n}$.
+    \item For large $n$, which is larger: $n!$ or $(n/2)^n$? \ $n!$ or $(n/3)^n$?
+    \item Use $\ln n! = n \ln n - n + O(\ln n)$ to find the exponential growth rate of
+      $\binom{3n}{n}$, that is, $\lim \sqrt[n]{\binom{3n}{n}}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $\sqrt{60\pi}\,(30/e)^{30} \approx 2.6452 \cdot 10^{32}$: ratio $1.0028$, close to
+      $e^{1/360}$.
+    \item $\frac{(2n)!}{(n!)^2} \sim \frac{\sqrt{4\pi n}\,(2n/e)^{2n}}{2\pi n\,(n/e)^{2n}}
+      = \frac{4^n}{\sqrt{\pi n}}$.
+    \item $\frac{4^{50}}{\sqrt{50\pi}} \approx 1.011 \cdot 10^{29}$ (exact: $1.0089 \cdot 10^{29}$).
+    \item $158$.
+    \item $\frac1e$: \ $\sqrt[n]{n!} \sim \frac{n}{e}\,(2\pi n)^{1/(2n)}$, and
+      $(2\pi n)^{1/(2n)} \to 1$.
+    \item $\frac{n!}{(n/2)^n} \sim \sqrt{2\pi n}\,\bigl(\frac2e\bigr)^n \to 0$, so $(n/2)^n$ is larger;
+      $\frac{n!}{(n/3)^n} \sim \sqrt{2\pi n}\,\bigl(\frac3e\bigr)^n \to \infty$, so $n!$ is larger.
+    \item $\ln\binom{3n}{n} = 3n\ln 3n - n \ln n - 2n \ln 2n + O(\ln n)
+      = n \ln\frac{27}{4} + O(\ln n)$, so the limit is $\frac{27}{4}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 09 --- Functions of several variables} (Unit 9)
+  \begin{itemize}
+    \item Part 2 of the module begins: calculus in $\mathbb{R}^n$
+    \item Norms and distance; open and closed sets
+    \item Limits and continuity --- and why approaching along lines is not enough
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 3} (OpenStax), Sections 4.1 and 4.2.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

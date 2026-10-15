@@ -1,0 +1,452 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 09
+%  Unit 9: R^n: norms, open and closed sets, limits and continuity
+%
+%  Build from the repository root:   npm run materials -- lecture-09
+%  This writes lecture-09.pdf (slides, with overlays) and
+%  lecture-09-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\va}{\mathbf{a}}
+\newcommand{\vy}{\mathbf{y}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L09 \textperiodcentered\ Functions of several variables]{Functions of several variables}
+\subtitle{$\mathbb{R}^n$: norms, open and closed sets, limits and continuity}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 09\enspace\textperiodcentered\enspace Unit 9\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Where we are}
+  \begin{itemize}
+    \item \textbf{Units 1--8}: series, power series, Taylor series, generating functions,
+      Stirling's formula --- all for functions of \emph{one} variable.
+    \item \textbf{Units 9--17}: differential calculus in $\R^n$. Partial derivatives, the gradient,
+      the chain rule and the Jacobian, the Hessian, optimisation, gradient descent, Lagrange
+      multipliers.
+    \item Then multiple integrals (Units 18--22) and differential equations (Units 23--25).
+  \end{itemize}
+  \vskip0.6em
+  Today we set the stage: distance in $\R^n$, which sets are open or closed, and what a limit
+  means when you can approach a point from infinitely many directions.
+  Vectors and inner products come from Linear Algebra (MAT102-S27).
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 3} (OpenStax), Sections 4.1 and 4.2.\par}
+\end{frame}
+
+% =============================================================
+\section{Functions of several variables}
+
+\begin{frame}{Examples}
+  \begin{itemize}
+    \item $f(x, y) = x^2 + y^2$: \ $\R^2 \to \R$.
+    \item The temperature $T(x, y, z)$ at a point of a room: \ $\R^3 \to \R$.
+    \item The loss $L(\mathbf{w})$ of a machine-learning model with weights
+      $\mathbf{w} \in \R^n$, often with $n$ in the millions: \ $\R^n \to \R$.
+    \item Polar coordinates $(r, \theta) \mapsto (r\cos\theta, r\sin\theta)$: \ $\R^2 \to \R^2$.
+  \end{itemize}
+  \pause
+  We write $\vx = (x_1, \dots, x_n)$ for a point of $\R^n$, and $f\colon D \to \R^m$ with a
+  \textbf{domain} $D \subseteq \R^n$. For $m = 1$, $f$ is \textbf{real-valued}; for $m > 1$,
+  \textbf{vector-valued}, $f = (f_1, \dots, f_m)$.
+\end{frame}
+
+\begin{frame}{Graphs and level sets}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[width=\linewidth, height=5.8cm, view={35}{25},
+            axis lines=center, axis line style={wosm-muted},
+            ticks=none, xlabel={$x$}, ylabel={$y$}, zlabel={$z$},
+            label style={font=\scriptsize, text=wosm-muted},
+            xmin=-1.6, xmax=1.6, ymin=-1.6, ymax=1.6, zmin=0, zmax=2.4]
+          \addplot3[mesh, draw=wosm-accent!45, domain=-1.1:1.1, y domain=-1.1:1.1,
+            samples=13, samples y=13] {x^2 + y^2};
+          \addplot3[wosm-brick, very thick, domain=0:360, samples=60, samples y=0]
+            ({0.5*cos(x)}, {0.5*sin(x)}, {0.25});
+          \addplot3[wosm-brick, very thick, domain=0:360, samples=60, samples y=0]
+            ({cos(x)}, {sin(x)}, {1});
+          \addplot3[wosm-brick, very thick, domain=0:360, samples=60, samples y=0]
+            ({1.4*cos(x)}, {1.4*sin(x)}, {1.96});
+        \end{axis}
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \small
+      \begin{itemize}
+        \item The \textbf{graph} of $f\colon \R^2 \to \R$ is the surface $z = f(x, y)$ in $\R^3$.
+          Here $z = x^2 + y^2$, a paraboloid.
+        \item A \textbf{level set} is $\{\vx : f(\vx) = c\}$. For $x^2 + y^2$ the level sets are
+          circles of radius $\sqrt c$ ({\color{wosm-brick}drawn at height $c$}).
+        \item Contour lines on a map are level sets of the height.
+      \end{itemize}
+      For $n \ge 3$ we cannot draw the graph; level sets and slices still help.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Norms and distance}
+
+\begin{frame}{The Euclidean norm}
+  For $\vx, \vy \in \R^n$ (Linear Algebra):
+  \[ \vx \cdot \vy = \sum_{i=1}^n x_i y_i, \qquad
+     \norm{\vx} = \sqrt{\vx \cdot \vx} = \sqrt{x_1^2 + \dots + x_n^2}, \qquad
+     \text{distance } \norm{\vx - \vy} . \]
+  \pause
+  \begin{itemize}
+    \item \textbf{Cauchy--Schwarz}: $|\vx \cdot \vy| \le \norm{\vx}\, \norm{\vy}$.
+    \item \textbf{Triangle inequality}: $\norm{\vx + \vy} \le \norm{\vx} + \norm{\vy}$, since
+      \[ \norm{\vx + \vy}^2 = \norm{\vx}^2 + 2\,\vx \cdot \vy + \norm{\vy}^2
+         \le \norm{\vx}^2 + 2\norm{\vx}\norm{\vy} + \norm{\vy}^2 = (\norm{\vx} + \norm{\vy})^2 . \]
+    \item Hence also $\bigl|\norm{\vx} - \norm{\vy}\bigr| \le \norm{\vx - \vy}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Norms}
+  \begin{definition}
+    A \textbf{norm} on $\R^n$ is a function $\vx \mapsto \norm{\vx} \ge 0$ with
+    (1) $\norm{\vx} = 0$ only for $\vx = \mathbf{0}$, \
+    (2) $\norm{\lambda \vx} = |\lambda|\, \norm{\vx}$, \
+    (3) $\norm{\vx + \vy} \le \norm{\vx} + \norm{\vy}$.
+  \end{definition}
+  \pause
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      \small
+      \begin{itemize}
+        \item {\color{wosm-accent}$\norm{\vx}_2 = \sqrt{\sum x_i^2}$}: Euclidean (straight line).
+        \item {\color{wosm-brick}$\norm{\vx}_1 = \sum |x_i|$}: Manhattan (along a street grid).
+        \item $\norm{\vx}_\infty = \max_i |x_i|$: maximum (the moves of a chess king).
+      \end{itemize}
+      The ``unit balls'' $\{\vx : \norm{\vx} \le 1\}$ in $\R^2$: a disc, a diamond, a square.
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=1.15]
+        \draw[wosm-muted, ->] (-1.4,0) -- (1.5,0);
+        \draw[wosm-muted, ->] (0,-1.4) -- (0,1.5);
+        \draw[wosm-text, thick] (-1,-1) rectangle (1,1);
+        \draw[wosm-accent, thick] (0,0) circle (1);
+        \draw[wosm-brick, thick] (1,0) -- (0,1) -- (-1,0) -- (0,-1) -- cycle;
+        \node[font=\scriptsize, text=wosm-muted, below right] at (1,0) {$1$};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{All norms on $\R^n$ are equivalent}
+  \begin{theorem}
+    For every $\vx \in \R^n$: \quad
+    $\norm{\vx}_\infty \le \norm{\vx}_2 \le \norm{\vx}_1 \le n \norm{\vx}_\infty$.
+  \end{theorem}
+  \pause
+  {\small Proof: $\max_i x_i^2 \le \sum x_i^2 \le \bigl(\sum |x_i|\bigr)^2$, and each
+  $|x_i| \le \max_j |x_j|$.\par}
+  \pause
+  \begin{itemize}
+    \item So if $\norm{\vx_k - \vx} \to 0$ in one of these norms, it does in all of them.
+      In fact any two norms on $\R^n$ satisfy such inequalities (we omit the proof).
+    \item Everything in this lecture --- open sets, limits, continuity --- is the same for every
+      norm. We use $\norm{\cdot} = \norm{\cdot}_2$ unless we say otherwise.
+    \item Consequence: $\vx_k \to \vx$ if and only if each coordinate converges,
+      $x_{k,i} \to x_i$ \ (use $\norm{\cdot}_\infty$).
+  \end{itemize}
+  {\small In infinite-dimensional spaces (functions, Lecture 4) norms need not be equivalent:
+  uniform and pointwise convergence differ.\par}
+\end{frame}
+
+% =============================================================
+\section{Open and closed sets}
+
+\begin{frame}{Balls, interior and boundary}
+  \begin{columns}[c]
+    \begin{column}{0.58\textwidth}
+      \begin{itemize}
+        \item \textbf{Open ball}: $B(\va, r) = \{\vx : \norm{\vx - \va} < r\}$.
+        \item $\va$ is an \textbf{interior point} of $S$ if some ball $B(\va, r)$, $r > 0$,
+          lies inside $S$.
+        \item $\va$ is a \textbf{boundary point} of $S$ if every ball $B(\va, r)$ contains points
+          of $S$ and points outside $S$.
+      \end{itemize}
+      \begin{definition}
+        $S$ is \textbf{open} if all its points are interior points. \
+        $S$ is \textbf{closed} if its complement $\R^n \setminus S$ is open.
+      \end{definition}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.95]
+        \fill[wosm-accent!14] plot[smooth cycle, tension=0.8]
+          coordinates {(0,0) (2,-0.3) (3,0.8) (2.4,2.2) (0.8,2.1) (-0.3,1.2)};
+        \draw[wosm-accent, thick, dashed] plot[smooth cycle, tension=0.8]
+          coordinates {(0,0) (2,-0.3) (3,0.8) (2.4,2.2) (0.8,2.1) (-0.3,1.2)};
+        \fill[wosm-text] (1.3,1) circle (1.2pt);
+        \draw[wosm-text] (1.3,1) circle (0.45);
+        \node[font=\scriptsize, text=wosm-text, below] at (1.3,0.95) {$\va$};
+        \fill[wosm-brick] (3,0.8) circle (1.2pt);
+        \draw[wosm-brick] (3,0.8) circle (0.35);
+        \node[font=\scriptsize, text=wosm-brick, right] at (3.35,0.8) {$\mathbf{b}$};
+        \node[font=\scriptsize, text=wosm-accent] at (0.6,0.4) {$S$};
+      \end{tikzpicture}
+      \par\small\color{wosm-muted}
+      $\va$ is interior; $\mathbf{b}$ is a boundary point.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{itemize}
+    \item An open ball is open: if $\norm{\vx - \va} < r$, then $B(\vx, \varepsilon) \subseteq B(\va, r)$
+      for $\varepsilon = r - \norm{\vx - \va}$, by the triangle inequality.
+    \item The closed ball $\{\vx : \norm{\vx - \va} \le r\}$ is closed. Its boundary is the sphere
+      $\norm{\vx - \va} = r$.
+    \item The half-plane $\{(x, y) : y > 0\}$ is open; $\{(x, y) : y \ge 0\}$ is closed.
+    \item $[0, 1) \times [0, 1)$ is neither open nor closed.
+    \item $\R^n$ and $\varnothing$ are both open and closed.
+  \end{itemize}
+  \pause
+  \begin{warning}
+    ``Not open'' does not mean ``closed''. Most sets are neither.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{Closed sets and sequences}
+  \begin{theorem}
+    $S$ is closed if and only if it contains the limit of every convergent sequence of points
+    of $S$.
+  \end{theorem}
+  {\small Proof idea: if $\vx_k \in S$, $\vx_k \to \vx$ and $\vx \notin S$, then $\vx$ is in the
+  open complement, so a ball around $\vx$ misses $S$ --- but the $\vx_k$ get into every ball
+  around $\vx$. The converse is similar.\par}
+  \pause
+  \begin{itemize}
+    \item $S$ is \textbf{bounded} if it lies in some ball $B(\mathbf{0}, R)$.
+    \item \textbf{Bolzano--Weierstrass in $\R^n$}: every bounded sequence has a convergent
+      subsequence. (Apply the one-variable theorem of Calculus I, Unit 4, to one coordinate after
+      another.)
+    \item Closed and bounded sets are called \textbf{compact}. They are where continuous functions
+      attain their maximum and minimum (Section 5).
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Limits}
+
+\begin{frame}{Limits in $\R^n$}
+  \begin{definition}
+    Let $f\colon D \to \R^m$ and let every ball around $\va$ contain points of $D$ other than
+    $\va$. Then $\lim_{\vx \to \va} f(\vx) = L$ if for every $\varepsilon > 0$ there is a
+    $\delta > 0$ with
+    \[ \norm{f(\vx) - L} < \varepsilon \quad\text{for all } \vx \in D
+       \text{ with } 0 < \norm{\vx - \va} < \delta . \]
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item The same words as in Calculus I, with $|\cdot|$ replaced by $\norm{\cdot}$.
+      The limit laws (sums, products, quotients) hold with the same proofs.
+    \item A vector-valued $f$ has a limit if and only if each component $f_i$ does.
+    \item New: $\vx$ may approach $\va$ along infinitely many paths. The limit must be the same
+      along all of them.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Different paths, different limits}
+  \begin{example}[$f(x, y) = \dfrac{xy}{x^2 + y^2}$ at $(0, 0)$]
+    \begin{itemize}
+      \item Along the $x$-axis ($y = 0$): \ $f(x, 0) = 0 \to 0$.
+      \item Along the diagonal ($y = x$): \ $f(x, x) = \frac{x^2}{2x^2} = \frac12 \to \frac12$.
+      \item Along $y = mx$: \ $f(x, mx) = \frac{m}{1 + m^2}$: a different value for each slope.
+    \end{itemize}
+    So $\lim_{(x,y)\to(0,0)} f(x, y)$ does not exist.
+  \end{example}
+  \pause
+  \begin{block}{Strategy}
+    To show that a limit does \emph{not} exist, find two paths with different limits.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Lines are not enough}
+  \begin{example}[$f(x, y) = \dfrac{x^2 y}{x^4 + y^2}$ at $(0, 0)$]
+    \begin{itemize}
+      \item Along $x = 0$: $f = 0$. \ Along $y = mx$:
+        $f(x, mx) = \frac{m x^3}{x^4 + m^2 x^2} = \frac{m x}{x^2 + m^2} \to 0$.
+        Every line gives $0$.
+      \item Along the parabola $y = x^2$: \ $f(x, x^2) = \frac{x^4}{2x^4} = \frac12$.
+    \end{itemize}
+    The limit does not exist.
+  \end{example}
+  \pause
+  \begin{warning}
+    Checking all straight lines proves nothing. To show that a limit \emph{exists}, you need an
+    estimate that holds for all $\vx$ near $\va$ at once.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{Proving that a limit exists}
+  Bound $|f(\vx) - L|$ by something that depends only on $\norm{\vx - \va}$ and tends to $0$.
+  \begin{example}[$\lim_{(x,y)\to(0,0)} \frac{x^2 y}{x^2 + y^2} = 0$]
+    $x^2 \le x^2 + y^2$, so $\Bigl|\frac{x^2 y}{x^2 + y^2}\Bigr| \le |y| \le \norm{(x, y)} \to 0$.
+  \end{example}
+  \pause
+  \begin{example}[Polar coordinates]
+    With $x = r\cos\theta$, $y = r\sin\theta$: \
+    $\frac{x^2 y}{x^2 + y^2} = r \cos^2\theta \sin\theta$, and $|r\cos^2\theta\sin\theta| \le r \to 0$.
+    \ But $\frac{xy}{x^2 + y^2} = \cos\theta\sin\theta$ depends on $\theta$: no limit.
+  \end{example}
+  \pause
+  {\small The polar bound must not depend on $\theta$: for $\frac{x^2y}{x^4 + y^2}$ each fixed
+  $\theta$ gives $0$, yet there is no limit.\par}
+\end{frame}
+
+% =============================================================
+\section{Continuity}
+
+\begin{frame}{Continuity}
+  \begin{definition}
+    $f\colon D \to \R^m$ is \textbf{continuous at} $\va \in D$ if $\lim_{\vx \to \va} f(\vx) = f(\va)$
+    (or $\va$ is an isolated point of $D$); it is continuous on $D$ if it is continuous at every point.
+  \end{definition}
+  \begin{itemize}
+    \item Equivalently: $\vx_k \to \va$ implies $f(\vx_k) \to f(\va)$.
+    \item The coordinate functions $\vx \mapsto x_i$ are continuous. Sums, products, quotients
+      (where the denominator is not $0$) and compositions of continuous functions are continuous.
+    \item So polynomials and rational functions in $x_1, \dots, x_n$ are continuous where
+      defined, and so are $e^{xy}$, $\sin(x^2 + y)$, and $\vx \mapsto \norm{\vx}$
+      \ (as $\bigl|\norm{\vx} - \norm{\va}\bigr| \le \norm{\vx - \va}$).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Continuous in each variable is not enough}
+  \begin{example}
+    $f(x, y) = \frac{xy}{x^2 + y^2}$ for $(x, y) \ne (0, 0)$, \ $f(0, 0) = 0$.
+    \begin{itemize}
+      \item For each fixed $y$, \ $x \mapsto f(x, y)$ is continuous; for each fixed $x$,
+        $y \mapsto f(x, y)$ is continuous. (At $0$: $f(x, 0) = 0$ and $f(0, y) = 0$.)
+      \item But $f$ is not continuous at $(0, 0)$: along $y = x$ it equals $\frac12$.
+    \end{itemize}
+  \end{example}
+  \pause
+  Continuity in $\R^n$ is about all ways of approaching a point, not only the coordinate
+  directions. We will meet the same lesson for derivatives next lecture.
+\end{frame}
+
+\begin{frame}{Continuity and open and closed sets}
+  \begin{theorem}
+    If $f\colon \R^n \to \R$ is continuous and $c \in \R$, then
+    $\{\vx : f(\vx) < c\}$ is open, and $\{\vx : f(\vx) \le c\}$ and $\{\vx : f(\vx) = c\}$ are closed.
+  \end{theorem}
+  {\small Proof: if $f(\va) < c$, continuity gives a ball around $\va$ on which $f < c$. The other
+  two sets have open complements $\{f > c\}$ and $\{f < c\} \cup \{f > c\}$.\par}
+  \pause
+  \begin{example}
+    \begin{itemize}
+      \item $\{(x, y) : x^2 + y^2 < 1\}$ is open; the unit circle $x^2 + y^2 = 1$ is closed.
+      \item $\{\vx : x_1 \ge 0, \dots, x_n \ge 0\}$ is closed: an intersection of closed sets.
+      \item The level set $\{(x, y) : x^2 - y^2 = 1\}$, a hyperbola, is closed.
+    \end{itemize}
+  \end{example}
+\end{frame}
+
+\begin{frame}{The extreme value theorem}
+  \begin{theorem}
+    A continuous function $f\colon K \to \R$ on a nonempty closed and bounded set $K \subseteq \R^n$
+    attains a maximum and a minimum on $K$.
+  \end{theorem}
+  {\small Proof idea, as in Calculus I: take $\vx_k \in K$ with $f(\vx_k) \to \sup_K f$; a subsequence
+  converges (Bolzano--Weierstrass) to a point of $K$ ($K$ is closed), and $f$ is continuous there.\par}
+  \pause
+  \begin{itemize}
+    \item Both conditions matter: $f(x, y) = x$ has no maximum on the open disc, nor on the
+      closed but unbounded half-plane $x \ge 0$.
+    \item Unit 14 finds such extrema with derivatives; Unit 16 does it on curved sets such as
+      circles, with Lagrange multipliers.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Functions $f\colon D \subseteq \R^n \to \R^m$; graphs and level sets.
+    \item Norms $\norm{\cdot}_2$, $\norm{\cdot}_1$, $\norm{\cdot}_\infty$; on $\R^n$ all norms are
+      equivalent, so convergence means convergence of each coordinate.
+    \item Open sets (every point has a ball inside), closed sets (complement open, or: contain
+      their limits), compact sets (closed and bounded).
+    \item Limits must agree along \emph{every} path; two paths with different limits disprove a
+      limit; a bound in terms of $\norm{\vx - \va}$ proves one.
+    \item Continuous functions: built from coordinates by algebra and composition;
+      $\{f < c\}$ is open, $\{f \le c\}$ closed; extreme values on compact sets.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Describe the level sets of $f(x, y) = x^2 - y^2$ and of $g(x, y) = xy$.
+    \item Show that $\norm{\vx}_1 \le \sqrt n\, \norm{\vx}_2$ for $\vx \in \R^n$.
+    \item Open, closed, both or neither?
+      (a) $x^2 + y^2 \le 1$ \quad (b) $0 < x < 1$ in $\R^2$ \quad (c) $y = x^2$ \quad
+      (d) $x > 0, \ y \ge 0$ \quad (e) $\mathbb{Q}^2$ \quad (f) $\varnothing$
+    \item Find the limit at $(0, 0)$, or show that it does not exist:
+      (a) $\frac{x^2 - y^2}{x^2 + y^2}$ \quad (b) $\frac{x y^2}{x^2 + y^2}$ \quad
+      (c) $\frac{\sin(x^2 + y^2)}{x^2 + y^2}$ \quad (d) $\frac{x y^2}{x^2 + y^4}$
+    \item Where is $f(x, y) = \frac{x^2 + y^2}{x - y}$ continuous?
+    \item Show that $\vx \mapsto \norm{\vx}$ is continuous on $\R^n$.
+    \item Give a continuous function on a bounded set in $\R^2$ that has no maximum.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item Hyperbolas $x^2 - y^2 = c$ (and the lines $y = \pm x$ for $c = 0$); hyperbolas $xy = c$
+      (and the two axes for $c = 0$).
+    \item Cauchy--Schwarz with $(|x_1|, \dots, |x_n|)$ and $(1, \dots, 1)$.
+    \item (a) closed \ (b) open \ (c) closed (a level set) \ (d) neither \
+      (e) neither: no ball fits inside, and irrational points are limits of rational ones \
+      (f) both.
+    \item (a) does not exist: $1$ along the $x$-axis, $-1$ along the $y$-axis. \
+      (b) $0$: \ $|\cdot| \le |x|$. \
+      (c) $1$: \ $\frac{\sin t}{t} \to 1$ with $t = x^2 + y^2 \to 0$. \
+      (d) does not exist: $0$ along lines, $\frac12$ along $x = y^2$.
+    \item Wherever $x \ne y$: a quotient of continuous functions.
+    \item $\bigl|\norm{\vx} - \norm{\va}\bigr| \le \norm{\vx - \va}$, so take $\delta = \varepsilon$.
+    \item $f(x, y) = x$ on the open unit disc: its values approach $1$ but never reach it.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 10 --- Partial derivatives and differentiability} (Unit 10)
+  \begin{itemize}
+    \item Partial derivatives: differentiate in one variable, freeze the others
+    \item Why partial derivatives are not enough
+    \item The total derivative: the best linear approximation, and the Jacobian matrix
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Sections 4.3 and 4.4.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

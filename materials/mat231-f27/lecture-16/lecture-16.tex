@@ -1,0 +1,449 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 16
+%  Unit 16: Constrained optimisation: Lagrange multipliers
+%
+%  Build from the repository root:   npm run materials -- lecture-16
+%  This writes lecture-16.pdf (slides, with overlays) and
+%  lecture-16-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\va}{\mathbf{a}}
+\newcommand{\vp}{\mathbf{p}}
+\newcommand{\vv}{\mathbf{v}}
+\newcommand{\Lag}{\mathcal{L}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L16 \textperiodcentered\ Lagrange multipliers]{Constrained optimisation}
+\subtitle{Lagrange multipliers}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 16\enspace\textperiodcentered\enspace Unit 16\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item Gradient descent: $\vx_{k+1} = \vx_k - \eta\,\nabla f(\vx_k)$.
+    \item On a convex quadratic it converges iff $0 < \eta < 2/L$; with the best fixed step the
+      error shrinks by $(\kappa - 1)/(\kappa + 1)$ per step.
+    \item Ill-conditioned problems zigzag; in general we only reach a critical point.
+  \end{itemize}
+  \vskip0.6em
+  So far the variables were free. Today they must satisfy a constraint --- a budget, a fixed
+  total, a surface to stay on --- and the condition $\nabla f = \mathbf 0$ is replaced by
+  $\nabla f = \lambda\, \nabla g$.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Section 4.8; Marsden \& Tromba,
+  \emph{Vector Calculus}, Section 3.4.\par}
+\end{frame}
+
+% =============================================================
+\section{Constrained problems}
+
+\begin{frame}{Optimisation with a constraint}
+  \begin{block}{The problem}
+    Find the largest or smallest value of $f(\vx)$ \ \textbf{subject to} \ $g(\vx) = c$,
+    \ that is, on the level set $S = \{\vx : g(\vx) = c\}$.
+  \end{block}
+  \pause
+  \begin{itemize}
+    \item The boundary step of Lecture 14: the extrema of $f$ on a circle or a sphere.
+    \item Geometry: the point of a surface closest to a given point.
+    \item Economics: the largest output, or utility, for a fixed budget.
+    \item Information theory: the distribution of largest entropy, among $p_i \ge 0$ with
+      $\sum_i p_i = 1$.
+  \end{itemize}
+  \pause
+  {\small Critical points of $f$ on $\R^n$ do not help: the extrema on $S$ are usually not
+  critical points of $f$.\par}
+\end{frame}
+
+\begin{frame}{First method: parametrise the constraint}
+  \begin{example}[$f(x, y) = x + y$ on the circle $x^2 + y^2 = 1$]
+    Put $x = \cos t$, $y = \sin t$:
+    \[ f = \cos t + \sin t = \sqrt2\, \sin\Bigl(t + \frac\pi4\Bigr) . \]
+    Maximum $\sqrt2$ at $t = \frac\pi4$, the point $\bigl(\frac1{\sqrt2}, \frac1{\sqrt2}\bigr)$; minimum
+    $-\sqrt2$ at the opposite point.
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item This turns the problem into one of fewer variables, without constraints.
+    \item But most constraint sets have no convenient parametrisation: try
+      $x^4 + y^4 + z^4 = 1$, or $\sum_i p_i = 1$ with a thousand $p_i$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The geometric picture}
+  \begin{columns}[c]
+    \begin{column}{0.45\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=1.25]
+        \clip (-1.75,-1.75) rectangle (1.75,1.75);
+        \foreach \k in {-2, -1, 0, 1, 2}
+          \draw[wosm-accent!45!wosm-bg] ({\k/2 - 2}, {\k/2 + 2}) -- ({\k/2 + 2}, {\k/2 - 2});
+        \draw[wosm-accent, thick] (-1.414 - 2, 2) -- (-1.414 + 2, -2) (1.414 - 2, 2) -- (1.414 + 2, -2);
+        \draw[wosm-text, very thick] (0,0) circle (1);
+        \fill[wosm-brick] (0.7071,0.7071) circle (1.6pt);
+        \fill[wosm-brick] (-0.7071,-0.7071) circle (1.6pt);
+        \draw[wosm-brick, thick, -latex] (0.7071,0.7071) -- (1.25,1.25) node[above, font=\scriptsize] {$\nabla f \parallel \nabla g$};
+        \fill[wosm-muted] (0.7071,-0.7071) circle (1.3pt);
+        \draw[wosm-accent, thick, -latex] (0.7071,-0.7071) -- (1.12,-0.29) node[right, font=\scriptsize] {$\nabla f$};
+        \draw[wosm-text, thick, -latex] (0.7071,-0.7071) -- (1.12,-1.12) node[right, font=\scriptsize] {$\nabla g$};
+        \node[font=\scriptsize, wosm-text] at (-1.18,0.62) {$S$};
+      \end{tikzpicture}
+      \par\small Level lines $x + y = k$ and the circle $S$.
+    \end{column}
+    \begin{column}{0.53\textwidth}
+      Walk along $S$ and watch the level lines of $f$ you cross.
+      \pause
+      \begin{itemize}
+        \item Where a level line \textbf{crosses} $S$, $f$ still increases one way along $S$.
+        \item At an extremum the level line just \textbf{touches} $S$: the two curves are tangent.
+        \item Tangent curves have parallel normals, and $\nabla f$, $\nabla g$ are the normals
+          (Lecture 11).
+      \end{itemize}
+      \pause
+      \[ \nabla f = \lambda\, \nabla g . \]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{The method of Lagrange multipliers}
+
+\begin{frame}{Lagrange's theorem}
+  \begin{theorem}[Lagrange]
+    Let $f, g$ be $C^1$ on an open set $U \subseteq \R^n$, and $S = \{\vx \in U : g(\vx) = c\}$. If
+    $f$ restricted to $S$ has a local extremum at $\va \in S$ and $\nabla g(\va) \ne \mathbf 0$, then
+    \[ \nabla f(\va) = \lambda\, \nabla g(\va) \qquad \text{for some } \lambda \in \R . \]
+  \end{theorem}
+  \pause
+  \begin{itemize}
+    \item $\lambda$ is the \textbf{Lagrange multiplier}.
+    \item With the \textbf{Lagrangian} $\Lag(\vx, \lambda) = f(\vx) - \lambda\,\bigl(g(\vx) - c\bigr)$, the
+      conditions say that $(\va, \lambda)$ is a critical point of $\Lag$:
+      $\nabla_{\vx}\Lag = \nabla f - \lambda\nabla g = \mathbf 0$ and
+      $\partial\Lag/\partial\lambda = c - g = 0$.
+    \item $n + 1$ equations for the $n + 1$ unknowns $x_1, \dots, x_n, \lambda$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Why it holds}
+  Let $\gamma(t)$ be a $C^1$ curve in $S$ with $\gamma(0) = \va$, and $\vv = \gamma'(0)$.
+  \pause
+  \begin{itemize}
+    \item $g(\gamma(t)) = c$ for all $t$, so by the chain rule (Lecture 12)
+      $\nabla g(\va) \cdot \vv = 0$.
+    \item $f(\gamma(t))$ has a local extremum at $t = 0$, so $\nabla f(\va) \cdot \vv = 0$.
+  \end{itemize}
+  \pause
+  So $\nabla f(\va)$ is perpendicular to every velocity $\vv$ of a curve in $S$ through $\va$.
+  \pause
+  \begin{block}{The one fact we borrow}
+    If $\nabla g(\va) \ne \mathbf 0$, then \textbf{every} $\vv$ with $\nabla g(\va)\cdot\vv = 0$ is the
+    velocity of such a curve: near $\va$, $S$ is a smooth hypersurface with tangent space
+    $\nabla g(\va)^\perp$. This follows from the implicit function theorem (Lecture 17).
+  \end{block}
+  \pause
+  Then $\nabla f(\va) \perp \nabla g(\va)^\perp$, so $\nabla f(\va)$ lies in the line spanned by
+  $\nabla g(\va)$. \qed
+\end{frame}
+
+\begin{frame}{The recipe}
+  \begin{block}{To find the extrema of $f$ on $S = \{g = c\}$}
+    \begin{enumerate}
+      \item Solve $\nabla f = \lambda\nabla g$, \ $g = c$ \ for $\vx$ and $\lambda$.
+      \item Add the points of $S$ where $\nabla g = \mathbf 0$.
+      \item If $S$ is closed and bounded, $f$ has a maximum and a minimum on $S$ (Lecture 9):
+        evaluate $f$ at all candidates and compare.
+    \end{enumerate}
+  \end{block}
+  \pause
+  \begin{itemize}
+    \item The equations are usually nonlinear. Useful moves: divide two equations to eliminate
+      $\lambda$; split into cases ($x = 0$ or $x \ne 0$); use symmetry.
+    \item The value of $\lambda$ is often not needed --- but it has a meaning (later today).
+    \item If $S$ is not bounded, a separate argument is needed that an extremum exists.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Example: $x + y$ on the unit circle, again}
+  $f = x + y$, \ $g = x^2 + y^2 = 1$:
+  \[ \nabla f = (1, 1) = \lambda\,(2x, 2y) = \lambda\nabla g . \]
+  \pause
+  \begin{itemize}
+    \item $\lambda \ne 0$ (else $1 = 0$), so $x = y = \frac{1}{2\lambda}$.
+    \item Then $x^2 + y^2 = 2x^2 = 1$: \ $x = y = \pm\frac1{\sqrt2}$, with $\lambda = \pm\frac1{\sqrt2}$.
+    \item $\nabla g = (2x, 2y) \ne \mathbf 0$ on the circle.
+  \end{itemize}
+  \pause
+  The circle is closed and bounded, so compare: \
+  $f\bigl(\frac1{\sqrt2}, \frac1{\sqrt2}\bigr) = \sqrt2$ is the maximum,
+  $f\bigl(-\frac1{\sqrt2}, -\frac1{\sqrt2}\bigr) = -\sqrt2$ the minimum. \ As before.
+\end{frame}
+
+\begin{frame}{Example: the best rectangle}
+  \begin{example}[Largest area for a given perimeter $P$]
+    Maximise $A = xy$ subject to $2x + 2y = P$, with $x, y \ge 0$.
+    \pause
+    \[ (y, x) = \lambda\,(2, 2) \quad\Longrightarrow\quad x = y = 2\lambda . \]
+    The constraint gives $x = y = \frac P4$ and $\lambda = \frac P8$. \ Area $\frac{P^2}{16}$.
+    \pause
+    \\[0.3em] The constraint set is a segment; at its endpoints ($x = 0$ or $y = 0$) the area is $0$.
+    So the maximum is the \textbf{square}.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Example: the closest points of a hyperbola}
+  \begin{example}[Closest points of $xy = 1$ to the origin]
+    Minimise $x^2 + y^2$ subject to $xy = 1$: \ $(2x, 2y) = \lambda\,(y, x)$.
+    \pause
+    \begin{itemize}
+      \item Multiplying the two equations: $4xy = \lambda^2 xy$, and $xy = 1$, so $\lambda = \pm 2$.
+      \item $\lambda = 2$: \ $x = y$, so $x^2 = 1$: the points $(1, 1)$ and $(-1, -1)$.
+      \item $\lambda = -2$: \ $x = -y$, and $xy = -x^2 = 1$ is impossible.
+    \end{itemize}
+    \pause
+    The closest points are $\pm(1, 1)$, at distance $\sqrt2$.
+  \end{example}
+  \pause
+  {\small The hyperbola is not bounded, so existence needs an argument: $x^2 + y^2 \to \infty$ along both
+  ends of each branch, so a minimum exists, and it must be among the candidates.\par}
+\end{frame}
+
+\begin{frame}{Example: a product with a fixed sum}
+  \begin{example}[Maximise $xyz$ subject to $x + y + z = 3$, \ $x, y, z \ge 0$]
+    $(yz, \ xz, \ xy) = \lambda\,(1, 1, 1)$.
+    \pause
+    If all three are positive: $yz = xz$ gives $x = y$, and $xz = xy$ gives $y = z$. So
+    $x = y = z = 1$, with product $1$.
+    \pause
+    \\[0.3em] If one of them is $0$, the product is $0$. The set is closed and bounded, so the
+    maximum is $1$.
+  \end{example}
+  \pause
+  \begin{remark}[The AM--GM inequality]
+    Rescaling to $x + y + z = 3$: \ for all $x, y, z \ge 0$, \ $\sqrt[3]{xyz} \le \dfrac{x + y + z}{3}$. \ The same method gives the
+    inequality for $n$ numbers.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{What the multiplier means}
+
+\begin{frame}{$\lambda$ is the rate of change of the optimum}
+  Let $M(c)$ be the optimal value of $f$ on $\{g = c\}$, attained at $\va(c)$ with multiplier
+  $\lambda(c)$. Assume $\va(c)$ is differentiable in $c$.
+  \pause
+  \begin{theorem}
+    $M'(c) = \lambda(c)$.
+  \end{theorem}
+  \pause
+  \textbf{Proof.} $M(c) = f(\va(c))$ and $g(\va(c)) = c$, so by the chain rule
+  \[ M'(c) = \nabla f(\va) \cdot \va'(c) = \lambda\, \nabla g(\va) \cdot \va'(c)
+     = \lambda\, \frac{d}{dc}\, g(\va(c)) = \lambda . \qquad \qed \]
+  \pause
+  Rectangle: $M(P) = \frac{P^2}{16}$ and $M'(P) = \frac P8 = \lambda$: one more unit of fence buys about
+  $\frac P8$ more area. Economists call $\lambda$ a \textbf{shadow price}: the value, at the optimum, of
+  one more unit of the constrained resource.
+\end{frame}
+
+% =============================================================
+\section{Applications}
+
+\begin{frame}{Maximum entropy}
+  The \textbf{entropy} of a probability distribution $p_1, \dots, p_n > 0$ is
+  $H(\vp) = -\sum_i p_i \ln p_i$. \ Maximise it subject to $\sum_i p_i = 1$.
+  \pause
+  \[ \frac{\partial H}{\partial p_i} = -\ln p_i - 1 = \lambda \quad\Longrightarrow\quad
+     p_i = e^{-1 - \lambda} \quad \text{for every } i . \]
+  So all $p_i$ are equal: $p_i = \frac1n$, and $H = \ln n$.
+  \pause
+  \begin{itemize}
+    \item It is the global maximum: the Hessian of $H$ is $\operatorname{diag}(-1/p_1, \dots, -1/p_n)$,
+      negative definite, so $H$ is strictly concave on the convex constraint set (Lecture 14).
+    \item The uniform distribution is the ``most uncertain'' one. Adding the constraint
+      $\sum_i p_i E_i = E$ gives instead $p_i \propto e^{-\beta E_i}$: the Boltzmann distribution of
+      statistical physics.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Eigenvalues as constrained extrema}
+  For a symmetric matrix $A$: the extrema of $f(\vx) = \vx^\top A\vx$ on the sphere $\vx^\top\vx = 1$.
+  \pause\\[0.4em]
+  $\nabla f = 2A\vx = \lambda \cdot 2\vx = \lambda\nabla g$ \ means \ $A\vx = \lambda\vx$: the candidates
+  are the unit \textbf{eigenvectors}, and there $f = \vx^\top(\lambda\vx) = \lambda$.
+  \pause
+  \begin{block}{Conclusion}
+    On the unit sphere, the maximum of $\vx^\top A\vx$ is the largest eigenvalue of $A$ and the
+    minimum the smallest, attained at corresponding eigenvectors.
+  \end{block}
+  \pause
+  \begin{itemize}
+    \item The maximum exists (the sphere is closed and bounded): so every symmetric matrix has a
+      real eigenvalue.
+    \item PCA: the direction of largest variance is the top eigenvector of the covariance
+      matrix (Linear Algebra, Unit 23).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Extrema on a closed region}
+  \begin{example}[$f = x^2 + 2y^2 - x$ on the disc $x^2 + y^2 \le 1$]
+    \textbf{Interior.} $\nabla f = (2x - 1, \ 4y) = \mathbf 0$ at $\bigl(\frac12, 0\bigr)$, \ $f = -\frac14$.
+    \pause\\[0.3em]
+    \textbf{Boundary.} $(2x - 1, \ 4y) = \lambda\,(2x, 2y)$. The second equation: $y = 0$ or $\lambda = 2$.
+    \begin{itemize}
+      \item $y = 0$: \ $(\pm 1, 0)$, \ $f(1, 0) = 0$, \ $f(-1, 0) = 2$.
+      \item $\lambda = 2$: \ $2x - 1 = 4x$, so $x = -\frac12$, $y = \pm\frac{\sqrt3}{2}$, \
+        $f = \frac14 + \frac32 + \frac12 = \frac94$.
+    \end{itemize}
+    \pause
+    \textbf{Compare} $-\frac14$, $0$, $2$, $\frac94$: \ maximum $\frac94$ at
+    $\bigl(-\frac12, \pm\frac{\sqrt3}2\bigr)$, minimum $-\frac14$ at $\bigl(\frac12, 0\bigr)$.
+  \end{example}
+  {\small Lecture 14's recipe, with Lagrange multipliers for the boundary.\par}
+\end{frame}
+
+% =============================================================
+\section{More constraints, and limits of the method}
+
+\begin{frame}{Several constraints}
+  \begin{theorem}
+    If $\va$ is a local extremum of $f$ subject to $g_1 = c_1, \dots, g_k = c_k$, and
+    $\nabla g_1(\va), \dots, \nabla g_k(\va)$ are linearly independent, then
+    \[ \nabla f(\va) = \lambda_1 \nabla g_1(\va) + \dots + \lambda_k \nabla g_k(\va) . \]
+  \end{theorem}
+  \pause
+  \begin{example}[Extrema of $z$ on the ellipse $x^2 + y^2 = 1$, \ $x + y + z = 1$]
+    $(0, 0, 1) = \lambda\,(2x, 2y, 0) + \mu\,(1, 1, 1)$. \ Third component: $\mu = 1$; then
+    $2\lambda x = 2\lambda y = -1$, so $x = y = \pm\frac1{\sqrt2}$ and $z = 1 \mp \sqrt2$.
+    \pause\\[0.3em]
+    Maximum $1 + \sqrt2$ at $\bigl(-\frac1{\sqrt2}, -\frac1{\sqrt2}, 1 + \sqrt2\bigr)$, \
+    minimum $1 - \sqrt2$ at $\bigl(\frac1{\sqrt2}, \frac1{\sqrt2}, 1 - \sqrt2\bigr)$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Inequality constraints (outlook)}
+  Minimise $f$ subject to $g(\vx) \le c$. At a minimum $\va$, either
+  \begin{itemize}
+    \item $g(\va) < c$: the constraint is \textbf{inactive}, and $\nabla f(\va) = \mathbf 0$; or
+    \item $g(\va) = c$: it is \textbf{active}, and $\nabla f(\va) = -\mu\nabla g(\va)$ with $\mu \ge 0$ ---
+      $f$ must not decrease towards the inside, where $g < c$.
+  \end{itemize}
+  \pause
+  Both cases together: \ $\nabla f + \mu\nabla g = \mathbf 0$, \ $\mu \ge 0$, \ $\mu\,(g - c) = 0$.
+  \pause
+  \begin{remark}
+    These are the \textbf{Karush--Kuhn--Tucker} (KKT) conditions, for one constraint. With many
+    constraints they are the foundation of constrained optimisation algorithms, and of the
+    support vector machine in machine learning.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{When the method fails}
+  \begin{columns}[c]
+    \begin{column}{0.6\textwidth}
+      \begin{example}[Minimise $f = x$ on the curve $y^2 = x^3$]
+        On the curve $x = |y|^{2/3} \ge 0$, so the minimum is $0$, at $(0, 0)$.
+        \pause\\[0.3em]
+        But with $g = y^2 - x^3$: \ $(1, 0) = \lambda\,(-3x^2, \ 2y)$. \ The second component gives
+        $\lambda = 0$ (then $1 = 0$) or $y = 0$, so $x = 0$ (then $1 = 0$ again). \
+        \textbf{No solution.}
+      \end{example}
+      \pause
+      At $(0, 0)$, $\nabla g = \mathbf 0$: the curve has a cusp, and the theorem does not apply.
+      That is why step 2 of the recipe is there.
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[width=\linewidth, height=4.6cm, axis lines=middle, axis line style={wosm-muted, -},
+            xmin=-0.3, xmax=1.4, ymin=-1.4, ymax=1.4, xtick=\empty, ytick=\empty]
+          \addplot[wosm-text, very thick, domain=0:1.2, samples=60] {x^1.5};
+          \addplot[wosm-text, very thick, domain=0:1.2, samples=60] {-x^1.5};
+          \addplot[wosm-brick, only marks, mark=*, mark size=2pt] coordinates {(0,0)};
+        \end{axis}
+      \end{tikzpicture}
+      \par\small The cusp $y^2 = x^3$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item \textbf{Lagrange}: at an extremum of $f$ on $\{g = c\}$ with $\nabla g \ne \mathbf 0$, \
+      $\nabla f = \lambda\nabla g$ --- the level set of $f$ is tangent to the constraint.
+    \item Recipe: solve $\nabla f = \lambda\nabla g$, $g = c$; add the points with $\nabla g = \mathbf 0$;
+      compare values (on a closed bounded set).
+    \item $\lambda = M'(c)$: the rate at which the optimum changes with the constraint level.
+    \item Applications: the square, AM--GM, maximum entropy (uniform), eigenvalues as extrema
+      of $\vx^\top A\vx$ on the sphere.
+    \item Several constraints: $\nabla f = \sum_j \lambda_j\nabla g_j$. Inequalities: KKT.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find the extrema of $xy$ on the circle $x^2 + y^2 = 8$.
+    \item Find the point of the plane $x + 2y + 2z = 9$ closest to the origin.
+    \item A closed box has surface area $6$. Find the largest possible volume.
+    \item Find the extrema of $2x + y$ on the ellipse $x^2 + 4y^2 = 4$.
+    \item Find the distribution $(p_1, p_2, p_3)$ of largest entropy, and the entropy.
+    \item Find the extrema of $\vx^\top A\vx$ on the unit circle for
+      $A = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}$.
+    \item Let $M(c)$ be the maximum of $xy$ on $x^2 + y^2 = c$. Find $M(c)$ and $\lambda$, and check
+      that $M'(c) = \lambda$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $y = 2\lambda x$, $x = 2\lambda y$ give $x^2 = y^2 = 4$. Maximum $4$ at $\pm(2, 2)$,
+      minimum $-4$ at $\pm(2, -2)$.
+    \item $\nabla(x^2 + y^2 + z^2) = \lambda\,(1, 2, 2)$: the point $(1, 2, 2)$, at distance $3$.
+    \item $xy + yz + zx = 3$; the equations force $x = y = z = 1$: \ volume $1$ (a cube).
+    \item $x = \frac1\lambda$, $y = \frac1{8\lambda}$, \ $\lambda = \pm\frac{\sqrt{17}}{8}$: \ maximum $\sqrt{17}$,
+      minimum $-\sqrt{17}$.
+    \item The uniform distribution $\bigl(\frac13, \frac13, \frac13\bigr)$, \ $H = \ln 3$.
+    \item Eigenvalues $3$ and $1$: maximum $3$ at $\pm\frac{1}{\sqrt2}(1, 1)$, minimum $1$ at
+      $\pm\frac{1}{\sqrt2}(1, -1)$.
+    \item At the maximum $x = y$, so $M(c) = \frac c2$ and $\lambda = \frac12 = M'(c)$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 17 --- Implicit and inverse function theorems} (Unit 17)
+  \begin{itemize}
+    \item When does $g(x, y) = c$ define $y$ as a function of $x$?
+    \item The implicit function theorem, and implicit differentiation
+    \item The inverse function theorem: local invertibility from the Jacobian
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Marsden \& Tromba, \emph{Vector Calculus}, Section 3.5.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

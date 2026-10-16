@@ -1,0 +1,417 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 15
+%  Unit 15: Gradient descent and its convergence for convex
+%  quadratics
+%
+%  Build from the repository root:   npm run materials -- lecture-15
+%  This writes lecture-15.pdf (slides, with overlays) and
+%  lecture-15-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{wosm axis/.style={
+  axis lines=left, axis line style={wosm-muted, -},
+  tick style={wosm-muted}, tick label style={font=\scriptsize, text=wosm-muted},
+  label style={font=\scriptsize, text=wosm-muted},
+  legend style={draw=none, fill=none, font=\scriptsize, text=wosm-text},
+  legend cell align=left}}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\vb}{\mathbf{b}}
+\newcommand{\ve}{\mathbf{e}}
+\newcommand{\vg}{\mathbf{g}}
+\newcommand{\vh}{\mathbf{h}}
+\newcommand{\vu}{\mathbf{u}}
+\newcommand{\vv}{\mathbf{v}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L15 \textperiodcentered\ Gradient descent]{Gradient descent}
+\subtitle{The algorithm, and its convergence for convex quadratics}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 15\enspace\textperiodcentered\enspace Unit 15\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item Critical points: $\nabla f = \mathbf 0$. Local extrema in the interior are critical points.
+    \item Second-derivative test: the signs of the eigenvalues of the Hessian.
+    \item Convex functions: every critical point is a global minimum.
+    \item Least squares is convex; its minimisers solve the normal equations.
+  \end{itemize}
+  \vskip0.6em
+  But solving $\nabla f = \mathbf 0$ is usually the hard part. Today: an algorithm that does
+  not solve it, but walks towards a solution.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: Boyd \& Vandenberghe, \emph{Convex Optimization}, Sections 9.1--9.3.\par}
+\end{frame}
+
+% =============================================================
+\section{The algorithm}
+
+\begin{frame}{Why iterate?}
+  \begin{itemize}
+    \item $\nabla f(\vx) = \mathbf 0$ is a system of $n$ equations in $n$ unknowns. If $f$ is not
+      quadratic, the system is nonlinear, and usually has no formula for its solutions.
+    \item Even for least squares, solving the $n \times n$ normal equations by elimination takes
+      about $n^3$ operations: too many when $n$ is in the millions.
+    \item A gradient is cheap: by backpropagation (Lecture 12) it costs a small multiple of one
+      evaluation of $f$.
+  \end{itemize}
+  \pause
+  \begin{block}{Idea}
+    Start somewhere, and repeatedly take a small step downhill. The steepest way down is
+    $-\nabla f$ (Lecture 11).
+  \end{block}
+\end{frame}
+
+\begin{frame}{Gradient descent}
+  \begin{block}{Algorithm}
+    Choose a starting point $\vx_0$, a \textbf{step size} $\eta > 0$ and a tolerance $\varepsilon > 0$.
+    For $k = 0, 1, 2, \dots$
+    \begin{enumerate}
+      \item compute $\vg_k = \nabla f(\vx_k)$;
+      \item if $\norm{\vg_k} \le \varepsilon$, stop;
+      \item set $\vx_{k+1} = \vx_k - \eta\, \vg_k$.
+    \end{enumerate}
+  \end{block}
+  \pause
+  \begin{itemize}
+    \item In machine learning $\eta$ is called the \textbf{learning rate}.
+    \item The stopping rule asks for an approximate critical point. For a convex $f$ that is
+      close to a global minimum (made precise later today).
+    \item The questions: does $\vx_k$ converge, to what, how fast --- and how to choose $\eta$?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Each step goes downhill --- if it is short enough}
+  By the first-order Taylor formula, with $\vg = \nabla f(\vx) \ne \mathbf 0$:
+  \[ f(\vx - \eta\vg) = f(\vx) - \eta\, \norm{\vg}^2 + o(\eta) \ <\ f(\vx)
+     \qquad \text{for small } \eta > 0 . \]
+  \pause
+  \begin{example}[$f(x) = x^2$ in one variable]
+    $x_{k+1} = x_k - 2\eta\, x_k = (1 - 2\eta)\, x_k$, \ so $x_k = (1 - 2\eta)^k x_0$.
+    \begin{itemize}
+      \item $0 < \eta < \frac12$: \ steady approach to $0$. \quad $\eta = \frac12$: \ $0$ in one step.
+      \item $\frac12 < \eta < 1$: \ the sign alternates, but $x_k \to 0$.
+      \item $\eta \ge 1$: \ $|x_k|$ does not shrink: no convergence.
+    \end{itemize}
+  \end{example}
+  \pause
+  {\small Too small a step is slow; too large a step overshoots. The rest of the lecture is this
+  example in $n$ dimensions.\par}
+\end{frame}
+
+% =============================================================
+\section{Convex quadratics}
+
+\begin{frame}{The model problem}
+  \[ f(\vx) = \tfrac12\, \vx^\top Q \vx - \vb^\top \vx, \qquad Q \text{ symmetric positive definite}, \]
+  with eigenvalues $0 < m = \lambda_1 \le \dots \le \lambda_n = L$. \ Then
+  $\nabla f = Q\vx - \vb$ and $H_f = Q$.
+  \begin{itemize}
+    \item $f$ is strictly convex, with the unique minimiser $\vx^* = Q^{-1}\vb$.
+  \end{itemize}
+  \pause
+  Why this model?
+  \begin{itemize}
+    \item Least squares is of this form: $\norm{A\vx - \vb}^2 = \frac12 \vx^\top (2A^\top A)\vx
+      - (2A^\top\vb)^\top\vx + \norm{\vb}^2$.
+    \item Near a strict local minimum $\vx^*$, every $C^2$ function looks like this, with
+      $Q = H_f(\vx^*)$ (Taylor, Lecture 13).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The error recursion}
+  Let $\ve_k = \vx_k - \vx^*$ be the error. Since $Q\vx^* = \vb$:
+  \[ \ve_{k+1} = \vx_k - \eta\,(Q\vx_k - \vb) - \vx^* = \ve_k - \eta\, Q\ve_k = (I - \eta Q)\,\ve_k , \]
+  so $\ve_k = (I - \eta Q)^k\, \ve_0$.
+  \pause
+  \vskip0.4em
+  Expand in an orthonormal basis of eigenvectors of $Q$ (spectral theorem):
+  \[ \ve_0 = \sum_i c_i \vu_i \quad\Longrightarrow\quad
+     \ve_k = \sum_i (1 - \eta\lambda_i)^k\, c_i\, \vu_i . \]
+  \pause
+  \begin{block}{In the eigenbasis, the problem splits}
+    Each eigendirection is a one-variable problem like $x^2$: its error component is multiplied by
+    $1 - \eta\lambda_i$ at every step.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Convergence}
+  \begin{theorem}
+    Gradient descent on $f(\vx) = \frac12 \vx^\top Q\vx - \vb^\top\vx$ converges to $\vx^*$ from every
+    starting point if and only if $0 < \eta < 2/L$. Then
+    \[ \norm{\vx_k - \vx^*} \le \rho^k\, \norm{\vx_0 - \vx^*}, \qquad
+       \rho = \max\bigl(|1 - \eta m|, \ |1 - \eta L|\bigr) < 1 . \]
+  \end{theorem}
+  \pause
+  \begin{proof}
+    $\norm{\ve_k}^2 = \sum_i (1 - \eta\lambda_i)^{2k} c_i^2 \le \rho^{2k} \sum_i c_i^2 = \rho^{2k}\norm{\ve_0}^2$,
+    because $|1 - \eta\lambda_i| \le \rho$ for $m \le \lambda_i \le L$. \ And $\rho < 1$ exactly when
+    $0 < \eta < 2/L$.
+    \pause
+    Conversely, if $\eta \ge 2/L$ (or $\eta \le 0$), start at $\ve_0 = \vu_n$: then
+    $\norm{\ve_k} = |1 - \eta L|^k \ge 1$ for all $k$.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{The best step size}
+  \begin{columns}[c]
+    \begin{column}{0.48\textwidth}
+      $\rho(\eta)$ is the larger of $|1 - \eta m|$ (falling) and $|1 - \eta L|$ (a V). It is
+      smallest where they meet: $1 - \eta m = \eta L - 1$.
+      \pause
+      \begin{block}{Optimal fixed step}
+        \[ \eta^* = \frac{2}{m + L}, \]
+        \[ \rho^* = \frac{L - m}{L + m} = \frac{\kappa - 1}{\kappa + 1}, \]
+        where $\kappa = L/m \ge 1$ is the \textbf{condition number} of $Q$.
+      \end{block}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5.2cm, xmin=0, xmax=0.25, ymin=0, ymax=1.55,
+            xlabel={step size $\eta$}, xtick={0, 0.1, 0.1818}, xticklabels={$0$, $0.1$, $\eta^*$},
+            ytick={0, 0.818, 1}, yticklabels={$0$, $\rho^*$, $1$}, legend pos=north west]
+          \addplot[wosm-accent, thick, domain=0:0.25] {abs(1 - x)};
+          \addplot[wosm-muted, thick, domain=0:0.25, samples=101] {abs(1 - 10*x)};
+          \addplot[wosm-brick, very thick, domain=0:0.25, samples=101] {max(abs(1 - x), abs(1 - 10*x))};
+          \addplot[wosm-rule, dashed, domain=0:0.25] {1};
+          \legend{$|1 - \eta m|$, $|1 - \eta L|$, $\rho(\eta)$}
+          \fill[wosm-brick] (axis cs:0.1818,0.8182) circle (1.8pt);
+          \fill[wosm-text] (axis cs:0.2,1) circle (1.5pt) node[above, font=\scriptsize] {$\frac2L$};
+        \end{axis}
+      \end{tikzpicture}
+      \par\small $m = 1$, $L = 10$: \ $\eta^* = \frac2{11}$, \ $\rho^* = \frac9{11}$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The condition number decides the speed}
+  With $\eta = \eta^*$, the error falls by the factor $10^{-6}$ once
+  $k \ge \dfrac{\ln 10^6}{\ln (1/\rho^*)}$:
+  \vskip0.4em
+  \begin{center}
+    \begin{tabular}{rrr}
+      \toprule
+      $\kappa$ & $\rho^* = \frac{\kappa - 1}{\kappa + 1}$ & iterations \\
+      \midrule
+      $1$    & $0$      & $1$ \\
+      $10$   & $0.8182$ & $69$ \\
+      $100$  & $0.9802$ & $691$ \\
+      $1000$ & $0.9980$ & $6908$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  \pause
+  \begin{itemize}
+    \item For large $\kappa$: \ $\ln(1/\rho^*) \approx 2/\kappa$, so about $\frac{\kappa}{2} \ln 10^6 \approx 6.9\,\kappa$
+      iterations: the work grows in proportion to $\kappa$.
+    \item $\kappa = 1$ ($Q = mI$): the level sets are spheres, $-\nabla f$ points straight at
+      $\vx^*$, and one step of size $1/m$ lands on it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Why it zigzags}
+  \centering
+  \begin{tikzpicture}[x=1cm, y=1cm]
+    \clip (-1.2,-1.15) rectangle (10.8,1.15);
+    \foreach \k in {0, 2, 4, 6, 8, 10, 12, 14}
+      \draw[wosm-accent!60!wosm-bg] (0,0) ellipse ({10.488*(9/11)^\k} and {3.317*(9/11)^\k});
+    \draw[wosm-muted, very thin] (-1.2,0) -- (10.8,0);
+    \draw[wosm-brick, thick] plot coordinates {(10.000,1.000) (8.182,-0.818) (6.694,0.669) (5.477,-0.548)
+      (4.481,0.448) (3.666,-0.367) (3.000,0.300) (2.454,-0.245) (2.008,0.201) (1.643,-0.164)
+      (1.344,0.134) (1.100,-0.110) (0.900,0.090) (0.736,-0.074) (0.602,0.060)};
+    \foreach \x/\y in {10.000/1.000, 8.182/-0.818, 6.694/0.669, 5.477/-0.548, 4.481/0.448,
+      3.666/-0.367, 3.000/0.300, 2.454/-0.245, 2.008/0.201}
+      \fill[wosm-brick] (\x,\y) circle (1.6pt);
+    \fill[wosm-text] (0,0) circle (1.8pt) node[below left, font=\scriptsize] {$\vx^*$};
+    \node[font=\scriptsize, wosm-brick, right] at (10.05,1.0) {$\vx_0$};
+  \end{tikzpicture}
+  \vskip0.5em
+  \raggedright
+  $f = \frac12 (x^2 + 10y^2)$, \ $\kappa = 10$, \ $\eta = \eta^* = \frac2{11}$, from $\vx_0 = (10, 1)$
+  (same scale on both axes).
+  \pause
+  \begin{itemize}
+    \item The steep direction ($y$, $\lambda = 10$) overshoots: factor $1 - \frac{20}{11} = -\frac9{11}$.
+      The shallow direction ($x$, $\lambda = 1$) creeps: factor $\frac9{11}$.
+    \item Each step is perpendicular to the level curve it starts from, not aimed at $\vx^*$.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Beyond quadratics}
+
+\begin{frame}{The descent lemma}
+  \begin{lemma}
+    Let $f$ be $C^2$ on $\R^n$ with $\vv^\top H_f(\vx)\vv \le L\norm{\vv}^2$ for all $\vx, \vv$. Then
+    \[ f(\vy) \le f(\vx) + \nabla f(\vx)\cdot(\vy - \vx) + \tfrac{L}{2}\norm{\vy - \vx}^2 . \]
+  \end{lemma}
+  \pause
+  {\small\textbf{Proof.} Let $\vh = \vy - \vx$ and $\varphi(t) = f(\vx + t\vh)$. By Taylor with the
+  Lagrange remainder (Calculus~I, Unit 17), $\varphi(1) = \varphi(0) + \varphi'(0) + \frac12\varphi''(\tau)$
+  for some $\tau \in (0, 1)$, and $\varphi''(\tau) = \vh^\top H_f(\vx + \tau\vh)\,\vh \le L\norm{\vh}^2$. \qed\par}
+  \pause
+  \vskip0.4em
+  With $\vy = \vx_{k+1} = \vx_k - \eta\vg_k$:
+  \[ f(\vx_{k+1}) \le f(\vx_k) - \eta\Bigl(1 - \frac{L\eta}{2}\Bigr)\norm{\vg_k}^2 . \]
+  For $0 < \eta < 2/L$ every step decreases $f$. \ For $\eta = 1/L$: \
+  $f(\vx_{k+1}) \le f(\vx_k) - \frac{1}{2L}\norm{\vg_k}^2$.
+\end{frame}
+
+\begin{frame}{Strongly convex functions}
+  Suppose also $\vv^\top H_f(\vx)\vv \ge m\norm{\vv}^2$ with $m > 0$ ($f$ is \textbf{strongly convex}).
+  The same proof gives $f(\vy) \ge f(\vx) + \nabla f(\vx)\cdot(\vy - \vx) + \frac m2 \norm{\vy - \vx}^2$.
+  \pause
+  Minimising the right-hand side over $\vy$ (at $\vy = \vx - \nabla f(\vx)/m$):
+  \[ f^* = \min f \ \ge\ f(\vx) - \frac{1}{2m}\norm{\nabla f(\vx)}^2 . \]
+  {\small A large gradient forces a large gap above the minimum, and the other way round: at a point
+  with a small gradient, $f$ is close to $f^*$.\par}
+\end{frame}
+
+\begin{frame}{Linear convergence}
+  \begin{theorem}
+    If $m\norm{\vv}^2 \le \vv^\top H_f(\vx)\vv \le L\norm{\vv}^2$ for all $\vx, \vv$ (with $m > 0$), and
+    $\eta = 1/L$, then \
+    $f(\vx_k) - f^* \le \bigl(1 - \frac1\kappa\bigr)^k \bigl(f(\vx_0) - f^*\bigr)$, \ where $\kappa = L/m$.
+  \end{theorem}
+  \pause
+  \textbf{Proof.} The descent lemma, then the bound $\norm{\vg_k}^2 \ge 2m\,\bigl(f(\vx_k) - f^*\bigr)$:
+  \[ f(\vx_{k+1}) - f^* \le f(\vx_k) - f^* - \frac{1}{2L}\norm{\vg_k}^2
+     \le \Bigl(1 - \frac mL\Bigr)\bigl(f(\vx_k) - f^*\bigr) . \qquad \qed \]
+  \pause
+  {\small ``Linear'': the gap shrinks by a constant factor per step, so its logarithm falls
+  linearly in $k$. Again the condition number sets the speed, as for quadratics (Boyd \&
+  Vandenberghe, Section 9.3).\par}
+\end{frame}
+
+\begin{frame}{Non-convex functions}
+  If $f$ is bounded below and the descent lemma holds, then with $\eta = 1/L$ the decreases add up:
+  \[ \frac{1}{2L}\sum_{k=0}^{K} \norm{\vg_k}^2 \le f(\vx_0) - f(\vx_{K+1}) \le f(\vx_0) - \inf f , \]
+  so $\nabla f(\vx_k) \to \mathbf 0$: gradient descent finds approximate \textbf{critical points}.
+  \pause
+  \begin{warning}[A critical point, not necessarily a minimum]
+    $f = x^4 + y^4 - 4xy + 1$ (Lecture 14): from $(1, -1)$ the iterates stay on the line $y = -x$
+    and converge to the saddle $(0, 0)$. From $(1, -0.99)$ they converge to the minimum $(1, 1)$
+    ($\eta = 0.05$).
+  \end{warning}
+  \pause
+  {\small For convex $f$ there is no such problem: every critical point is a global minimum.\par}
+\end{frame}
+
+\begin{frame}{Choosing the step size in practice}
+  $L$ is rarely known. Common choices:
+  \begin{itemize}
+    \item \textbf{Fixed} $\eta$, tuned by trial: too large diverges, too small crawls.
+    \pause
+    \item \textbf{Backtracking line search}: start with $\eta = 1$ and halve it until
+      \[ f(\vx_k - \eta\vg_k) \le f(\vx_k) - \tfrac{\eta}{2}\norm{\vg_k}^2 . \]
+      By the descent lemma this holds as soon as $\eta \le 1/L$, so the search stops.
+    \pause
+    \item \textbf{Exact line search}: minimise $f(\vx_k - \eta\vg_k)$ over $\eta$. For the model
+      quadratic it has a formula: $\eta_k = \dfrac{\vg_k^\top\vg_k}{\vg_k^\top Q\,\vg_k}$.
+  \end{itemize}
+  \pause
+  {\small All of these still zigzag when $\kappa$ is large: the trouble is the direction, not the
+  length of the step.\par}
+\end{frame}
+
+\begin{frame}{Beyond gradient descent}
+  \begin{itemize}
+    \item \textbf{Newton's method}: \ $\vx_{k+1} = \vx_k - H_f(\vx_k)^{-1}\nabla f(\vx_k)$ jumps to the
+      minimum of the quadratic Taylor model. On the model quadratic it reaches $\vx^*$ in one step.
+      Each step solves an $n \times n$ linear system (compare Calculus~I, Unit 16).
+    \item \textbf{Momentum} and \textbf{conjugate gradients} combine the new gradient with earlier
+      steps to damp the zigzag.
+    \item \textbf{Stochastic gradient descent}: when $f$ is a sum over a huge data set, use the
+      gradient of a randomly chosen part of the sum. With refinements, this is how neural networks are trained.
+  \end{itemize}
+  \pause
+  \begin{remark}[Project 2]
+    Project 2 asks you to implement gradient descent and study how the step size affects
+    convergence. Compare what you observe with the theory of this lecture.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item \textbf{Gradient descent}: $\vx_{k+1} = \vx_k - \eta\,\nabla f(\vx_k)$; a short enough
+      step always decreases $f$.
+    \item \textbf{Convex quadratic} $\frac12\vx^\top Q\vx - \vb^\top\vx$: \ $\ve_{k+1} = (I - \eta Q)\ve_k$.
+      Convergence from every start iff $0 < \eta < 2/L$, at the rate
+      $\rho = \max(|1 - \eta m|, |1 - \eta L|)$.
+    \item Best fixed step $\eta^* = 2/(m + L)$, with $\rho^* = (\kappa - 1)/(\kappa + 1)$: the
+      number of iterations grows like the condition number $\kappa = L/m$.
+    \item Zigzag: steep directions overshoot while shallow ones creep.
+    \item In general: the descent lemma; linear convergence for strongly convex $f$; for non-convex
+      $f$, convergence to critical points, which may be saddles.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Take two steps of gradient descent on $f = x^2 + 2y^2$ from $(1, 1)$ with $\eta = 0.25$.
+    \item For $f = \frac12\vx^\top Q\vx$ with $Q = \operatorname{diag}(1, 4)$: for which $\eta$ does gradient
+      descent converge? Find $\eta^*$ and $\rho^*$.
+    \item The same for $Q = \begin{pmatrix} 3 & 1 \\ 1 & 3 \end{pmatrix}$.
+    \item With $\kappa = 50$ and $\eta = \eta^*$, how many iterations reduce the error by the factor $10^{-3}$?
+    \item Show that one step of Newton's method minimises $\frac12\vx^\top Q\vx - \vb^\top\vx$ from any $\vx_0$.
+    \item Show that exact line search on the model quadratic gives
+      $\eta_k = \vg_k^\top\vg_k / \vg_k^\top Q\vg_k$.
+    \item Gradient descent on $f(x) = x^4$ from $x_0 = 1$, with $\eta = 0.1$: show that $x_k \to 0$.
+      Why does the convergence theorem for strongly convex functions not apply?
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $\nabla f = (2x, 4y)$: \ $(1, 1) \to (0.5, 0) \to (0.25, 0)$.
+    \item $0 < \eta < \frac12$; \ $\eta^* = \frac25$, \ $\rho^* = \frac35$.
+    \item Eigenvalues $2$ and $4$: \ $0 < \eta < \frac12$, \ $\eta^* = \frac13$, \ $\rho^* = \frac13$.
+    \item $\rho^* = \frac{49}{51}$; \ $k \ge \ln 1000 / \ln\frac{51}{49} \approx 172.7$: \ $173$ iterations.
+    \item $\vx_1 = \vx_0 - Q^{-1}(Q\vx_0 - \vb) = Q^{-1}\vb = \vx^*$.
+    \item $\varphi(\eta) = f(\vx_k - \eta\vg_k) = f(\vx_k) - \eta\,\vg_k^\top\vg_k + \frac{\eta^2}{2}\vg_k^\top Q\vg_k$;
+      \ set $\varphi'(\eta) = 0$.
+    \item $x_{k+1} = x_k(1 - 0.4x_k^2)$: positive and decreasing, and the limit $c$ satisfies $c = c - 0.4c^3$,
+      so $c = 0$. Slowly: $x_{100} \approx 0.109$. \ $f''(0) = 0$, so no $m > 0$ exists.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 16 --- Constrained optimisation: Lagrange multipliers} (Unit 16)
+  \begin{itemize}
+    \item Optimising $f(\vx)$ subject to a constraint $g(\vx) = c$
+    \item The condition $\nabla f = \lambda\,\nabla g$, and why it holds
+    \item Examples from geometry, economics, information theory and linear algebra
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Section 4.8; Marsden \& Tromba,
+  \emph{Vector Calculus}, Section 3.4.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

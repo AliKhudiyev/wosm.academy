@@ -1,0 +1,323 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 19
+%  Unit 19: Triple integrals
+%
+%  Build from the repository root:   npm run materials -- lecture-19
+%  This writes lecture-19.pdf (slides, with overlays) and
+%  lecture-19-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dA}{\, dA}
+\newcommand{\dV}{\, dV}
+
+\course{MAT231-F27}{Calculus II}
+\title[L19 \textperiodcentered\ Triple integrals]{Triple integrals}
+\subtitle{Boxes, general solids, and applications}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 19\enspace\textperiodcentered\enspace Unit 19\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item $\iint_R f \dA$: the limit of Riemann sums; for $f \ge 0$, the volume under the graph.
+    \item Fubini: for continuous $f$, an iterated integral in either order.
+    \item General regions: type I ($y$ between two curves) and type II ($x$ between two curves);
+      changing the order of integration.
+  \end{itemize}
+  \vskip0.6em
+  Today: one more variable. Nothing new in principle --- the work is in describing solids in
+  space by inequalities.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Sections 5.4 and 5.6.\par}
+\end{frame}
+
+% =============================================================
+\section{Triple integrals over boxes}
+
+\begin{frame}{The triple integral}
+  Let $f$ be defined on a box $B = [a, b] \times [c, d] \times [r, s]$. Cut $B$ into small boxes
+  $B_{ijk}$ of volume $\Delta V = \Delta x\, \Delta y\, \Delta z$ and choose sample points in them:
+  \[ \iiint_B f(x, y, z) \dV = \lim \sum_{i, j, k} f(x_{ijk}^*, y_{ijk}^*, z_{ijk}^*)\, \Delta V , \]
+  if the limit exists for all choices of sample points. Continuous functions are integrable.
+  \pause
+  \begin{itemize}
+    \item $f = 1$: \ $\iiint_B 1 \dV$ is the volume of $B$.
+    \item $f = \rho$, a density (mass per unit volume): \ $\iiint_B \rho \dV$ is the mass.
+    \item There is no ``graph'' to look at any more: the graph of $f$ lives in $\R^4$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Fubini's theorem in three variables}
+  \begin{theorem}[Fubini]
+    If $f$ is continuous on $B = [a, b] \times [c, d] \times [r, s]$, then
+    \[ \iiint_B f \dV = \int_a^b \int_c^d \int_r^s f(x, y, z)\, dz\, dy\, dx , \]
+    and the same holds for each of the $3! = 6$ orders of integration.
+  \end{theorem}
+  \pause
+  \begin{itemize}
+    \item Integrate in one variable at a time, treating the others as constants. The innermost
+      integral is a function of the two outer variables, and so on.
+    \item The proof is the same regrouping of Riemann sums as for double integrals.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{example}[A product]
+    $\displaystyle \iiint_{[0,1] \times [0,2] \times [0,3]} x y z^2 \dV
+      = \int_0^1 x\, dx \int_0^2 y\, dy \int_0^3 z^2\, dz = \frac12 \cdot 2 \cdot 9 = 9 .$
+  \end{example}
+  \pause
+  \begin{example}[$\iiint (x + y + z)^2 \dV$ over the unit cube]
+    Expand: $\iiint x^2 \dV = \frac13$ (three such terms), $\iiint 2xy \dV = 2 \cdot \frac12 \cdot \frac12 = \frac12$
+    (three such terms). Total: $1 + \frac32 = \frac52$.
+  \end{example}
+  \pause
+  {\small The cube has volume $1$, so $\frac52$ is also the \textbf{average value} of $(x + y + z)^2$ on it:
+  in general $\bar f = \frac{1}{\operatorname{vol}(E)} \iiint_E f \dV$.\par}
+\end{frame}
+
+% =============================================================
+\section{General solids}
+
+\begin{frame}{A solid between two surfaces}
+  Let $D$ be a region in the $xy$-plane, and \
+  $E = \{(x, y, z) : (x, y) \in D, \ u_1(x, y) \le z \le u_2(x, y)\}$. Then
+  \[ \iiint_E f \dV = \iint_D \Bigl( \int_{u_1(x, y)}^{u_2(x, y)} f(x, y, z)\, dz \Bigr) \dA . \]
+  \pause
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \begin{itemize}
+        \item $D$ is the \textbf{projection} (shadow) of $E$ on the $xy$-plane.
+        \item The double integral over $D$ is set up as in Lecture 18. Projections on the other
+          coordinate planes work the same way.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.43\textwidth}
+      \centering
+      \begin{tikzpicture}[x={(-0.75cm,-0.6cm)}, y={(1.25cm,-0.1cm)}, z={(0cm,1cm)}, scale=1.1]
+        \fill[wosm-accent!18!wosm-bg] (0,0,0) -- (1,0,0) -- (0,1,0) -- cycle;
+        \draw[wosm-muted, -latex] (0,0,0) -- (1.35,0,0) node[below left, font=\scriptsize] {$x$};
+        \draw[wosm-muted, -latex] (0,0,0) -- (0,1.35,0) node[right, font=\scriptsize] {$y$};
+        \draw[wosm-muted, -latex] (0,0,0) -- (0,0,1.3) node[above, font=\scriptsize] {$z$};
+        \draw[wosm-text, thick] (1,0,0) -- (0,1,0) -- (0,0,1) -- cycle;
+        \draw[wosm-brick, very thick] (0.3,0.3,0) -- (0.3,0.3,0.4);
+        \fill[wosm-brick] (0.3,0.3,0) circle (0.9pt);
+        \fill[wosm-brick] (0.3,0.3,0.4) circle (0.9pt);
+        \node[font=\scriptsize, wosm-accent] at (0.62,0.18,0) {$D$};
+      \end{tikzpicture}
+      \par\small Over $(x, y) \in D$: \ $0 \le z \le 1 - x - y$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Example: the tetrahedron}
+  $E$: \ $x, y, z \ge 0$, \ $x + y + z \le 1$. \ Over $(x, y)$, $z$ runs from $0$ to $1 - x - y$; the
+  shadow $D$ is the triangle $0 \le x \le 1$, $0 \le y \le 1 - x$.
+  \pause
+  \[ \operatorname{vol}(E) = \int_0^1 \int_0^{1-x} \int_0^{1-x-y} dz\, dy\, dx
+     = \int_0^1 \int_0^{1-x} (1 - x - y)\, dy\, dx = \frac16 \quad \text{(Lecture 18).} \]
+  \pause
+  \[ \iiint_E z \dV = \int_0^1 \int_0^{1-x} \frac{(1 - x - y)^2}{2}\, dy\, dx
+     = \int_0^1 \frac{(1 - x)^3}{6}\, dx = \frac{1}{24} . \]
+  \pause
+  So the average height of a point of $E$ is $\frac{1/24}{1/6} = \frac14$. By symmetry the centroid is
+  $\bigl(\frac14, \frac14, \frac14\bigr)$ --- the average of the four vertices.
+\end{frame}
+
+\begin{frame}{Example: a solid with a curved side}
+  $E$ is bounded by the parabolic cylinder $y = x^2$ and the planes $z = 0$ and $y + z = 1$.
+  \pause
+  \begin{itemize}
+    \item Over a point $(x, y)$ of the shadow, $z$ runs from $0$ to $1 - y$.
+    \item The shadow: $z = 0$ and $y + z = 1$ meet where $y = 1$, so $D$ is $x^2 \le y \le 1$,
+      $-1 \le x \le 1$.
+  \end{itemize}
+  \pause
+  \[ \operatorname{vol}(E) = \int_{-1}^1 \int_{x^2}^1 \int_0^{1-y} dz\, dy\, dx
+     = \int_{-1}^1 \frac{(1 - x^2)^2}{2}\, dx = \frac12\Bigl(2 - \frac43 + \frac25\Bigr) = \frac{8}{15} . \]
+\end{frame}
+
+\begin{frame}{The same solid, in another order}
+  Project the same solid on the $yz$-plane instead.
+  \pause
+  \begin{itemize}
+    \item The shadow is the triangle $0 \le y \le 1$, $0 \le z \le 1 - y$ (between $z = 0$ and $y + z = 1$).
+    \item Over a point $(y, z)$ of it, $x$ runs across the parabolic cylinder: $-\sqrt y \le x \le \sqrt y$.
+  \end{itemize}
+  \pause
+  \[ \int_0^1 \int_0^{1-y} \int_{-\sqrt y}^{\sqrt y} dx\, dz\, dy = \int_0^1 2\sqrt y\, (1 - y)\, dy
+     = 2\Bigl(\frac23 - \frac25\Bigr) = \frac{8}{15} . \]
+  \pause
+  {\small Same answer, as Fubini promises. Here both orders are easy; often only one is.\par}
+\end{frame}
+
+\begin{frame}{Slicing by planes}
+  Integrate over $x$ and $y$ first. With $E_z$ the slice of $E$ at height $z$:
+  \[ \iiint_E f \dV = \int_r^s \Bigl( \iint_{E_z} f \dA \Bigr) dz , \qquad
+     \operatorname{vol}(E) = \int_r^s \operatorname{area}(E_z)\, dz . \]
+  \pause
+  \begin{columns}[c]
+    \begin{column}{0.58\textwidth}
+      \begin{example}[Under $z = 4$, above $z = x^2 + y^2$]
+        The slice at height $z$ is the disc $x^2 + y^2 \le z$, of area $\pi z$:
+        \ $\operatorname{vol} = \int_0^4 \pi z\, dz = 8\pi$.
+      \end{example}
+      {\small Projecting on the $xy$-plane instead leads to an integral over a disc, best done in polar
+      coordinates (Lecture 20).\par}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \centering
+      \begin{tikzpicture}[x=0.62cm, y=0.48cm]
+        \fill[wosm-accent!25!wosm-bg] (0,2) ellipse (1.414 and 0.22);
+        \draw[wosm-accent, thick] (0,2) ellipse (1.414 and 0.22);
+        \draw[wosm-text, thick, domain=-2:2, samples=50] plot (\x, {\x*\x});
+        \draw[wosm-text, thick] (0,4) ellipse (2 and 0.32);
+        \draw[wosm-muted, -latex] (0,-0.2) -- (0,4.8) node[above, font=\scriptsize] {$z$};
+        \node[font=\scriptsize, right] at (2.0,4) {$z = 4$};
+        \node[font=\scriptsize, right, wosm-accent] at (1.45,2) {$E_z$};
+      \end{tikzpicture}
+      \par\small The paraboloid cut off at $z = 4$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Choosing the order}
+  \begin{itemize}
+    \item Sketch the solid, or at least its shadows on the coordinate planes.
+    \item Choose as the inner variable one that runs between \textbf{two} surfaces, each given by a
+      single formula, for every point of the shadow. Otherwise, split the solid.
+    \item Of the six orders, prefer the one whose inner integrals are easy --- as in two variables, a
+      change of order can turn an impossible integral into an easy one.
+    \item If every slice $E_z$ is a simple shape (a disc, a square, a triangle), slice by planes.
+  \end{itemize}
+  \pause
+  \begin{warning}[Round solids]
+    Balls, cylinders and cones lead to square roots in Cartesian limits. Lecture 20 introduces
+    cylindrical and spherical coordinates for them.
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{Applications}
+
+\begin{frame}{Mass, centre of mass, moment of inertia}
+  A solid $E$ with density $\rho(x, y, z)$:
+  \[ M = \iiint_E \rho \dV, \qquad \bar x = \frac1M \iiint_E x\rho \dV \ \ (\bar y, \bar z \text{ alike}),
+     \qquad I_z = \iiint_E (x^2 + y^2)\, \rho \dV . \]
+  $I_z$, the moment of inertia about the $z$-axis, measures resistance to rotation about it.
+  \pause
+  \begin{example}[{The unit cube $[0, 1]^3$}]
+    \begin{itemize}
+      \item Density $\rho = z$ (heavier at the top): $M = \frac12$, \
+        $\bar z = \frac{1}{M}\iiint z^2 \dV = 2 \cdot \frac13 = \frac23$, \ $\bar x = \bar y = \frac12$.
+      \item Density $\rho = 1$, about the $z$-axis (an edge): $I_z = \iiint (x^2 + y^2) \dV = \frac23$.
+        About the parallel axis through the centre: $\iiint \bigl((x - \frac12)^2 + (y - \frac12)^2\bigr) \dV = \frac16$.
+    \end{itemize}
+  \end{example}
+\end{frame}
+
+\begin{frame}{Probability in three dimensions}
+  A joint density $p(x, y, z) \ge 0$ with $\iiint_{\R^3} p \dV = 1$ gives
+  $P\bigl((X, Y, Z) \in E\bigr) = \iiint_E p \dV$.
+  \pause
+  \begin{example}[$X$, $Y$, $Z$ independent and uniform on {$[0, 1]$}]
+    Then $p = 1$ on the unit cube, and probabilities are volumes.
+    \begin{itemize}
+      \item $P(X + Y + Z \le 1) = \frac16$: the tetrahedron.
+      \item $P(X < Y < Z) = \int_0^1 \int_0^z \int_0^y dx\, dy\, dz = \int_0^1 \frac{z^2}{2}\, dz = \frac16$.
+    \end{itemize}
+  \end{example}
+  \pause
+  {\small Check: the $3! = 6$ orderings of $X, Y, Z$ are equally likely, by symmetry.\par}
+\end{frame}
+
+\begin{frame}{More dimensions}
+  \begin{example}[In $\R^n$: the simplex $\Delta_n = \{x_i \ge 0, \ x_1 + \dots + x_n \le 1\}$]
+    The slice at $x_n = t$ is $\Delta_{n-1}$ scaled by $1 - t$, of volume
+    $(1 - t)^{n-1} \operatorname{vol}(\Delta_{n-1})$:
+    \[ \operatorname{vol}(\Delta_n) = \operatorname{vol}(\Delta_{n-1}) \int_0^1 (1 - t)^{n-1}\, dt
+       = \frac{\operatorname{vol}(\Delta_{n-1})}{n} = \dots = \frac{1}{n!} . \]
+  \end{example}
+  \pause
+  \begin{remark}[High dimensions]
+    A grid with $k$ points per axis has $k^n$ points: hopeless for $n = 100$. Monte Carlo methods
+    average $f$ at $N$ random points; the typical error is proportional to $1/\sqrt N$ for every $n$.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item $\iiint_E f \dV$: the limit of Riemann sums over small boxes; volume ($f = 1$), mass ($f = \rho$).
+    \item \textbf{Fubini}: on a box, any of the six orders of iterated integration.
+    \item A solid between two surfaces over a shadow $D$:
+      $\iiint_E f \dV = \iint_D \int_{u_1}^{u_2} f\, dz \dA$.
+    \item Slicing: $\operatorname{vol}(E) = \int \operatorname{area}(E_z)\, dz$.
+    \item Applications: mass, centre of mass, moments of inertia, probabilities as volumes.
+      The simplex in $\R^n$ has volume $1/n!$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Compute $\iiint_B (x + yz) \dV$ for $B = [0, 1] \times [0, 1] \times [0, 2]$.
+    \item Find the volume of the tetrahedron $x, y, z \ge 0$, $\frac xa + \frac yb + \frac zc \le 1$ ($a, b, c > 0$).
+    \item Find the volume of the solid under $z = y$ and above the region $0 \le x \le 1$, $0 \le y \le 1 - x^2$.
+    \item Write $\iiint_E f \dV$ for the tetrahedron $x, y, z \ge 0$, $x + y + z \le 1$ in the order
+      $dx\, dy\, dz$.
+    \item Find the volume of a ball of radius $R$ by slicing.
+    \item Find the mass and the centre of mass of the unit cube with density $\rho = x + y + z$.
+    \item $X$, $Y$, $Z$ are independent and uniform on $[0, 1]$. Find $P(X + Y \le Z)$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $\iiint x \dV + \iiint yz \dV = 1 + 1 = 2$.
+    \item $\frac{abc}{6}$ \ (substitute $x = au$, $y = bv$, $z = cw$, or integrate directly).
+    \item $\int_0^1 \int_0^{1-x^2} y\, dy\, dx = \int_0^1 \frac{(1 - x^2)^2}{2}\, dx = \frac{4}{15}$.
+    \item $\int_0^1 \int_0^{1-z} \int_0^{1-y-z} f\, dx\, dy\, dz$.
+    \item The slice at height $z$ is a disc of radius $\sqrt{R^2 - z^2}$:
+      $\int_{-R}^R \pi(R^2 - z^2)\, dz = \frac43 \pi R^3$.
+    \item $M = \frac32$; \ $\iiint x\rho \dV = \frac13 + \frac14 + \frac14 = \frac56$, so
+      $\bar x = \bar y = \bar z = \frac59$.
+    \item For fixed $z$, $\{x + y \le z\}$ is a triangle of area $\frac{z^2}{2}$: \
+      $\int_0^1 \frac{z^2}{2}\, dz = \frac16$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 20 --- Change of variables} (Unit 20)
+  \begin{itemize}
+    \item The change of variables formula, and the Jacobian determinant
+    \item Polar coordinates for discs and annuli
+    \item Cylindrical and spherical coordinates for round solids
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Sections 5.3, 5.5 and 5.7.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

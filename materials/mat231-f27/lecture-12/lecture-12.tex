@@ -1,0 +1,437 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 12
+%  Unit 12: The multivariable chain rule; the Jacobian matrix
+%
+%  Build from the repository root:   npm run materials -- lecture-12
+%  This writes lecture-12.pdf (slides, with overlays) and
+%  lecture-12-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\va}{\mathbf{a}}
+\newcommand{\vb}{\mathbf{b}}
+\newcommand{\vh}{\mathbf{h}}
+\newcommand{\vk}{\mathbf{k}}
+\newcommand{\vr}{\mathbf{r}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L12 \textperiodcentered\ The chain rule]{The chain rule}
+\subtitle{The multivariable chain rule and the Jacobian matrix}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 12\enspace\textperiodcentered\enspace Unit 12\enspace\textperiodcentered\enspace Fall 2027}
+
+\tikzset{
+  gnode/.style={circle, draw=wosm-accent, fill=wosm-box, minimum size=7mm, inner sep=1pt, font=\small},
+  ginp/.style={circle, draw=wosm-text, fill=wosm-bg, minimum size=7mm, inner sep=1pt, font=\small},
+  gedge/.style={-latex, wosm-text},
+  glab/.style={font=\scriptsize, text=wosm-brick}}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item The gradient $\nabla f$: \ $D_\mathbf{v} f = \nabla f \cdot \mathbf{v}$; it points in the
+      direction of steepest ascent.
+    \item $\nabla f$ is perpendicular to level sets; tangent lines and planes.
+    \item Vector rules such as $\nabla(\vx^\top A \vx) = (A + A^\top)\vx$; least squares.
+  \end{itemize}
+  \vskip0.6em
+  Today: the most important rule of multivariable calculus. Most functions are built by
+  composing simpler ones --- and so are their derivatives. The chain rule is also the
+  mathematics behind backpropagation in neural networks.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: G.~Strang, E.~Herman, \emph{Calculus, Volume 3} (OpenStax), Section 4.5.\par}
+\end{frame}
+
+% =============================================================
+\section{The Jacobian matrix}
+
+\begin{frame}{The Jacobian matrix}
+  For $F = (F_1, \dots, F_m)\colon U \subseteq \R^n \to \R^m$ differentiable at $\va$, the derivative
+  $DF(\va)$ is the $m \times n$ \textbf{Jacobian matrix}:
+  \[ DF(\va) = \begin{pmatrix} \nabla F_1(\va)^\top \\ \vdots \\ \nabla F_m(\va)^\top \end{pmatrix}
+     = \begin{pmatrix}
+       \pd{F_1}{x_1} & \cdots & \pd{F_1}{x_n} \\
+       \vdots & & \vdots \\
+       \pd{F_m}{x_1} & \cdots & \pd{F_m}{x_n}
+     \end{pmatrix}(\va) . \]
+  Row $i$ is the gradient of the component $F_i$; column $j$ says how $F$ moves when only $x_j$ moves.
+  \pause
+  \begin{itemize}
+    \item $m = 1$: \ $Df = \nabla f^\top$, a row. \quad
+      $n = 1$, a curve $\vr(t)$: \ $D\vr = \vr'(t)$, a column.
+    \item A linear map $F(\vx) = M\vx$ has $DF(\va) = M$ at every point.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \textbf{Polar coordinates}, $\R^2 \to \R^2$: \\ $P(r, \theta) = (r\cos\theta, \ r\sin\theta)$,
+      \[ DP(r, \theta) = \begin{pmatrix} \cos\theta & -r\sin\theta \\ \sin\theta & r\cos\theta \end{pmatrix} . \]
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      $\R^2 \to \R^3$: \\ $F(x, y) = (x^2 y, \ x + y^3, \ e^x)$,
+      \[ DF(x, y) = \begin{pmatrix} 2xy & x^2 \\ 1 & 3y^2 \\ e^x & 0 \end{pmatrix} . \]
+    \end{column}
+  \end{columns}
+  \pause
+  \begin{remark}[The best linear approximation]
+    $F(\va + \vh) = F(\va) + DF(\va)\,\vh + o(\norm{\vh})$: near $\va$, $F$ acts like the linear map
+    $DF(\va)$ (Linear Algebra, Units 9--10).
+  \end{remark}
+\end{frame}
+
+\begin{frame}{A picture: polar coordinates near a point}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=2.2]
+        \draw[wosm-muted, -latex] (0.8,0.3) -- (1.9,0.3) node[right, font=\scriptsize] {$r$};
+        \draw[wosm-muted, -latex] (0.8,0.3) -- (0.8,1.15) node[above, font=\scriptsize] {$\theta$};
+        \filldraw[fill=wosm-accent!16, draw=wosm-accent, thick] (1,0.4) rectangle (1.6,1.0);
+        \fill[wosm-text] (1,0.4) circle (0.6pt);
+        \node[font=\scriptsize, below] at (1.3,0.4) {$\Delta r$};
+        \node[font=\scriptsize, right] at (1.6,0.7) {$\Delta\theta$};
+      \end{tikzpicture}
+      \par\small $(r, \theta)$-plane: $\Delta r \times \Delta\theta$
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=2.2]
+        \draw[wosm-muted, -latex] (0,0) -- (1.75,0) node[right, font=\scriptsize] {$x$};
+        \draw[wosm-muted, -latex] (0,0) -- (0,1.5) node[above, font=\scriptsize] {$y$};
+        \filldraw[fill=wosm-accent!16, draw=wosm-accent, thick]
+          (22.92:1) arc[start angle=22.92, end angle=57.30, radius=1]
+          -- (57.30:1.6) arc[start angle=57.30, end angle=22.92, radius=1.6] -- cycle;
+        \draw[wosm-brick, thick, dashed] (0.9211,0.3894) -- ++(0.5526,0.2337)
+          -- ++(-0.2337,0.5526) -- ++(-0.5526,-0.2337) -- cycle;
+        \fill[wosm-text] (0.9211,0.3894) circle (0.6pt);
+        \draw[wosm-muted, thin] (0,0) -- (22.92:1);
+      \end{tikzpicture}
+      \par\small $(x, y)$-plane: the image, and {\color{wosm-brick}$DP$ applied to the rectangle}
+    \end{column}
+  \end{columns}
+  \vskip0.4em
+  {\small The image of a small rectangle is a curved patch. The Jacobian maps the rectangle to a
+  parallelogram that matches the patch to first order --- better and better as the rectangle shrinks.\par}
+\end{frame}
+
+% =============================================================
+\section{The chain rule}
+
+\begin{frame}{The chain rule}
+  \begin{theorem}[Chain rule]
+    Let $G\colon \R^k \to \R^n$ be differentiable at $\va$, and $F\colon \R^n \to \R^m$ differentiable
+    at $G(\va)$. Then $F \circ G$ is differentiable at $\va$, and
+    $D(F \circ G)(\va) = DF\bigl(G(\va)\bigr)\; DG(\va)$.
+  \end{theorem}
+  \begin{itemize}
+    \item The derivative of a composition is the \emph{product} of the Jacobian matrices;
+      the sizes $(m \times n)(n \times k) = m \times k$ always fit.
+    \item One variable: $(f \circ g)'(a) = f'(g(a))\, g'(a)$ (Calculus I, Unit 10).
+  \end{itemize}
+  \pause
+  \begin{block}{Why it must be so}
+    Near $\va$, $G$ acts like the matrix $DG(\va)$, and near $G(\va)$, $F$ like $DF(G(\va))$.
+    Composing linear maps multiplies their matrices (Linear Algebra, Unit 3).
+  \end{block}
+\end{frame}
+
+\begin{frame}{Proof}
+  \begin{proof}
+    Let $\vb = G(\va)$, $A = DG(\va)$, $B = DF(\vb)$, and write
+    $G(\va + \vh) = \vb + A\vh + \rho(\vh)$ and $F(\vb + \vk) = F(\vb) + B\vk + \sigma(\vk)$, with
+    $\rho(\vh) = o(\norm{\vh})$ and $\sigma(\vk) = o(\norm{\vk})$. Put $\vk = G(\va + \vh) - \vb = A\vh + \rho(\vh)$:
+    \[ F(G(\va + \vh)) = F(\vb) + BA\,\vh + \underbrace{B\rho(\vh)}_{(1)} + \underbrace{\sigma(\vk)}_{(2)} . \]
+    (1) $\norm{B\rho(\vh)} \le C\norm{\rho(\vh)} = o(\norm{\vh})$, since a matrix stretches vectors by at
+    most a constant $C$.
+    \ (2) For small $\vh$, $\norm{\vk} \le C'\norm{\vh}$, so
+    $\frac{\norm{\sigma(\vk)}}{\norm{\vh}} \le C' \frac{\norm{\sigma(\vk)}}{\norm{\vk}} \to 0$ (and $\sigma(\mathbf 0) = \mathbf 0$).
+    So the remainder is $o(\norm{\vh})$, and $D(F \circ G)(\va) = BA$.
+  \end{proof}
+\end{frame}
+
+% =============================================================
+\section{Special cases}
+
+\begin{frame}{A function along a curve}
+  $f\colon \R^2 \to \R$ along a curve $\vr(t) = (x(t), y(t))$ --- say a temperature along your path.
+  With $(1 \times 2)(2 \times 1) = 1 \times 1$:
+  \[ \frac{\mathrm d}{\mathrm dt} f(x(t), y(t))
+     = f_x\, x'(t) + f_y\, y'(t) = \nabla f(\vr(t)) \cdot \vr'(t) . \]
+  \pause
+  \begin{example}
+    $f(x, y) = x^2 y$ on the circle $\vr(t) = (\cos t, \sin t)$:
+    $\frac{\mathrm d}{\mathrm dt} f(\vr(t)) = 2xy \cdot (-\sin t) + x^2 \cdot \cos t
+    = -2\cos t \sin^2 t + \cos^3 t$. \ Check: $f(\vr(t)) = \cos^2 t \sin t$ has the same derivative.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Two intermediate variables}
+  \begin{columns}[c]
+    \begin{column}{0.4\textwidth}
+      \centering
+      \begin{tikzpicture}[x=1.1cm, y=1.1cm]
+        \node[gnode] (z) at (0,2) {$z$};
+        \node[gnode] (x) at (-1,1) {$x$};
+        \node[gnode] (y) at (1,1) {$y$};
+        \node[ginp] (s1) at (-1.5,0) {$s$};
+        \node[ginp] (t1) at (-0.5,0) {$t$};
+        \node[ginp] (s2) at (0.5,0) {$s$};
+        \node[ginp] (t2) at (1.5,0) {$t$};
+        \draw[wosm-text] (z) -- node[glab, left] {$f_x$} (x);
+        \draw[wosm-text] (z) -- node[glab, right] {$f_y$} (y);
+        \draw[wosm-text] (x) -- node[glab, left] {$x_s$} (s1);
+        \draw[wosm-text] (x) -- node[glab, right] {$x_t$} (t1);
+        \draw[wosm-text] (y) -- node[glab, left] {$y_s$} (s2);
+        \draw[wosm-text] (y) -- node[glab, right] {$y_t$} (t2);
+      \end{tikzpicture}
+      \par\small A dependency tree
+    \end{column}
+    \begin{column}{0.58\textwidth}
+      $z = f(x, y)$ with $x = x(s, t)$, $y = y(s, t)$:
+      \begin{align*}
+        z_s &= f_x\, x_s + f_y\, y_s, \\
+        z_t &= f_x\, x_t + f_y\, y_t .
+      \end{align*}
+      \pause
+      \small
+      \begin{itemize}
+        \item Rule: for $z_s$, follow every path from $z$ down to $s$, multiply along each path,
+          and add the paths.
+        \item In matrices:
+          $(z_s \ \ z_t) = (f_x \ \ f_y) \begin{pmatrix} x_s & x_t \\ y_s & y_t \end{pmatrix}$.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Example: partial derivatives in polar coordinates}
+  With $x = r\cos\theta$, $y = r\sin\theta$, a function $f(x, y)$ becomes a function of $(r, \theta)$:
+  \[ f_r = f_x \cos\theta + f_y \sin\theta, \qquad f_\theta = -f_x\, r\sin\theta + f_y\, r\cos\theta . \]
+  \pause
+  \begin{example}
+    $f = x^2 + y^2$: \ $f_r = 2x\cos\theta + 2y\sin\theta = 2r$. Indeed $f = r^2$.
+  \end{example}
+  \pause
+  Inverting the Jacobian of $P$ (possible for $r > 0$) gives the other direction:
+  \[ f_x = \cos\theta\, f_r - \frac{\sin\theta}{r} f_\theta, \qquad
+     f_y = \sin\theta\, f_r + \frac{\cos\theta}{r} f_\theta . \]
+  {\small For example, the angle $\theta$ itself has $\theta_x = -\frac{\sin\theta}{r} = -\frac{y}{x^2 + y^2}$.\par}
+\end{frame}
+
+% =============================================================
+\section{Implicit differentiation revisited}
+
+\begin{frame}{Implicit differentiation}
+  Suppose the curve $F(x, y) = 0$ is the graph of a differentiable function $y = y(x)$ near a point.
+  \pause
+  Differentiate $F(x, y(x)) = 0$ with the chain rule:
+  \[ F_x + F_y\, y'(x) = 0 \qquad\Longrightarrow\qquad y'(x) = -\frac{F_x}{F_y} \quad (F_y \ne 0) . \]
+  \pause
+  \begin{example}
+    \begin{itemize}
+      \item $x^2 + y^2 = 25$ at $(3, 4)$: \ $y' = -\frac{2x}{2y} = -\frac34$ --- as in Calculus I.
+      \item $x^3 + y^3 = 6xy$ at $(3, 3)$: \ $F_x = 3x^2 - 6y = 9$, $F_y = 3y^2 - 6x = 9$, so $y' = -1$.
+    \end{itemize}
+  \end{example}
+  \pause
+  {\small The tangent direction $(F_y, -F_x)$ is perpendicular to $\nabla F$ (Lecture 11). We
+  \emph{assumed} that $y(x)$ exists; the implicit function theorem (Lecture 17) proves it when $F_y \ne 0$.\par}
+\end{frame}
+
+% =============================================================
+\section{Computational graphs and backpropagation}
+
+\begin{frame}{A computational graph}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[x=1.3cm, y=1.1cm]
+        \node[ginp] (x) at (0,1.6) {$x$};
+        \node[ginp] (y) at (0,0) {$y$};
+        \node[gnode] (a) at (1.4,0.4) {$+$};
+        \node[gnode] (b) at (1.4,1.9) {$\sin$};
+        \node[gnode] (f) at (2.8,1.15) {$\times$};
+        \draw[gedge] (x) -- (a); \draw[gedge] (y) -- (a);
+        \draw[gedge] (x) -- (b);
+        \draw[gedge] (a) -- node[below right, font=\scriptsize] {$a$} (f);
+        \draw[gedge] (b) -- node[above right, font=\scriptsize] {$b$} (f);
+        \draw[gedge] (f) -- ++(0.8,0) node[right, font=\small] {$f$};
+      \end{tikzpicture}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      $f(x, y) = (x + y)\sin x$ as elementary steps:
+      \[ a = x + y, \qquad b = \sin x, \qquad f = a \cdot b . \]
+      \small
+      Each node knows its own \emph{local} derivatives:
+      \begin{gather*}
+        \frac{\partial a}{\partial x} = 1, \quad \frac{\partial a}{\partial y} = 1, \quad
+        \frac{\mathrm d b}{\mathrm d x} = \cos x, \\
+        \frac{\partial f}{\partial a} = b, \quad \frac{\partial f}{\partial b} = a .
+      \end{gather*}
+    \end{column}
+  \end{columns}
+  \vskip0.4em
+  The chain rule multiplies local derivatives along paths and adds over paths. In which order?
+\end{frame}
+
+\begin{frame}{Forward mode}
+  Pick one input and push derivatives forward with the values. For $\pd{}{x}$, start with
+  $\dot x = 1$, $\dot y = 0$:
+  \[ \dot a = \dot x + \dot y = 1, \qquad \dot b = \cos x \cdot \dot x = \cos x, \qquad
+     \dot f = b\,\dot a + a\,\dot b = \sin x + (x + y)\cos x . \]
+  \pause
+  \begin{example}[At $(x, y) = (1, 2)$]
+    Values: $a = 3$, $b = \sin 1 \approx 0.8415$, $f \approx 2.5244$.
+    Then $f_x = 0.8415 + 3 \cdot 0.5403 \approx 2.4624$.
+    \ For $f_y$, a second pass with $\dot x = 0$, $\dot y = 1$: \ $f_y = \sin 1 \approx 0.8415$.
+  \end{example}
+  \pause
+  {\small One pass per input variable. Fine for two inputs; hopeless for a million.\par}
+\end{frame}
+
+\begin{frame}{Reverse mode: backpropagation}
+  First compute all values forward. Then push \textbf{adjoints} $\bar u = \pd{f}{u}$ backwards,
+  from the output to the inputs, starting with $\bar f = 1$:
+  \[ \bar a = \bar f \cdot b = \sin x, \qquad \bar b = \bar f \cdot a = x + y, \]
+  \[ \bar x = \bar a \cdot 1 + \bar b \cdot \cos x = \sin x + (x + y)\cos x, \qquad \bar y = \bar a \cdot 1 = \sin x . \]
+  \pause
+  \begin{itemize}
+    \item \emph{One} backward pass gives \emph{all} partial derivatives: $\bar x = f_x$, \ $\bar y = f_y$.
+    \item Where a variable feeds several nodes ($x$ feeds $a$ and $b$), its adjoint is the \emph{sum}
+      over the paths --- the ``add over paths'' of the chain rule.
+    \item At $(1, 2)$: \ $\bar x \approx 2.4624$, \ $\bar y \approx 0.8415$, as before.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Why reverse mode trains neural networks}
+  A network computes a loss $L\colon \R^n \to \R$ through layers, $L = \ell \circ F_k \circ \dots \circ F_1$,
+  with $n$ often in the millions. By the chain rule,
+  \[ DL = D\ell \cdot DF_k \cdots DF_1 \qquad (1 \times n) . \]
+  \pause
+  \begin{itemize}
+    \item \textbf{Forward mode} multiplies from the right: one pass for each of the $n$ input directions.
+    \item \textbf{Reverse mode} multiplies from the left, starting with the row $D\ell$: every step is
+      a row vector times a matrix. One backward pass gives the whole gradient.
+    \item So the full gradient costs a small constant times one evaluation of $L$, however large $n$ is.
+      Backpropagation is exactly this.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{The Jacobian determinant}
+
+\begin{frame}{The Jacobian determinant}
+  For $F\colon \R^n \to \R^n$ the Jacobian matrix is square, and $\det DF(\va)$ is the
+  \textbf{Jacobian determinant}.
+  \pause
+  \begin{itemize}
+    \item A linear map $M$ multiplies volumes by $|\det M|$ (Linear Algebra, Unit 12).
+    \item Near $\va$, $F$ acts like $DF(\va)$. So a small region of volume $V$ near $\va$ is mapped to
+      a region of volume about $|\det DF(\va)|\, V$: the local scaling factor of volumes.
+    \item The sign tells whether $F$ preserves or reverses orientation.
+    \item By the chain rule and $\det(BA) = \det B \det A$, the factors multiply under composition.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Polar coordinates, again}
+  \[ \det DP(r, \theta) = \det \begin{pmatrix} \cos\theta & -r\sin\theta \\ \sin\theta & r\cos\theta \end{pmatrix}
+     = r\cos^2\theta + r\sin^2\theta = r . \]
+  \pause
+  \begin{itemize}
+    \item The patch in the picture ($1 \le r \le 1.6$, $0.4 \le \theta \le 1$) has area
+      $\frac12(1.6^2 - 1^2) \cdot 0.6 = 0.468$, and $r\,\Delta r\,\Delta\theta$ at $r = 1.3$ is
+      $1.3 \cdot 0.6 \cdot 0.6 = 0.468$.
+    \item Patches near the origin are squeezed ($r \to 0$); far away they are stretched.
+  \end{itemize}
+  \pause
+  \begin{block}{Coming up}
+    Change of variables in integrals (Lecture 20):
+    $\iint f(x, y)\,\mathrm dx\,\mathrm dy = \iint f(r\cos\theta, r\sin\theta)\, r\,\mathrm dr\,\mathrm d\theta$.
+    The inverse function theorem (Lecture 17): if $\det DF(\va) \ne 0$, $F$ is invertible near $\va$.
+  \end{block}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item The \textbf{Jacobian matrix} $DF(\va)$: rows are the gradients of the components; it is the
+      matrix of the best linear approximation.
+    \item \textbf{Chain rule}: $D(F \circ G)(\va) = DF(G(\va))\, DG(\va)$ --- composing linear
+      approximations multiplies matrices.
+    \item Along a curve: $\frac{\mathrm d}{\mathrm dt} f(\vr(t)) = \nabla f \cdot \vr'$. Through
+      intermediate variables: multiply along paths, add over paths.
+    \item Implicit differentiation: $y' = -F_x / F_y$.
+    \item Computational graphs: forward mode pushes derivatives with the values; reverse mode
+      (backpropagation) pushes adjoints back and gets the whole gradient in one pass.
+    \item $|\det DF|$ is the local factor by which $F$ scales volumes; for polar coordinates it is $r$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find the Jacobian matrix and its determinant for $F(x, y, z) = (xy, \ yz, \ zx)$.
+    \item Let $z = e^{xy}$ with $x = s + t$, $y = s - t$. Find $z_s$ and $z_t$ with the chain rule, and
+      check by substituting.
+    \item Find $\frac{\mathrm d}{\mathrm dt} f(\vr(t))$ for $f(x, y) = xy^2$ and $\vr(t) = (e^t, t^2)$.
+    \item Find $\frac{\mathrm dy}{\mathrm dx}$ on the curve $x^2 y + y^3 = 2$ at $(1, 1)$.
+    \item Show that if $f(x, y) = g(x^2 + y^2)$ for a differentiable $g$, then $y f_x - x f_y = 0$.
+    \item Compute $\nabla f$ for $f(x, y) = xy + e^x$ at $(0, 3)$ by forward mode and by reverse mode.
+    \item Show that the Jacobian determinant of spherical coordinates
+      $(\rho, \varphi, \theta) \mapsto (\rho\sin\varphi\cos\theta, \ \rho\sin\varphi\sin\theta, \ \rho\cos\varphi)$
+      is $\rho^2 \sin\varphi$.
+    \item If $F$ is invertible with a differentiable inverse, show that
+      $D(F^{-1})(F(\va)) = DF(\va)^{-1}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $DF = \begin{pmatrix} y & x & 0 \\ 0 & z & y \\ z & 0 & x \end{pmatrix}$, \ $\det DF = 2xyz$.
+    \item $z_s = y e^{xy} + x e^{xy} = 2s\, e^{s^2 - t^2}$, \ $z_t = (y - x) e^{xy} = -2t\, e^{s^2 - t^2}$;
+      indeed $z = e^{s^2 - t^2}$.
+    \item $y^2 x' + 2xy\, y' = t^4 e^t + 4t^3 e^t$.
+    \item $F_x = 2xy = 2$, \ $F_y = x^2 + 3y^2 = 4$: \ $y' = -\frac12$.
+    \item $f_x = 2x\, g'(x^2 + y^2)$ and $f_y = 2y\, g'(x^2 + y^2)$.
+    \item Graph $a = xy$, $b = e^x$, $f = a + b$. Both modes give $f_x = y + e^x = 4$, \ $f_y = x = 0$.
+    \item Expand the $3 \times 3$ determinant along its last row
+      $(\cos\varphi, \ -\rho\sin\varphi, \ 0)$ and use $\sin^2 + \cos^2 = 1$.
+    \item $F^{-1} \circ F$ is the identity, so the chain rule gives $D(F^{-1})(F(\va))\, DF(\va) = I$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 13 --- Second derivatives} (Unit 13)
+  \begin{itemize}
+    \item Higher partial derivatives; Schwarz's theorem
+    \item The Hessian matrix
+    \item The Taylor expansion in several variables; quadratic forms and curvature
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: J.~E.~Marsden, A.~Tromba, \emph{Vector Calculus}, Sections 3.1 and 3.2.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

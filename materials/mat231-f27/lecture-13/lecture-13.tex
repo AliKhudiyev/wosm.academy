@@ -1,0 +1,452 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 13
+%  Unit 13: Higher derivatives; the Hessian; multivariable Taylor
+%  expansion
+%
+%  Build from the repository root:   npm run materials -- lecture-13
+%  This writes lecture-13.pdf (slides, with overlays) and
+%  lecture-13-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\va}{\mathbf{a}}
+\newcommand{\vb}{\mathbf{b}}
+\newcommand{\vh}{\mathbf{h}}
+\newcommand{\vu}{\mathbf{u}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L13 \textperiodcentered\ Second derivatives]{Second derivatives}
+\subtitle{The Hessian and the multivariable Taylor expansion}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 13\enspace\textperiodcentered\enspace Unit 13\enspace\textperiodcentered\enspace Fall 2027}
+
+% Small 3D surfaces for the three shapes.
+\pgfplotsset{shape3d/.style={width=4.4cm, height=3.8cm, view={30}{30},
+  axis lines=none, domain=-1:1, y domain=-1:1, samples=11, samples y=11}}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item The Jacobian matrix $DF(\va)$: rows are the gradients of the components.
+    \item \textbf{Chain rule}: $D(F \circ G)(\va) = DF(G(\va))\, DG(\va)$.
+    \item Backpropagation: the chain rule in reverse order gives the whole gradient in one pass.
+    \item $|\det DF|$ is the local volume factor.
+  \end{itemize}
+  \vskip0.6em
+  First derivatives give the best linear approximation: the tangent plane. Today: second
+  derivatives, which describe how $f$ \emph{curves} away from it --- the information we need to
+  tell summits from pits and saddles (Lecture 14).
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: J.~E.~Marsden, A.~Tromba, \emph{Vector Calculus}, Sections 3.1 and 3.2.\par}
+\end{frame}
+
+% =============================================================
+\section{Higher partial derivatives}
+
+\begin{frame}{Second and higher partial derivatives}
+  Partial derivatives of partial derivatives:
+  \[ f_{xx} = \frac{\partial^2 f}{\partial x^2}, \qquad
+     f_{xy} = (f_x)_y = \frac{\partial^2 f}{\partial y\, \partial x}, \qquad
+     f_{yx} = (f_y)_x = \frac{\partial^2 f}{\partial x\, \partial y}, \qquad
+     f_{yy} = \frac{\partial^2 f}{\partial y^2} . \]
+  \begin{itemize}
+    \item In the subscript notation the order of differentiation is read from left to right; in
+      the $\partial$ notation, from right to left.
+    \item A function of $n$ variables has $n^2$ second partial derivatives; third derivatives such as
+      $f_{xyz}$ are formed the same way.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Smoothness classes}
+  \begin{definition}
+    $f$ is of class $C^k$ on an open set $U$ if all its partial derivatives of order $\le k$ exist
+    and are continuous on $U$; it is $C^\infty$ if this holds for every $k$.
+  \end{definition}
+  \begin{itemize}
+    \item Polynomials, $e^x$, $\sin$, $\cos$ and their sums, products, quotients and compositions are
+      $C^\infty$ where defined.
+    \item $x|x|$ is $C^1$ but not $C^2$ at $0$: its derivative $2|x|$ has a corner.
+    \item $C^1$ functions are differentiable (Lecture 10); $C^2$ functions have a second-order Taylor
+      expansion (this lecture).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{example}[$f(x, y) = x^3 y^2 + e^{xy}$]
+    $f_x = 3x^2 y^2 + y\, e^{xy}$, \quad $f_y = 2x^3 y + x\, e^{xy}$,
+    \begin{align*}
+      f_{xx} &= 6xy^2 + y^2 e^{xy}, & f_{yy} &= 2x^3 + x^2 e^{xy}, \\
+      f_{xy} &= 6x^2 y + (1 + xy)\, e^{xy}, & f_{yx} &= 6x^2 y + (1 + xy)\, e^{xy} .
+    \end{align*}
+  \end{example}
+  \pause
+  \begin{example}[$f(x, y) = \sin(x + 2y)$]
+    $f_{xx} = -\sin(x + 2y)$, \quad $f_{xy} = f_{yx} = -2\sin(x + 2y)$, \quad $f_{yy} = -4\sin(x + 2y)$.
+  \end{example}
+  \pause
+  {\small In both, $f_{xy} = f_{yx}$. That is no accident.\par}
+\end{frame}
+
+% =============================================================
+\section{Schwarz's theorem}
+
+\begin{frame}{Mixed partial derivatives commute}
+  \begin{theorem}[Schwarz, or Clairaut]
+    If $f$ is $C^2$ near $(a, b)$, then $f_{xy}(a, b) = f_{yx}(a, b)$.
+  \end{theorem}
+  \pause
+  \begin{proof}[Proof sketch: the mean value theorem twice]
+    Let $\Delta = f(a+h, b+k) - f(a+h, b) - f(a, b+k) + f(a, b)$.
+    \begin{itemize}
+      \item With $\varphi(x) = f(x, b+k) - f(x, b)$: \ $\Delta = \varphi'(\xi)\,h
+        = \bigl(f_x(\xi, b+k) - f_x(\xi, b)\bigr) h = f_{xy}(\xi, \eta)\, hk$.
+      \item With $\psi(y) = f(a+h, y) - f(a, y)$, the same steps give
+        $\Delta = f_{yx}(\xi', \eta')\, hk$.
+    \end{itemize}
+    Divide by $hk$, let $h, k \to 0$, and use continuity.
+  \end{proof}
+\end{frame}
+
+\begin{frame}{The hypothesis matters}
+  \begin{example}
+    $f(x, y) = \frac{xy(x^2 - y^2)}{x^2 + y^2}$ for $(x, y) \ne (0, 0)$, \ $f(0, 0) = 0$.
+    \begin{itemize}
+      \item $f_x(0, y) = \lim_{h \to 0} \frac{f(h, y)}{h} = -y$, \ so $f_{xy}(0, 0) = -1$.
+      \item $f_y(x, 0) = \lim_{k \to 0} \frac{f(x, k)}{k} = x$, \ so $f_{yx}(0, 0) = +1$.
+    \end{itemize}
+  \end{example}
+  \pause
+  \begin{warning}
+    $f$ is $C^1$, and both mixed partial derivatives exist at $(0, 0)$, but they are not continuous
+    there --- and they differ. Schwarz's theorem needs continuous second derivatives.
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{The Hessian matrix}
+
+\begin{frame}{The Hessian matrix}
+  \begin{definition}
+    The \textbf{Hessian matrix} of $f\colon \R^n \to \R$ at $\va$ is the $n \times n$ matrix of second
+    partial derivatives,
+    \[ H_f(\va) = \bigl(f_{x_i x_j}(\va)\bigr)_{i, j = 1, \dots, n}
+       = \begin{pmatrix} f_{xx} & f_{xy} \\ f_{yx} & f_{yy} \end{pmatrix}(\va) \quad\text{for } n = 2 . \]
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item For $C^2$ functions, $H_f$ is \textbf{symmetric} (Schwarz).
+    \item $H_f$ is the Jacobian of the gradient: $H_f(\va) = D(\nabla f)(\va)$. Row $i$ is the gradient
+      of $\partial f / \partial x_i$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Hessians: examples}
+  \begin{example}[$f = x^3 y^2 + e^{xy}$, from the start of the lecture]
+    \[ H_f = \begin{pmatrix} 6xy^2 + y^2 e^{xy} & 6x^2 y + (1 + xy) e^{xy} \\
+                             6x^2 y + (1 + xy) e^{xy} & 2x^3 + x^2 e^{xy} \end{pmatrix}, \qquad
+       H_f(1, 0) = \begin{pmatrix} 0 & 1 \\ 1 & 3 \end{pmatrix} . \]
+  \end{example}
+  \pause
+  \begin{example}[Three variables: $g = xyz + z^2$]
+    $\nabla g = (yz, \ xz, \ xy + 2z)$, \ so \
+    $H_g = \begin{pmatrix} 0 & z & y \\ z & 0 & x \\ y & x & 2 \end{pmatrix}$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Quadratic functions}
+  For a fixed $n \times n$ matrix $A$, vector $\vb$ and number $c$, let
+  $f(\vx) = \vx^\top A \vx + \vb^\top \vx + c$.
+  \pause
+  \begin{itemize}
+    \item $\nabla f(\vx) = (A + A^\top)\vx + \vb$ \quad (Lecture 11).
+    \item $H_f(\vx) = D\bigl((A + A^\top)\vx + \vb\bigr) = A + A^\top$: \ constant.
+    \item With $A$ symmetric, $H_f = 2A$. So in optimisation one often writes
+      $f(\vx) = \frac12 \vx^\top Q \vx + \vb^\top \vx + c$ with $Q$ symmetric: then $H_f = Q$.
+  \end{itemize}
+  \pause
+  \begin{example}
+    $f(x, y) = x^2 + 3xy + 2y^2 - x + 5$: \
+    $H_f = \begin{pmatrix} 2 & 3 \\ 3 & 4 \end{pmatrix}$ everywhere.
+  \end{example}
+  {\small Least squares (Lecture 11): $\norm{A\vx - \vb}^2$ has Hessian $2A^\top A$.\par}
+\end{frame}
+
+% =============================================================
+\section{Taylor expansion in several variables}
+
+\begin{frame}{Reduce to one variable}
+  Fix $\va$ and $\vh$, and look at $f$ along the segment from $\va$ to $\va + \vh$:
+  \ $g(t) = f(\va + t\vh)$, \ $0 \le t \le 1$.
+  \pause
+  By the chain rule (Lecture 12):
+  \begin{align*}
+    g'(t) &= \nabla f(\va + t\vh) \cdot \vh = \sum_i f_{x_i}(\va + t\vh)\, h_i, \\
+    g''(t) &= \sum_{i,j} f_{x_i x_j}(\va + t\vh)\, h_i h_j = \vh^\top H_f(\va + t\vh)\, \vh .
+  \end{align*}
+  \pause
+  Taylor's theorem in one variable (Lecture 6), $g(1) = g(0) + g'(0) + \frac12 g''(\tau)$ for some
+  $\tau \in (0, 1)$, gives
+  \[ f(\va + \vh) = f(\va) + \nabla f(\va) \cdot \vh + \tfrac12\, \vh^\top H_f(\va + \tau\vh)\, \vh . \]
+\end{frame}
+
+\begin{frame}{The second-order Taylor expansion}
+  \begin{theorem}
+    If $f$ is $C^2$ near $\va$, then
+    \[ f(\va + \vh) = f(\va) + \nabla f(\va) \cdot \vh + \tfrac12\, \vh^\top H_f(\va)\, \vh + o(\norm{\vh}^2) . \]
+  \end{theorem}
+  {\small Proof: replace $H_f(\va + \tau\vh)$ by $H_f(\va)$; the error is at most
+  $\frac12 \norm{H_f(\va + \tau\vh) - H_f(\va)}\, \norm{\vh}^2$, and the first factor tends to $0$ by continuity.\par}
+  \pause
+  For $n = 2$, with $\vh = (h, k)$ and all derivatives at $(a, b)$:
+  \[ f(a + h, b + k) \approx f + f_x h + f_y k + \tfrac12\bigl(f_{xx} h^2 + 2 f_{xy} hk + f_{yy} k^2\bigr) . \]
+  \pause
+  {\small Constant, linear and quadratic terms: the tangent plane, corrected by a quadratic form.\par}
+\end{frame}
+
+\begin{frame}{Example: $e^x \cos y$ at $(0, 0)$}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \small
+      At $(0, 0)$: \ $f = 1$, \ $f_x = e^x\cos y = 1$, \ $f_y = -e^x \sin y = 0$, \\
+      $f_{xx} = 1$, \ $f_{xy} = -e^x \sin y = 0$, \ $f_{yy} = -e^x \cos y = -1$:
+      \[ T_2(x, y) = 1 + x + \tfrac12 (x^2 - y^2) . \]
+      \pause
+      Check with series: $(1 + x + \frac{x^2}{2} + \cdots)(1 - \frac{y^2}{2} + \cdots)$.
+      \pause
+      \vskip0.3em
+      At $(0.1, 0.2)$: \ $e^{0.1}\cos 0.2 = 1.08314$; the tangent plane gives $1.1$, and $T_2$
+      gives $1.085$.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[width=\linewidth, height=5.4cm, view={-40}{25},
+            axis lines=none, xmin=-1, xmax=1, ymin=-1.3, ymax=1.3]
+          \addplot3[mesh, draw=wosm-accent!30, domain=-1:1, y domain=-1.3:1.3,
+            samples=13, samples y=13] {exp(x)*cos(deg(y))};
+          \addplot3[mesh, draw=wosm-brick, thick, domain=-0.6:0.6, y domain=-0.6:0.6,
+            samples=7, samples y=7] {1 + x + 0.5*(x^2 - y^2)};
+          \addplot3[only marks, mark=*, mark size=1.6pt, wosm-text] coordinates {(0,0,1)};
+        \end{axis}
+      \end{tikzpicture}
+      \par\small The graph, and {\color{wosm-brick}the quadratic surface $z = T_2$} touching it at $(0, 0, 1)$
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Example: $\ln(1 + x + 2y)$ at $(0, 0)$}
+  With $u = 1 + x + 2y$:
+  \[ \nabla f = \frac{1}{u}\begin{pmatrix} 1 \\ 2 \end{pmatrix}, \qquad
+     H_f = -\frac{1}{u^2}\begin{pmatrix} 1 & 2 \\ 2 & 4 \end{pmatrix} . \]
+  \pause
+  At $(0, 0)$, $u = 1$:
+  \[ T_2(x, y) = 0 + (x + 2y) - \tfrac12\bigl(x^2 + 4xy + 4y^2\bigr) = (x + 2y) - \tfrac12 (x + 2y)^2 . \]
+  \pause
+  {\small The same as $\ln(1 + v) = v - \frac{v^2}{2} + \cdots$ with $v = x + 2y$ (Lecture 6) --- by
+  uniqueness, any correct quadratic approximation is the Taylor polynomial. At $(0.1, 0.05)$:
+  $\ln 1.2 = 0.18232$ and $T_2 = 0.18$.\par}
+\end{frame}
+
+% =============================================================
+\section{Quadratic forms and curvature}
+
+\begin{frame}{The quadratic term is a quadratic form}
+  $Q(\vh) = \vh^\top H \vh$ with $H = H_f(\va)$ symmetric is a \textbf{quadratic form} (Linear Algebra,
+  Unit 21).
+  \pause
+  \begin{itemize}
+    \item Spectral theorem (Linear Algebra, Unit 20): $H = U \Lambda U^\top$ with $U$ orthogonal and
+      $\Lambda = \mathrm{diag}(\lambda_1, \dots, \lambda_n)$, the eigenvalues.
+    \item In the rotated coordinates $\vu = U^\top \vh$ (along the eigenvectors):
+      \[ \vh^\top H \vh = \lambda_1 u_1^2 + \lambda_2 u_2^2 + \dots + \lambda_n u_n^2 . \]
+  \end{itemize}
+  \pause
+  At a point where $\nabla f(\va) = \mathbf 0$:
+  \[ f(\va + \vh) \approx f(\va) + \tfrac12\bigl(\lambda_1 u_1^2 + \dots + \lambda_n u_n^2\bigr) . \]
+  The eigenvectors are the \textbf{principal directions}, and the eigenvalues are the
+  \textbf{principal curvatures} of the approximating quadratic surface: along $u_i$ it is the
+  parabola $\frac12 \lambda_i u_i^2$.
+\end{frame}
+
+\begin{frame}{Three shapes}
+  \begin{columns}[T]
+    \begin{column}{0.32\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[shape3d]
+          \addplot3[mesh, draw=wosm-accent] {x^2 + y^2};
+        \end{axis}
+      \end{tikzpicture}
+      \begin{tikzpicture}[scale=0.55]
+        \clip (-1.6,-1.6) rectangle (1.6,1.6);
+        \foreach \r in {0.5, 0.9, 1.25, 1.55} \draw[wosm-accent, thick] (0,0) circle (\r);
+      \end{tikzpicture}
+      \par\small \textbf{Bowl}: $x^2 + y^2$ \\
+      all $\lambda_i > 0$: positive definite
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[shape3d]
+          \addplot3[mesh, draw=wosm-brick] {-x^2 - y^2};
+        \end{axis}
+      \end{tikzpicture}
+      \begin{tikzpicture}[scale=0.55]
+        \clip (-1.6,-1.6) rectangle (1.6,1.6);
+        \foreach \r in {0.5, 0.9, 1.25, 1.55} \draw[wosm-brick, thick] (0,0) circle (\r);
+      \end{tikzpicture}
+      \par\small \textbf{Cap}: $-x^2 - y^2$ \\
+      all $\lambda_i < 0$: negative definite
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[shape3d]
+          \addplot3[mesh, draw=wosm-text] {x^2 - y^2};
+        \end{axis}
+      \end{tikzpicture}
+      \begin{tikzpicture}[scale=0.55]
+        \clip (-1.6,-1.6) rectangle (1.6,1.6);
+        \draw[wosm-muted, thick] (-1.6,-1.6) -- (1.6,1.6) (-1.6,1.6) -- (1.6,-1.6);
+        \foreach \k in {0.6, 1.1} {
+          \draw[wosm-text, thick, domain=-1.6:1.6, smooth, variable=\t] plot ({\k*cosh(\t)}, {\k*sinh(\t)});
+          \draw[wosm-text, thick, domain=-1.6:1.6, smooth, variable=\t] plot ({-\k*cosh(\t)}, {\k*sinh(\t)});
+          \draw[wosm-text, thick, domain=-1.6:1.6, smooth, variable=\t] plot ({\k*sinh(\t)}, {\k*cosh(\t)});
+          \draw[wosm-text, thick, domain=-1.6:1.6, smooth, variable=\t] plot ({\k*sinh(\t)}, {-\k*cosh(\t)});
+        }
+      \end{tikzpicture}
+      \par\small \textbf{Saddle}: $x^2 - y^2$ \\
+      $\lambda_i$ of both signs: indefinite
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{itemize}
+    \item $f = x^2 + 3xy + 2y^2$: \ $H = \begin{pmatrix} 2 & 3 \\ 3 & 4 \end{pmatrix}$, eigenvalues
+      $3 \pm \sqrt{10} \approx 6.16, \ -0.16$: \ a \textbf{saddle}, although every coefficient is positive.
+    \item $f = 2x^2 + 2xy + 2y^2$: \ $H = \begin{pmatrix} 4 & 2 \\ 2 & 4 \end{pmatrix}$, eigenvalues $6$
+      and $2$: \ a \textbf{bowl}. The principal directions are $(1, 1)$ and $(1, -1)$.
+  \end{itemize}
+  \pause
+  \begin{remark}[For $2 \times 2$ matrices]
+    $\det H = \lambda_1 \lambda_2$ and $\operatorname{tr} H = \lambda_1 + \lambda_2$. So: $\det H < 0$ means a
+    saddle; $\det H > 0$ means a bowl if $\operatorname{tr} H > 0$ and a cap if $\operatorname{tr} H < 0$.
+    If $\det H = 0$, the quadratic term alone does not decide (Lecture 14).
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Higher-order Taylor expansions (optional)}
+
+\begin{frame}{Multi-index notation}
+  A \textbf{multi-index} is $\alpha = (\alpha_1, \dots, \alpha_n)$ with integers $\alpha_i \ge 0$. Write
+  \[ |\alpha| = \alpha_1 + \dots + \alpha_n, \quad \alpha! = \alpha_1! \cdots \alpha_n!, \quad
+     \vh^\alpha = h_1^{\alpha_1} \cdots h_n^{\alpha_n}, \quad
+     \partial^\alpha f = \frac{\partial^{|\alpha|} f}{\partial x_1^{\alpha_1} \cdots \partial x_n^{\alpha_n}} . \]
+  \pause
+  \begin{theorem}
+    If $f$ is $C^k$ near $\va$, then
+    $\displaystyle f(\va + \vh) = \sum_{|\alpha| \le k} \frac{\partial^\alpha f(\va)}{\alpha!}\, \vh^\alpha + o(\norm{\vh}^k)$.
+  \end{theorem}
+  {\small Check for $|\alpha| = 2$, $n = 2$: $\alpha = (2, 0), (1, 1), (0, 2)$ give
+  $\frac{f_{xx}}{2} h^2 + f_{xy}\, hk + \frac{f_{yy}}{2} k^2$ --- the quadratic term from before.\par}
+\end{frame}
+
+\begin{frame}{A third-order term}
+  \begin{example}[$e^x \cos y$ at $(0, 0)$, continued]
+    Third partial derivatives at $(0, 0)$: \
+    $f_{xxx} = 1$, \ $f_{xxy} = 0$, \ $f_{xyy} = -1$, \ $f_{yyy} = 0$. \ The third-order terms:
+    \[ \frac{f_{xxx}}{3!} x^3 + \frac{f_{xxy}}{2!\,1!} x^2 y + \frac{f_{xyy}}{1!\,2!} x y^2 + \frac{f_{yyy}}{3!} y^3
+       = \frac{x^3}{6} - \frac{x y^2}{2} . \]
+    At $(0.1, 0.2)$: \ $T_3 = 1.083167$, against $1.083141$.
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item In $n$ variables there are $\binom{n + k - 1}{k}$ terms of order $k$. For $n = 1000$: \
+      $500\,500$ of order $2$, and $167\,167\,000$ of order $3$.
+    \item So in several variables one rarely goes beyond second order. Optimisation methods
+      (Lectures 14--15) use the gradient and, at most, the Hessian.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Second partial derivatives $f_{xx}, f_{xy}, \dots$; the classes $C^k$.
+    \item \textbf{Schwarz}: for $C^2$ functions $f_{xy} = f_{yx}$; without continuity it can fail.
+    \item The \textbf{Hessian} $H_f$ is symmetric for $C^2$ functions, and it is the Jacobian of
+      $\nabla f$. For $\vx^\top A\vx + \vb^\top\vx + c$: \ $H_f = A + A^\top$.
+    \item \textbf{Taylor}: $f(\va + \vh) = f(\va) + \nabla f(\va)\cdot\vh + \frac12 \vh^\top H_f(\va)\vh + o(\norm{\vh}^2)$,
+      from the one-variable formula along $t \mapsto \va + t\vh$.
+    \item The quadratic term is a quadratic form: its eigenvalues are the principal curvatures.
+      Bowl (positive definite), cap (negative definite), saddle (indefinite).
+    \item Higher orders: multi-indices; the number of terms grows quickly.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Find all second partial derivatives of $f(x, y) = x^2 y^3 - 4xy + y^4$, and check that
+      $f_{xy} = f_{yx}$.
+    \item Find the Hessian of $f(x, y, z) = x^2 + y^2 + z^2 + xy + yz$.
+    \item Find the second-order Taylor polynomial of $\sqrt{1 + x + y}$ at $(0, 0)$.
+    \item Find the second-order Taylor polynomial of $x e^y$ at $(1, 0)$.
+    \item Bowl, cap or saddle? \
+      $H = \begin{pmatrix} 2 & 1 \\ 1 & 2 \end{pmatrix}$, \
+      $\begin{pmatrix} 1 & 2 \\ 2 & 1 \end{pmatrix}$, \
+      $\begin{pmatrix} -3 & 1 \\ 1 & -1 \end{pmatrix}$.
+    \item Show that $H_f = D(\nabla f)$, and use it to find the Hessian of $f(\vx) = \norm{\vx}^2$.
+    \item Find the third-order Taylor polynomial of $\sin(x + y)$ at $(0, 0)$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $f_{xx} = 2y^3$, \ $f_{xy} = f_{yx} = 6xy^2 - 4$, \ $f_{yy} = 6x^2 y + 12 y^2$.
+    \item $\begin{pmatrix} 2 & 1 & 0 \\ 1 & 2 & 1 \\ 0 & 1 & 2 \end{pmatrix}$.
+    \item $1 + \frac{x + y}{2} - \frac{(x + y)^2}{8}$ \ (the binomial series with $v = x + y$).
+    \item $1 + (x - 1) + y + (x - 1)\,y + \frac{y^2}{2}$.
+    \item Bowl (eigenvalues $3, 1$); saddle ($3, -1$); cap ($\det = 2 > 0$, $\operatorname{tr} = -4 < 0$).
+    \item Row $i$ of $D(\nabla f)$ is $\nabla (f_{x_i})$, that is $(f_{x_i x_1}, \dots, f_{x_i x_n})$.
+      For $\norm{\vx}^2$: \ $\nabla f = 2\vx$, so $H_f = 2I$.
+    \item $(x + y) - \frac{(x + y)^3}{6}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 14 --- Unconstrained optimisation} (Unit 14)
+  \begin{itemize}
+    \item Critical points, where $\nabla f = \mathbf 0$
+    \item The second-derivative test, using the Hessian
+    \item Convex functions: every critical point is a global minimum
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Section 4.7.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

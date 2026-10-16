@@ -124,10 +124,11 @@ Drafted from the spec; please read and approve or rewrite:
 - [ ] **`wosm.sty`**: it was not among the uploaded template files (`wosm-article.cls` came twice), so
       `materials/templates/wosm.sty` is a reconstruction (site colours, Latin Modern, glider mark). If you have the
       original, replace it and run `npm run materials`; the lectures only use `\course{…}{…}` from it
-- [ ] MAT231-F27 Lectures 01–10 (`materials/mat231-f27/`): review the content. The title slides give the semester
-      as “Fall 2027” and the author as “Dr. Ali Khudiyev”, both from the module description. Reading references are to
-      Strang & Herman, *Calculus, Volume 2* (OpenStax), Sections 5.2–5.6 and 6.1–6.4, *Calculus, Volume 3*,
-      Sections 4.1–4.4 and 4.6, and (for Lecture 07) Wilf, *generatingfunctionology*, Chapter 1 — check the section
+- [ ] MAT231-F27 Lectures 01–13 (`materials/mat231-f27/`): review the content. The title slides give the semester
+      as “Fall 2027” and the author as “Dr. Ali Khudiyev”, both from the module description. Lectures 07 and 11–13
+      follow your guidance documents. Reading references are to Strang & Herman, *Calculus, Volume 2* (OpenStax),
+      Sections 5.2–5.6 and 6.1–6.4, *Calculus, Volume 3*, Sections 4.1–4.7, Marsden & Tromba, *Vector Calculus*,
+      Sections 3.1–3.2 (Lecture 13), and Wilf, *generatingfunctionology*, Chapter 1 (Lecture 07) — check the section
       numbers against your copies
 - [ ] **MAT231-F27 Lecture 08 reading** (Stirling's approximation): none of the books on the reading list covers it.
       The “This lecture” slide shows a `TODO(owner)` placeholder until you choose a text

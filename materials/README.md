@@ -60,7 +60,11 @@ The slides are 16:9 at 11 pt. A frame that is too full runs off the bottom silen
 
 ## About `wosm.sty`
 
-The classes need `wosm.sty`, which was not among the files provided with them. The one here is a reconstruction:
-the website's light-theme colours (`src/styles/tokens.css`), Latin Modern fonts (as in the module description PDFs),
-the glider mark from `src/assets/brand/glider-mark.svg`, and the commands the classes use. If the original exists,
-replace this file with it; the lectures only use `\course{<code>}{<title>}` from it.
+`wosm.sty` is the shared style: the website's light-theme colours, British `babel` and `csquotes`, the glider mark
+and logo, `\course{<code>}{<title>}`, `listings` and the callout boxes. Its fonts are Source Serif with `newtxmath`
+and IBM Plex Mono when they are installed (`texlive-fonts-extra` on Debian/Ubuntu), and Latin Modern otherwise, so
+the same source compiles either way. Use the installed fonts for the committed PDFs.
+
+`newtxmath` defines some short macro names, for instance `\vv` (an arrow vector). A lecture that wants its own
+meaning for such a name defines it with `\DeclareRobustCommand`, which works whether or not the name exists:
+`\newcommand` would stop with "Command \vv already defined".

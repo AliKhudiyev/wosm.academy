@@ -13,7 +13,9 @@
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\vx}{\mathbf{x}}
-\newcommand{\vv}{\mathbf{v}}
+% \vv is also defined by newtxmath, which wosm.sty loads with Source Serif;
+% \DeclareRobustCommand (not \newcommand) works with or without it.
+\DeclareRobustCommand{\vv}{\mathbf{v}}
 \newcommand{\vc}{\mathbf{c}}
 
 \course{MAT231-F27}{Calculus II}

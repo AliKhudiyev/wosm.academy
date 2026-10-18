@@ -121,9 +121,6 @@ Drafted from the spec; please read and approve or rewrite:
 
 ## 4. Course materials (`materials/`)
 
-- [ ] **`wosm.sty`**: it was not among the uploaded template files (`wosm-article.cls` came twice), so
-      `materials/templates/wosm.sty` is a reconstruction (site colours, Latin Modern, glider mark). If you have the
-      original, replace it and run `npm run materials`; the lectures only use `\course{…}{…}` from it
 - [ ] MAT231-F27 Lectures 01–25 (`materials/mat231-f27/`, all units of the module): review the content. The title
       slides give the semester as “Fall 2027” and the author as “Dr. Ali Khudiyev”, both from the module
       description. Lectures 07 and 11–13 follow your guidance documents. Reading references are to Strang & Herman,

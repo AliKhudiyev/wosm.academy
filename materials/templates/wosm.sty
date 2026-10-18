@@ -1,104 +1,136 @@
 % =============================================================
-%  wosm.sty — WoSM Academy house style, shared by wosm-slides.cls
-%  and wosm-article.cls: colours, fonts, the glider mark and logo,
-%  labels, the course line and the box style used for blocks.
+%  wosm.sty — shared look of WoSM Academy course materials
+%  Loaded by wosm-slides.cls and wosm-article.cls; you do not load it
+%  yourself. Please do not edit it for a single course: change it here
+%  for everyone, or not at all.
 %
-%  Course details, set once in the preamble:
-%    \course{MAT231-F27}{Calculus II}
-%
-%  Colours follow the website's light theme (src/styles/tokens.css).
+%  Colours are the website's light theme ("paper"), fonts are the
+%  closest TeX Live matches to the website's: Source Serif for text,
+%  IBM Plex Mono for code and labels.
 % =============================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{wosm}[2026/10/13 v1.0 WoSM Academy house style]
+\ProvidesPackage{wosm}[2026/10/13 v1.0 WoSM Academy shared style]
 
-% ---------- Fonts and maths -----------------------------------
-\RequirePackage[T1]{fontenc}
-\RequirePackage{lmodern}
+% ---------- Language and fonts --------------------------------
+\RequirePackage{iftex}
+\ifPDFTeX
+  \RequirePackage[T1]{fontenc}
+\fi
+\RequirePackage[british]{babel}
+\RequirePackage{csquotes}
+
+% Dates as on the website: "5 October 2026" (babel's British \today
+% would print "5th October 2026").
+\addto\datebritish{\def\today{\number\day\space\ifcase\month\or
+  January\or February\or March\or April\or May\or June\or July\or
+  August\or September\or October\or November\or December\fi
+  \space\number\year}}
+
+\RequirePackage{amsmath}
+\RequirePackage{mathtools}
+\RequirePackage{amsthm} % before newtxmath, which would clash with it
+% Falls back to Latin Modern when the fonts are missing (e.g. BasicTeX).
+\IfFileExists{sourceserifpro.sty}{%
+  \RequirePackage[semibold]{sourceserifpro}%
+  \RequirePackage[varbb]{newtxmath}%
+}{%
+  \RequirePackage{lmodern}%
+  \RequirePackage{amssymb}%
+}
+\IfFileExists{plex-mono.sty}{\RequirePackage[scale=0.86]{plex-mono}}{}
 \RequirePackage{microtype}
-\RequirePackage{amsmath, amssymb, mathtools}
-\RequirePackage{amsthm}
 
-% ---------- Colours -------------------------------------------
+% ---------- Colours (website tokens, light theme) -------------
 \RequirePackage{xcolor}
 \definecolor{wosm-bg}{HTML}{F2EEE5}      % paper
 \definecolor{wosm-surface}{HTML}{EBE6DA} % raised areas
 \definecolor{wosm-text}{HTML}{2B2A27}    % warm charcoal
-\definecolor{wosm-muted}{HTML}{666158}   % metadata, captions
-\definecolor{wosm-rule}{HTML}{D6CFBF}    % rules
-\definecolor{wosm-accent}{HTML}{1D6864}  % deep teal
-\definecolor{wosm-brick}{HTML}{9A4A2E}   % warnings; the Mathematics colour
-\colorlet{wosm-box}{wosm-surface}        % box background (the classes may change it)
+\definecolor{wosm-muted}{HTML}{666158}   % metadata, remarks
+\definecolor{wosm-rule}{HTML}{D6CFBF}    % thin rules
+\definecolor{wosm-accent}{HTML}{1D6864}  % teal: structure, definitions, links
+\definecolor{wosm-brick}{HTML}{9A4A2E}   % warnings, \alert
+\colorlet{wosm-box}{wosm-surface}        % box background; the classes may change it
 
-% ---------- Graphics, tables ----------------------------------
-\RequirePackage{tikz}
+% ---------- Graphics, tables, code ----------------------------
+\RequirePackage{graphicx}
 \RequirePackage{booktabs}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning}
+\RequirePackage{ccicons}
 
-% ---------- Course --------------------------------------------
-% \course{<code>}{<title>}: shown above the title and in the
-% header (article) or footline (slides).
-\newcommand*\wosm@coursecode{}
-\newcommand*\wosm@coursetitle{}
-\newcommand\course[2]{\gdef\wosm@coursecode{#1}\gdef\wosm@coursetitle{#2}}
-\newcommand*\wosm@courseline{%
-  \ifx\wosm@coursecode\@empty\else
-    {\ttfamily\small\color{wosm-accent}\wosm@coursecode
-     \ifx\wosm@coursetitle\@empty\else
-       \enspace\textperiodcentered\enspace\wosm@coursetitle\fi}%
-  \fi}
+\RequirePackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{wosm-accent}\bfseries,
+  commentstyle=\color{wosm-muted}\itshape,
+  stringstyle=\color{wosm-brick},
+  numberstyle=\ttfamily\tiny\color{wosm-muted},
+  backgroundcolor=\color{wosm-box},
+  frame=l, framerule=2pt, rulecolor=\color{wosm-rule},
+  framesep=6pt, framexleftmargin=4pt, xleftmargin=10pt,
+  numbersep=16pt, % line numbers (numbers=left) sit in the margin
+  aboveskip=6pt, belowskip=6pt,
+  columns=fullflexible, keepspaces=true,
+  showstringspaces=false, upquote=true,
+  breaklines=true, tabsize=4,
+}
 
-% ---------- Mark, logo, labels --------------------------------
-% \wosmmark[<height>]: the glider, in the current colour, sitting
-% on the baseline. Same geometry as src/assets/brand/glider-mark.svg
-% (33 units square, 10-unit cells, 1.5-unit gaps).
-\newcommand*\wosmmark[1][1em]{%
-  \begingroup
-  \dimen@=#1\relax
-  \divide\dimen@ by 33
-  \edef\wosm@unit{\the\dimen@}%
-  \tikz[x=\wosm@unit, y=\wosm@unit, baseline=0pt]{%
-    \fill (11.5,23) rectangle ++(10,10);
-    \fill (23,11.5) rectangle ++(10,10);
-    \fill (0,0) rectangle ++(10,10);
-    \fill (11.5,0) rectangle ++(10,10);
-    \fill (23,0) rectangle ++(10,10);}%
-  \endgroup}
-
-% \wosmlogo: horizontal lockup — mark, "WoSM" in the serif,
-% "Academy" in the mono at 80% of the surrounding size.
-\newcommand*\wosmlogo{%
-  \mbox{\wosmmark[0.72em]\hspace{0.45em}%
-    {\rmfamily\bfseries WoSM}\hspace{0.35em}%
-    {\ttfamily\mdseries
-     \@tempdima=\f@size pt\@tempdima=0.8\@tempdima
-     \fontsize{\strip@pt\@tempdima}{\f@baselineskip}\selectfont Academy}}}
-
-% \wosmlabel{...}: small mono metadata, muted.
-\newcommand\wosmlabel[1]{{\ttfamily\footnotesize\color{wosm-muted}#1}}
-
-% \wosmbullet: one Life cell, in the accent colour.
-\newcommand*\wosmbullet{\textcolor{wosm-accent}{\rule[0.2ex]{0.8ex}{0.8ex}}}
-
-% \wosmlicence: the licence of all course materials.
-\newcommand*\wosmlicence{%
-  \href{https://creativecommons.org/licenses/by-sa/4.0/}{CC~BY-SA~4.0}}
-
-% ---------- Boxes ---------------------------------------------
-% tcolorbox style wosm=<colour>: a thin rule on the left in <colour>,
-% the title in <colour>, background wosm-box. Used for blocks,
-% theorems, examples, remarks, warnings and solutions.
-\RequirePackage{tcolorbox}
-\tcbuselibrary{skins}
+% ---------- Callout boxes -------------------------------------
+% A left border plus a tinted background, as on the website.
+% Usage: \begin{tcolorbox}[wosm=<colour>, title=<title>] ... \end{tcolorbox}
+\RequirePackage[skins]{tcolorbox}
 \tcbset{
   wosm/.style={
-    enhanced, sharp corners, boxrule=0pt, frame hidden,
-    borderline west={1.6pt}{0pt}{#1},
-    colback=wosm-box, colbacktitle=wosm-box,
-    coltitle=#1, coltext=wosm-text,
-    fonttitle=\bfseries, titlerule=0pt,
-    left=7pt, right=7pt, top=3pt, bottom=4pt,
-    lefttitle=7pt, toptitle=4pt, bottomtitle=0pt,
-    before skip=0.5em, after skip=0.5em,
+    enhanced, colback=wosm-box, colframe=#1, coltext=wosm-text,
+    boxrule=0pt, leftrule=2.5pt, arc=0pt, outer arc=0pt,
+    left=7pt, right=7pt, top=5pt, bottom=5pt,
+    before skip=6pt, after skip=6pt,
+    colbacktitle=wosm-box, coltitle=#1, fonttitle=\bfseries,
+    titlerule=0pt, toptitle=5pt, bottomtitle=-2pt, lefttitle=7pt,
   },
 }
+
+% ---------- Brand ---------------------------------------------
+% The glider (Game of Life) mark, drawn in the current text colour.
+% \wosmmark[<size>] — default size 1em.
+\newdimen\wosm@cell
+\newcommand*\wosmmark[1][1em]{%
+  \wosm@cell=\dimexpr #1/33\relax
+  \begin{tikzpicture}[x=\wosm@cell, y=\wosm@cell, baseline=0pt]
+    \foreach \c/\r in {1/2, 2/1, 0/0, 1/0, 2/0}
+      \fill (11.5*\c, 11.5*\r) rectangle ++(10, 10);
+  \end{tikzpicture}}
+
+% The horizontal logo: mark, "WoSM" in serif, "Academy" in mono.
+\newcommand*\wosmlogo{%
+  \mbox{\raisebox{-0.09em}{\wosmmark[0.85em]}\hspace{0.42em}%
+    {\bfseries WoSM}\hspace{0.32em}%
+    {\ttfamily\mdseries\fontsize{\fpeval{0.7*\f@size}}{\f@baselineskip}\selectfont
+     \textls[80]{Academy}}}}
+
+% A small square bullet: one glider cell.
+\newcommand*\wosmbullet{\raisebox{0.18em}{\textcolor{wosm-accent}{\rule{0.36em}{0.36em}}}}
+
+% Mono label for metadata, e.g. \wosmlabel{Due}.
+\newcommand*\wosmlabel[1]{{\ttfamily\footnotesize\color{wosm-muted}#1}}
+
+\newcommand*\wosmlicence{%
+  \href{https://creativecommons.org/licenses/by-sa/4.0/}{\ccbysa\enspace CC BY-SA 4.0}}
+
+% ---------- Course --------------------------------------------
+% \course{<code>}{<title>}, e.g. \course{M101-F26}{Discrete Structures}.
+\newcommand*\wosm@coursecode{}
+\newcommand*\wosm@coursetitle{}
+\newcommand\course[2]{\def\wosm@coursecode{#1}\def\wosm@coursetitle{#2}}
+
+% "M101-F26 · DISCRETE STRUCTURES", or nothing without \course.
+\newcommand*\wosm@courseline{%
+  \ifx\wosm@coursecode\@empty\else
+    {\ttfamily\footnotesize\color{wosm-muted}\textls[60]{%
+      \wosm@coursecode
+      \ifx\wosm@coursetitle\@empty\else
+        \enspace\textperiodcentered\enspace\MakeUppercase{\wosm@coursetitle}%
+      \fi}}%
+  \fi}
 
 \endinput

@@ -16,7 +16,9 @@
 \newcommand{\vx}{\mathbf{x}}
 \newcommand{\va}{\mathbf{a}}
 \newcommand{\vp}{\mathbf{p}}
-\newcommand{\vv}{\mathbf{v}}
+% \vv is also defined by newtxmath, which wosm.sty loads with Source Serif;
+% \DeclareRobustCommand (not \newcommand) works with or without it.
+\DeclareRobustCommand{\vv}{\mathbf{v}}
 \newcommand{\Lag}{\mathcal{L}}
 
 \course{MAT231-F27}{Calculus II}

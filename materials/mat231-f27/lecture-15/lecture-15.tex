@@ -27,7 +27,9 @@
 \newcommand{\vg}{\mathbf{g}}
 \newcommand{\vh}{\mathbf{h}}
 \newcommand{\vu}{\mathbf{u}}
-\newcommand{\vv}{\mathbf{v}}
+% \vv is also defined by newtxmath, which wosm.sty loads with Source Serif;
+% \DeclareRobustCommand (not \newcommand) works with or without it.
+\DeclareRobustCommand{\vv}{\mathbf{v}}
 
 \course{MAT231-F27}{Calculus II}
 \title[L15 \textperiodcentered\ Gradient descent]{Gradient descent}

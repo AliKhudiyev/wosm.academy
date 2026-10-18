@@ -124,13 +124,13 @@ Drafted from the spec; please read and approve or rewrite:
 - [ ] **`wosm.sty`**: it was not among the uploaded template files (`wosm-article.cls` came twice), so
       `materials/templates/wosm.sty` is a reconstruction (site colours, Latin Modern, glider mark). If you have the
       original, replace it and run `npm run materials`; the lectures only use `\course{…}{…}` from it
-- [ ] MAT231-F27 Lectures 01–19 (`materials/mat231-f27/`): review the content. The title slides give the semester
+- [ ] MAT231-F27 Lectures 01–22 (`materials/mat231-f27/`): review the content. The title slides give the semester
       as “Fall 2027” and the author as “Dr. Ali Khudiyev”, both from the module description. Lectures 07 and 11–13
       follow your guidance documents. Reading references are to Strang & Herman, *Calculus, Volume 2* (OpenStax),
-      Sections 5.2–5.6 and 6.1–6.4, *Calculus, Volume 3*, Sections 4.1–4.8, 5.1–5.2, 5.4 and 5.6 (and 5.3, 5.5,
-      5.7 announced for Lecture 20), Marsden & Tromba, *Vector Calculus*, Sections 3.1–3.2 (Lecture 13), 3.4
-      (Lecture 16) and 3.5 (Lecture 17), Boyd & Vandenberghe,
-      *Convex Optimization*, Section 3.1 (Lecture 14) and Sections 9.1–9.3 (Lecture 15), and Wilf,
+      Sections 5.2–5.6 and 6.1–6.4 (and 4.1, 4.3–4.5 announced for Lecture 23), *Calculus, Volume 3*, Sections
+      4.1–4.8, 5.1–5.7 and 6.1–6.3, Marsden & Tromba, *Vector Calculus*, Sections 3.1–3.2 (Lecture 13), 3.4
+      (Lecture 16), 3.5 (Lecture 17), 6.4 (Lecture 21) and Chapter 8 (mentioned in Lecture 22), Boyd &
+      Vandenberghe, *Convex Optimization*, Section 3.1 (Lecture 14) and Sections 9.1–9.3 (Lecture 15), and Wilf,
       *generatingfunctionology*, Chapter 1 (Lecture 07) — check the section numbers against your copies. Lecture 15
       points students to Project 2 but does not solve any part of it
 - [ ] **MAT231-F27 Lecture 08 reading** (Stirling's approximation): none of the books on the reading list covers it.

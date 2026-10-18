@@ -1,0 +1,390 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 22
+%  Unit 22: Introduction to vector fields and line integrals
+%
+%  Build from the repository root:   npm run materials -- lecture-22
+%  This writes lecture-22.pdf (slides, with overlays) and
+%  lecture-22-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vr}{\mathbf{r}}
+\newcommand{\vF}{\mathbf{F}}
+\newcommand{\vT}{\mathbf{T}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L22 \textperiodcentered\ Vector fields and line integrals]{Vector fields and line integrals}
+\subtitle{Integrating along curves}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 22\enspace\textperiodcentered\enspace Unit 22\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item $\int_{-\infty}^\infty e^{-x^2}\, dx = \sqrt\pi$, by a double integral in polar coordinates.
+    \item Improper multiple integrals: exhaustions; absolute convergence; Tonelli and Fubini.
+    \item The normal distribution, $\Gamma(\frac12) = \sqrt\pi$, and the volume of the ball in $\R^n$.
+  \end{itemize}
+  \vskip0.6em
+  So far we integrated over intervals, regions and solids. Today: over \textbf{curves}. And a new
+  kind of function --- one that attaches a vector to each point.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Sections 6.1--6.3.\par}
+\end{frame}
+
+% =============================================================
+\section{Vector fields}
+
+\begin{frame}{Vector fields}
+  \begin{definition}
+    A \textbf{vector field} on a region $D \subseteq \R^n$ is a function $\vF\colon D \to \R^n$: it
+    attaches a vector $\vF(\vx)$ to each point $\vx$. In the plane, $\vF = (P, Q)$; in space,
+    $\vF = (P, Q, R)$.
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item \textbf{Velocity fields}: wind, or the flow of water --- the velocity at each point.
+    \item \textbf{Force fields}: gravity, electric and magnetic forces.
+    \item \textbf{Gradient fields}: $\nabla f$, pointing uphill at each point (Lecture 11). Gradient
+      descent (Lecture 15) follows the field $-\nabla f$ in small steps.
+  \end{itemize}
+  \pause
+  {\small We draw a vector field by drawing some of its arrows, usually scaled down so that they do
+  not overlap.\par}
+\end{frame}
+
+\begin{frame}{Two pictures}
+  \begin{columns}[t]
+    \begin{column}{0.49\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.82]
+        \draw[wosm-rule] (-2.6,0) -- (2.6,0) (0,-2.6) -- (0,2.6);
+        \foreach \xa in {-2,-1.5,...,2}
+          \foreach \ya in {-2,-1.5,...,2}
+            \draw[wosm-accent, -latex] (\xa,\ya) -- ++({-0.18*\ya},{0.18*\xa});
+      \end{tikzpicture}
+      \par\small $\vF = (-y, x)$: \ a \textbf{rotation}. $\vF$ is perpendicular to the position vector,
+      and $\norm{\vF} = r$.
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.82]
+        \draw[wosm-rule] (-2.6,0) -- (2.6,0) (0,-2.6) -- (0,2.6);
+        \foreach \xa in {-2,-1.5,...,2}
+          \foreach \ya in {-2,-1.5,...,2}
+            \draw[wosm-brick, -latex] (\xa,\ya) -- ++({0.18*\xa},{0.18*\ya});
+      \end{tikzpicture}
+      \par\small $\vF = (x, y)$: \ \textbf{radial}, pointing away from the origin. It is the gradient of
+      $f = \frac12 (x^2 + y^2)$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Gradient fields}
+  \begin{definition}
+    $\vF$ is a \textbf{gradient field} (or \textbf{conservative}) on $D$ if $\vF = \nabla f$ for some
+    function $f$ on $D$, called a \textbf{potential} of $\vF$.
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item $(x, y) = \nabla\bigl(\frac12 (x^2 + y^2)\bigr)$, \quad $(2xy, \ x^2) = \nabla(x^2 y)$.
+    \item Gravity: $\vF(\vx) = -k\, \dfrac{\vx}{\norm{\vx}^3} = \nabla \dfrac{k}{\norm{\vx}}$ \ on $\R^3 \setminus \{\mathbf 0\}$.
+  \end{itemize}
+  \pause
+  \begin{block}{A necessary condition}
+    If $(P, Q) = \nabla f$ with $f$ of class $C^2$, then $P_y = f_{xy} = f_{yx} = Q_x$ (Schwarz, Lecture 13).
+    So $(-y, x)$ is \textbf{not} a gradient field: $P_y = -1$ but $Q_x = 1$.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Flow lines}
+  A \textbf{flow line} of $\vF$ is a curve $\vr(t)$ that follows the arrows: $\vr'(t) = \vF\bigl(\vr(t)\bigr)$.
+  \pause
+  \begin{itemize}
+    \item $\vF = (-y, x)$: \ $\vr(t) = (\cos t, \sin t)$, since $\vr'(t) = (-\sin t, \cos t) = \vF(\vr(t))$.
+      The flow lines are circles around the origin.
+    \item $\vF = (x, y)$: \ $\vr(t) = e^t (a, b)$: rays leaving the origin.
+  \end{itemize}
+  \pause
+  \begin{itemize}
+    \item $\vr' = \vF(\vr)$ is a system of differential equations; we solve such systems in Lectures
+      23--25.
+    \item For $\vF = -\nabla f$ the flow lines are paths of steepest descent. Gradient descent,
+      $\vx_{k+1} = \vx_k - \eta\nabla f(\vx_k)$, follows them in straight steps of length proportional
+      to $\eta$.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Line integrals of functions}
+
+\begin{frame}{Curves and arc length}
+  A \textbf{smooth curve} $C$ is given by a parametrisation $\vr\colon [a, b] \to \R^n$ of class $C^1$
+  with $\vr'(t) \ne \mathbf 0$. Its \textbf{length} is
+  \[ L = \int_a^b \norm{\vr'(t)}\, dt \]
+  --- speed integrated over time (in the plane: Calculus~I, Unit 24).
+  \pause
+  \begin{example}[The helix $\vr(t) = (\cos t, \sin t, t)$, \ $0 \le t \le 2\pi$]
+    $\vr'(t) = (-\sin t, \cos t, 1)$, \ $\norm{\vr'(t)} = \sqrt2$, \ so $L = 2\sqrt2\, \pi$.
+  \end{example}
+  \pause
+  {\small The length does not depend on the parametrisation: by the chain rule, a change of
+  parameter $t = g(u)$ changes $\norm{\vr'}\, dt$ to $\norm{(\vr \circ g)'}\, du$.\par}
+\end{frame}
+
+\begin{frame}{Line integrals with respect to arc length}
+  \begin{definition}
+    For $f$ continuous on $C$:
+    \[ \int_C f\, ds = \int_a^b f\bigl(\vr(t)\bigr)\, \norm{\vr'(t)}\, dt . \]
+  \end{definition}
+  It is the limit of the sums $\sum_i f(\vr(t_i^*))\, \Delta s_i$, where $\Delta s_i$ is the length of
+  the $i$-th piece of $C$. Here $ds = \norm{\vr'(t)}\, dt$ is the element of arc length.
+  \pause
+  \begin{itemize}
+    \item $f = 1$ gives the length; $f$ a density gives the \textbf{mass of a wire}; \
+      $\frac1L \int_C f\, ds$ is the average of $f$ on $C$.
+    \item It does not depend on the parametrisation, nor on the direction in which $C$ is traversed.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{example}[The upper half of the unit circle, $f = y$]
+    $\vr(t) = (\cos t, \sin t)$, $0 \le t \le \pi$, \ $\norm{\vr'} = 1$:
+    \ $\displaystyle \int_C y\, ds = \int_0^\pi \sin t\, dt = 2$.
+    \\[0.2em]
+    A semicircular wire of length $\pi$ has its centroid at height $\bar y = \frac{2}{\pi} \approx 0.64$.
+  \end{example}
+  \pause
+  \begin{example}[The parabola $y = x^2$, $0 \le x \le 1$, \ $f = x$]
+    $\vr(t) = (t, t^2)$, \ $\norm{\vr'(t)} = \sqrt{1 + 4t^2}$:
+    \[ \int_C x\, ds = \int_0^1 t\sqrt{1 + 4t^2}\, dt = \Bigl[\frac{(1 + 4t^2)^{3/2}}{12}\Bigr]_0^1
+       = \frac{5\sqrt5 - 1}{12} \approx 0.848 . \]
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{Work: line integrals of vector fields}
+
+\begin{frame}{Work done by a force}
+  A constant force $\vF$ moving an object along a straight displacement $\mathbf d$ does work
+  $W = \vF \cdot \mathbf d$. Along a curve, cut it into small pieces $\Delta\vr_i \approx \vr'(t_i)\, \Delta t$
+  and add: \ $W \approx \sum_i \vF\bigl(\vr(t_i)\bigr) \cdot \vr'(t_i)\, \Delta t$.
+  \pause
+  \begin{definition}
+    The \textbf{line integral} of $\vF$ along $C$, oriented by $\vr\colon [a, b] \to \R^n$, is
+    \[ \int_C \vF \cdot d\vr = \int_a^b \vF\bigl(\vr(t)\bigr) \cdot \vr'(t)\, dt = \int_C \vF \cdot \vT\, ds . \]
+  \end{definition}
+  \begin{itemize}
+    \item $\vT = \vr' / \norm{\vr'}$ is the unit tangent: only the component of $\vF$ along $C$ counts.
+    \item In coordinates, with $\vF = (P, Q)$: \ $\int_C \vF \cdot d\vr = \int_C P\, dx + Q\, dy$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Example: around a circle}
+  \begin{columns}[c]
+    \begin{column}{0.58\textwidth}
+      $C$: the unit circle, counterclockwise, $\vr(t) = (\cos t, \sin t)$, $0 \le t \le 2\pi$.
+      \pause
+      \begin{itemize}
+        \item $\vF = (-y, x)$: \ $\vF(\vr(t)) \cdot \vr'(t) = (-\sin t, \cos t) \cdot (-\sin t, \cos t) = 1$, so
+          \[ \oint_C \vF \cdot d\vr = 2\pi . \]
+          The field pushes along the whole way.
+        \pause
+        \item $\vF = (x, y)$: \ $(\cos t, \sin t) \cdot (-\sin t, \cos t) = 0$: no work. The field is
+          perpendicular to the path.
+      \end{itemize}
+      {\small $\oint$ marks a closed curve.\par}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.62]
+        \draw[wosm-rule] (-2.6,0) -- (2.6,0) (0,-2.6) -- (0,2.6);
+        \foreach \xa in {-2,-1,...,2}
+          \foreach \ya in {-2,-1,...,2}
+            \draw[wosm-accent!60!wosm-bg, -latex] (\xa,\ya) -- ++({-0.2*\ya},{0.2*\xa});
+        \draw[wosm-brick, very thick, -latex] (1.5,0) arc (0:350:1.5);
+        \node[font=\scriptsize, wosm-brick] at (1.85,1.5) {$C$};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Orientation, and dependence on the path}
+  \begin{itemize}
+    \item Reversing the direction of $C$ changes the sign: $\int_{-C} \vF \cdot d\vr = -\int_C \vF \cdot d\vr$
+      ($\vT$ flips). A reparametrisation in the same direction changes nothing.
+  \end{itemize}
+  \pause
+  \textbf{Does the value depend on the path between two points?}
+  \begin{itemize}
+    \item $\vF = (-y, x)$ from $(1, 0)$ to $(-1, 0)$: along the upper half circle $\pi$; along the lower
+      half circle ($\vr(t) = (\cos t, -\sin t)$) $-\pi$. \ \textbf{Yes.}
+    \pause
+    \item $\vF = (2xy, x^2)$ from $(0, 0)$ to $(1, 1)$: along $\vr(t) = (t, t)$,
+      $\int_0^1 (2t^2 + t^2)\, dt = 1$; along $\vr(t) = (t, t^2)$, $\int_0^1 (2t^3 + t^2 \cdot 2t)\, dt = 1$.
+      \ \textbf{The same.}
+  \end{itemize}
+  \pause
+  {\small The second field is a gradient, $\nabla(x^2 y)$, and $1 = x^2y\big|_{(1,1)} - x^2y\big|_{(0,0)}$.
+  That is no accident.\par}
+\end{frame}
+
+% =============================================================
+\section{The fundamental theorem for line integrals}
+
+\begin{frame}{The fundamental theorem for line integrals}
+  \begin{theorem}
+    Let $f$ be $C^1$ on an open set containing $C$, a smooth curve from $A$ to $B$. Then
+    \[ \int_C \nabla f \cdot d\vr = f(B) - f(A) . \]
+  \end{theorem}
+  \pause
+  \begin{proof}
+    By the chain rule (Lecture 12), $\frac{d}{dt} f(\vr(t)) = \nabla f(\vr(t)) \cdot \vr'(t)$. So by the
+    Fundamental Theorem of Calculus the integral is $f(\vr(b)) - f(\vr(a)) = f(B) - f(A)$.
+  \end{proof}
+  \pause
+  {\small Compare $\int_a^b F'(x)\, dx = F(b) - F(a)$: the integral of a derivative depends only on the
+  endpoints.\par}
+\end{frame}
+
+\begin{frame}{Path independence}
+  \begin{itemize}
+    \item Line integrals of gradient fields are \textbf{path independent}, and $\oint_C \nabla f \cdot d\vr = 0$
+      for every closed curve.
+    \item Conversely, if all line integrals of $\vF$ on a connected open set are path independent, then
+      $\vF = \nabla f$ with $f(\vx) = \int_{A}^{\vx} \vF \cdot d\vr$ (from a fixed point $A$).
+    \pause
+    \item $(-y, x)$ is not a gradient field: its integral around the circle is $2\pi \ne 0$.
+  \end{itemize}
+  \pause
+  \begin{block}{Three equivalent properties of a continuous field $\vF$ on a connected open set}
+    (a) $\vF = \nabla f$ for some $f$; \quad (b) $\int_C \vF \cdot d\vr$ depends only on the endpoints of
+    $C$; \quad (c) $\oint_C \vF \cdot d\vr = 0$ for every closed curve $C$.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Example: gravity}
+  The gravitational force of a mass at the origin, $\vF = -k\, \dfrac{\vx}{\norm{\vx}^3}$, is $\nabla f$ with
+  $f = \dfrac{k}{\norm{\vx}}$.
+  \pause
+  \begin{itemize}
+    \item The work done by gravity moving an object from distance $r_1$ to distance $r_2$ is
+      \[ f(B) - f(A) = k\Bigl(\frac{1}{r_2} - \frac{1}{r_1}\Bigr) , \]
+      whatever the path. Moving outwards ($r_2 > r_1$), it is negative: we must work against gravity.
+    \pause
+    \item In physics, $U = -f$ is the \textbf{potential energy}, and ``conservative'' refers to the
+      conservation of kinetic plus potential energy in such fields.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Finding a potential}
+  \begin{example}[$\vF = (2xy + 1, \ x^2 + 3y^2)$]
+    \begin{enumerate}
+      \item Test: $P_y = 2x = Q_x$. \ (Necessary.)
+      \pause
+      \item Integrate $P$ in $x$: \ $f = x^2 y + x + g(y)$, with $g$ unknown.
+      \pause
+      \item Match $Q$: \ $f_y = x^2 + g'(y) = x^2 + 3y^2$, so $g(y) = y^3$.
+    \end{enumerate}
+    \pause
+    So $f = x^2 y + x + y^3$. Along \textbf{any} curve from $(0, 0)$ to $(1, 2)$:
+    \[ \int_C \vF \cdot d\vr = f(1, 2) - f(0, 0) = 2 + 1 + 8 = 11 . \]
+  \end{example}
+\end{frame}
+
+\begin{frame}{A warning: holes}
+  \begin{example}[$\vF = \dfrac{(-y, \ x)}{x^2 + y^2}$ on $\R^2 \setminus \{\mathbf 0\}$]
+    A computation gives $P_y = Q_x = \dfrac{y^2 - x^2}{(x^2 + y^2)^2}$. \ But around the unit circle,
+    $\vF(\vr(t)) \cdot \vr'(t) = 1$, so $\oint_C \vF \cdot d\vr = 2\pi \ne 0$: \ \textbf{not} a gradient field.
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item Near each point, $\vF = \nabla\theta$, the gradient of the polar angle. But $\theta$ cannot be
+      defined continuously all the way around the origin: it gains $2\pi$.
+    \item So $P_y = Q_x$ is necessary, but not sufficient. It is sufficient on regions without holes
+      (such as $\R^2$ or a disc); the proof uses Green's theorem.
+  \end{itemize}
+  \pause
+  {\small Green's, Stokes' and the divergence theorem relate integrals over curves, surfaces and
+  solids (Marsden \& Tromba, Chapter 8).\par}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Vector fields $\vF\colon D \to \R^n$; gradient fields $\nabla f$; flow lines $\vr' = \vF(\vr)$.
+    \item Arc length $\int_a^b \norm{\vr'}\, dt$; \ $\int_C f\, ds = \int_a^b f(\vr(t))\, \norm{\vr'(t)}\, dt$
+      (mass, averages), independent of direction.
+    \item Work: $\int_C \vF \cdot d\vr = \int_a^b \vF(\vr(t)) \cdot \vr'(t)\, dt$; it changes sign with the
+      direction, and in general depends on the path.
+    \item \textbf{Fundamental theorem}: $\int_C \nabla f \cdot d\vr = f(B) - f(A)$. Gradient fields are
+      exactly the fields with path-independent integrals.
+    \item Test in the plane: $P_y = Q_x$ (necessary; sufficient on regions without holes).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Is $(y, x)$ a gradient field? Is $(y, -x)$? Find a potential where there is one.
+    \item Compute $\int_C (x + y)\, ds$ for the segment from $(0, 0)$ to $(3, 4)$.
+    \item Find the mass of the helix $\vr(t) = (\cos t, \sin t, t)$, $0 \le t \le 2\pi$, with density $z$.
+    \item For $\vF = (x^2, xy)$, compute $\int_C \vF \cdot d\vr$ from $(0, 0)$ to $(1, 1)$ along $y = x$ and
+      along $y = x^2$. Is $\vF$ a gradient field?
+    \item Find a potential for $\vF = (y e^{xy}, \ x e^{xy} + 2y)$, and compute $\int_C \vF \cdot d\vr$ from
+      $(0, 0)$ to $(1, 1)$.
+    \item Compute the work done by $\vF = (-y, x)$ around the square with vertices $(\pm 1, \pm 1)$,
+      counterclockwise.
+    \item Show that $\oint \frac{-y\, dx + x\, dy}{x^2 + y^2} = 2\pi$ around the circle of radius $R$, for
+      every $R > 0$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $(y, x) = \nabla(xy)$. \ $(y, -x)$: $P_y = 1 \ne -1 = Q_x$, not a gradient field.
+    \item $\vr(t) = (3t, 4t)$, $\norm{\vr'} = 5$: \ $\int_0^1 7t \cdot 5\, dt = \frac{35}{2}$.
+    \item $\int_0^{2\pi} t\sqrt2\, dt = 2\sqrt2\, \pi^2$.
+    \item Along $y = x$: $\int_0^1 2t^2\, dt = \frac23$; \ along $y = x^2$: $\int_0^1 (t^2 + 2t^4)\, dt = \frac{11}{15}$.
+      Different values, so not a gradient field ($P_y = 0 \ne y = Q_x$).
+    \item $f = e^{xy} + y^2$: \ $f(1, 1) - f(0, 0) = e + 1 - 1 = e$.
+    \item Each side contributes $2$: total $8$. \ (Green's theorem: $2 \times \text{area}$.)
+    \item $\vr(t) = (R\cos t, R\sin t)$: the integrand is $\frac{R^2\sin^2 t + R^2 \cos^2 t}{R^2} = 1$, so $2\pi$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 23 --- First-order differential equations} (Unit 23)
+  \begin{itemize}
+    \item What a differential equation is; initial value problems; direction fields
+    \item Separable equations: growth, decay, the logistic equation
+    \item First-order linear equations and integrating factors
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 2}, Sections 4.1 and 4.3--4.5.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,384 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 21
+%  Unit 21: The Gaussian integral; improper multiple integrals
+%
+%  Build from the repository root:   npm run materials -- lecture-21
+%  This writes lecture-21.pdf (slides, with overlays) and
+%  lecture-21-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{wosm axis/.style={
+  axis lines=left, axis line style={wosm-muted, -},
+  tick style={wosm-muted}, tick label style={font=\scriptsize, text=wosm-muted},
+  label style={font=\scriptsize, text=wosm-muted},
+  legend style={draw=none, fill=none, font=\scriptsize, text=wosm-text},
+  legend cell align=left}}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\dA}{\, dA}
+\newcommand{\dV}{\, dV}
+\newcommand{\norm}[1]{\lVert #1 \rVert}
+\newcommand{\vx}{\mathbf{x}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L21 \textperiodcentered\ The Gaussian integral]{The Gaussian integral}
+\subtitle{and improper multiple integrals}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 21\enspace\textperiodcentered\enspace Unit 21\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item Change of variables: $\iint_D f \dA = \iint_S f(T(u, v))\,
+      \bigl|\frac{\partial(x, y)}{\partial(u, v)}\bigr|\, du\, dv$.
+    \item Polar $dA = r\, dr\, d\theta$; cylindrical $dV = r\, dr\, d\theta\, dz$; spherical
+      $dV = \rho^2 \sin\varphi\, d\rho\, d\varphi\, d\theta$.
+  \end{itemize}
+  \vskip0.6em
+  Today polar coordinates compute an integral in \emph{one} variable that no antiderivative can:
+  the area under the bell curve. It needs integrals over the whole plane, so we also make sense of
+  improper multiple integrals.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: Marsden \& Tromba, \emph{Vector Calculus}, Section 6.4.\par}
+\end{frame}
+
+% =============================================================
+\section{The Gaussian integral}
+
+\begin{frame}{The bell curve}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      \[ I = \int_{-\infty}^{\infty} e^{-x^2}\, dx \]
+      \begin{itemize}
+        \item It converges: for $|x| \ge 1$, $e^{-x^2} \le e^{-|x|}$ (comparison, Calculus~I, Unit 23).
+        \item $e^{-x^2}$ has no elementary antiderivative (a theorem of Liouville), so the Fundamental
+          Theorem of Calculus does not help.
+        \item Numerically $I \approx 1.7725$.
+      \end{itemize}
+      \pause
+      The value is $\sqrt\pi \approx 1.77245$, and the proof goes through \textbf{two} dimensions.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=4.6cm, xmin=-3, xmax=3, ymin=0, ymax=1.15,
+            axis lines=middle, xtick={-2,-1,1,2}, ytick={1}, xlabel={$x$}]
+          \addplot[draw=none, fill=wosm-accent!25!wosm-bg, domain=-3:3, samples=80] {exp(-x^2)} \closedcycle;
+          \addplot[wosm-accent, thick, domain=-3:3, samples=80] {exp(-x^2)};
+          \node[font=\scriptsize] at (axis cs:1.6,0.6) {$y = e^{-x^2}$};
+        \end{axis}
+      \end{tikzpicture}
+      \par\small The shaded area is $\sqrt\pi$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The trick: square it}
+  The name of the variable does not matter, so
+  \[ I^2 = \Bigl(\int_{-\infty}^\infty e^{-x^2}\, dx\Bigr) \Bigl(\int_{-\infty}^\infty e^{-y^2}\, dy\Bigr)
+         = \iint_{\R^2} e^{-(x^2 + y^2)} \dA . \]
+  \pause
+  The integrand depends only on $r$. In polar coordinates:
+  \[ I^2 = \int_0^{2\pi} \int_0^\infty e^{-r^2}\, r\, dr\, d\theta
+         = 2\pi \Bigl[-\frac12 e^{-r^2}\Bigr]_0^\infty = \pi . \]
+  \pause
+  The factor $r$ from $dA$ is exactly what makes $e^{-r^2}$ integrable in closed form. So
+  \[ \boxed{\int_{-\infty}^{\infty} e^{-x^2}\, dx = \sqrt\pi} \]
+  {\small Two steps need justification: integrals over all of $\R^2$, and the polar change of
+  variables for them. Next.\par}
+\end{frame}
+
+\begin{frame}{Making it rigorous}
+  Let $D_R$ be the disc of radius $R$ and $S_R = [-R, R]^2$. Then $D_R \subset S_R \subset D_{R\sqrt2}$, and
+  the integrand is positive, so
+  \[ \iint_{D_R} e^{-(x^2 + y^2)} \dA \ \le \ \Bigl(\int_{-R}^R e^{-x^2}\, dx\Bigr)^2
+     \ \le \ \iint_{D_{R\sqrt2}} e^{-(x^2 + y^2)} \dA . \]
+  \begin{columns}[c]
+    \begin{column}{0.66\textwidth}
+      \pause
+      The middle term is the double integral over $S_R$ (Fubini). The outer ones are proper
+      integrals, computed in polar coordinates:
+      \[ \iint_{D_R} e^{-(x^2 + y^2)} \dA = \pi\bigl(1 - e^{-R^2}\bigr) \ \to\ \pi . \]
+      \pause
+      By the squeeze theorem, $\bigl(\int_{-R}^R e^{-x^2}\, dx\bigr)^2 \to \pi$. \qed
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.68]
+        \fill[wosm-accent!12!wosm-bg] (0,0) circle (1.414*1.2);
+        \draw[wosm-muted] (0,0) circle (1.414*1.2);
+        \fill[wosm-accent!28!wosm-bg] (-1.2,-1.2) rectangle (1.2,1.2);
+        \draw[wosm-text] (-1.2,-1.2) rectangle (1.2,1.2);
+        \fill[wosm-accent!50!wosm-bg] (0,0) circle (1.2);
+        \draw[wosm-accent, thick] (0,0) circle (1.2);
+        \node[font=\scriptsize] at (0,0) {$D_R$};
+        \node[font=\scriptsize] at (0.95,0.95) {$S_R$};
+        \node[font=\scriptsize, wosm-muted] at (1.25,1.45) {$D_{R\sqrt2}$};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Consequences}
+  \begin{itemize}
+    \item Substituting $x = \sqrt a\, u$: \ $\displaystyle \int_{-\infty}^\infty e^{-a x^2}\, dx = \sqrt{\frac\pi a}$ \ for $a > 0$.
+    \item With $a = \frac12$: \ $\displaystyle \int_{-\infty}^\infty e^{-x^2/2}\, dx = \sqrt{2\pi}$. \ This is the
+      $\sqrt{2\pi}$ in Stirling's formula $n! \sim \sqrt{2\pi n}\,(n/e)^n$ (Lecture 8).
+    \pause
+    \item The \textbf{standard normal density} $\varphi(x) = \frac{1}{\sqrt{2\pi}} e^{-x^2/2}$ has total
+      integral $1$; that is where its constant comes from.
+    \pause
+    \item Moments, by parts: $\displaystyle \int_{-\infty}^\infty x^2 e^{-x^2/2}\, dx
+      = \Bigl[-x e^{-x^2/2}\Bigr]_{-\infty}^\infty + \int_{-\infty}^\infty e^{-x^2/2}\, dx = \sqrt{2\pi}$.
+      So the standard normal distribution has variance $\int x^2 \varphi(x)\, dx = 1$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The Gamma function}
+  \begin{definition}
+    For $s > 0$: \ $\displaystyle \Gamma(s) = \int_0^\infty t^{s - 1} e^{-t}\, dt$.
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item By parts: $\Gamma(s + 1) = s\,\Gamma(s)$, and $\Gamma(1) = 1$. So $\Gamma(n + 1) = n!$: \ $\Gamma$
+      extends the factorial to non-integers.
+    \pause
+    \item With $t = x^2$, $dt = 2x\, dx$:
+      \[ \Gamma\bigl(\tfrac12\bigr) = \int_0^\infty x^{-1} e^{-x^2}\, 2x\, dx = 2 \int_0^\infty e^{-x^2}\, dx = \sqrt\pi . \]
+    \item Hence $\Gamma(\frac32) = \frac12 \sqrt\pi$, \ $\Gamma(\frac52) = \frac34 \sqrt\pi$, and so on.
+  \end{itemize}
+  \pause
+  {\small Stirling's formula holds for $\Gamma$ as well: $\Gamma(s + 1) \sim \sqrt{2\pi s}\,(s/e)^s$ as
+  $s \to \infty$.\par}
+\end{frame}
+
+% =============================================================
+\section{Improper multiple integrals}
+
+\begin{frame}{Improper integrals in several variables}
+  \begin{definition}
+    Let $f \ge 0$ be continuous on $D$. An \textbf{exhaustion} of $D$ is a sequence of bounded regions
+    $D_1 \subseteq D_2 \subseteq \dots$ with $\bigcup_k D_k = D$, on each of which $f$ is integrable. Then
+    \[ \iint_D f \dA = \lim_{k \to \infty} \iint_{D_k} f \dA \quad \in [0, \infty] . \]
+    The integral \textbf{converges} if this limit is finite.
+  \end{definition}
+  \pause
+  \begin{itemize}
+    \item For $f \ge 0$ the sequence is increasing, so the limit exists, and it is the \textbf{same} for
+      every exhaustion.
+    \item $D_k$ can avoid a point where $f$ blows up, e.g.\ $D_k = \{\frac1k \le \norm{\vx} \le 1\}$.
+      The same works in $\R^n$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Functions of both signs}
+  If $f$ takes both signs, we require \textbf{absolute convergence}: $\iint_D |f| \dA < \infty$. Then
+  $\iint_D f = \iint_D f^+ - \iint_D f^-$, with $f^{\pm} = \max(\pm f, 0)$, and every exhaustion gives
+  this value.
+  \pause
+  \begin{example}[$f = \sin(x^2 + y^2)$ on $\R^2$]
+    Over the disc of radius $R$:
+    $\displaystyle \int_0^{2\pi} \int_0^R \sin(r^2)\, r\, dr\, d\theta = \pi\bigl(1 - \cos R^2\bigr)$.
+    \\[0.2em]
+    Along $R^2 = 2k\pi$ this is $0$; along $R^2 = (2k + 1)\pi$ it is $2\pi$. No limit.
+  \end{example}
+  \pause
+  {\small As with series (Lecture 3): absolutely convergent sums can be taken in any order;
+  conditionally convergent ones depend on the order --- here, on the shape of the regions.\par}
+\end{frame}
+
+\begin{frame}{Power laws: when do they converge?}
+  In polar coordinates the radial integral carries the factor $r$:
+  \[ \iint_{r \ge 1} \frac{dA}{r^a} = 2\pi \int_1^\infty r^{1 - a}\, dr, \qquad
+     \iint_{r \le 1} \frac{dA}{r^a} = 2\pi \int_0^1 r^{1 - a}\, dr . \]
+  \pause
+  \begin{center}
+    \begin{tabular}{lccc}
+      \toprule
+      & $\R$ & $\R^2$ & $\R^n$ \\
+      \midrule
+      $\int_{\norm{\vx} \ge 1} \norm{\vx}^{-a}$ converges iff & $a > 1$ & $a > 2$ & $a > n$ \\
+      $\int_{\norm{\vx} \le 1} \norm{\vx}^{-a}$ converges iff & $a < 1$ & $a < 2$ & $a < n$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  {\small In $\R^n$ the volume of the shell $r \le \norm{\vx} \le r + dr$ is proportional to $r^{n-1}\, dr$.\par}
+  \pause
+  \begin{itemize}
+    \item $\iint_{\R^2} \frac{dA}{(1 + x^2 + y^2)^2} = 2\pi \int_0^\infty \frac{r\, dr}{(1 + r^2)^2} = \pi$.
+    \item $\iint_{r \le 1} \frac{dA}{\sqrt{x^2 + y^2}} = 2\pi$, although the integrand is unbounded; \
+      $\iint_{r \le 1} \frac{dA}{x^2 + y^2} = \infty$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Fubini for improper integrals}
+  \begin{theorem}[Tonelli and Fubini]
+    If $f \ge 0$, or if $\iint_{\R^2} |f| \dA < \infty$, then
+    \[ \iint_{\R^2} f \dA = \int_{-\infty}^\infty \int_{-\infty}^\infty f\, dy\, dx = \int_{-\infty}^\infty \int_{-\infty}^\infty f\, dx\, dy , \]
+    and the same on any region.
+  \end{theorem}
+  \pause
+  \begin{itemize}
+    \item This justifies the first step of the Gaussian trick: $e^{-x^2 - y^2} > 0$.
+    \item Lecture 18's counterexample $\frac{x^2 - y^2}{(x^2 + y^2)^2}$ on $[0, 1]^2$: in polar coordinates
+      $|f| = \frac{|\cos 2\theta|}{r^2}$, and $\iint |f| \dA = \int\!\!\int \frac{|\cos 2\theta|}{r}\, dr\, d\theta = \infty$.
+      Not absolutely convergent, so the orders may (and do) disagree.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Application: swapping the order}
+  Compute $\displaystyle \int_0^\infty \frac{e^{-x} - e^{-2x}}{x}\, dx$.
+  \pause
+  \begin{example}[Write the integrand as an integral]
+    $\displaystyle \frac{e^{-x} - e^{-2x}}{x} = \int_1^2 e^{-xy}\, dy$. \ The function $e^{-xy}$ is positive, so by Tonelli
+    \[ \int_0^\infty \int_1^2 e^{-xy}\, dy\, dx = \int_1^2 \int_0^\infty e^{-xy}\, dx\, dy
+       = \int_1^2 \frac{dy}{y} = \ln 2 . \]
+  \end{example}
+  \pause
+  {\small The same idea, writing a number as an integral and changing the order, evaluates many
+  integrals that have no elementary antiderivative.\par}
+\end{frame}
+
+% =============================================================
+\section{Probability and geometry}
+
+\begin{frame}{Two independent normal variables}
+  If $X$, $Y$ are independent standard normal, their joint density is
+  \[ p(x, y) = \varphi(x)\,\varphi(y) = \frac{1}{2\pi} e^{-(x^2 + y^2)/2} . \]
+  It depends only on $r$: the distribution is \textbf{rotation invariant}.
+  \pause
+  \begin{itemize}
+    \item $\displaystyle P(X^2 + Y^2 \le R^2) = \int_0^{2\pi} \int_0^R \frac{1}{2\pi} e^{-r^2/2}\, r\, dr\, d\theta = 1 - e^{-R^2/2}$:
+      \ $0.393$ for $R = 1$, \ $0.865$ for $R = 2$.
+    \pause
+    \item Expected distance from the origin:
+      $\displaystyle E\bigl[\sqrt{X^2 + Y^2}\bigr] = \int_0^\infty r \cdot r\, e^{-r^2/2}\, dr = \sqrt{\frac\pi2} \approx 1.253$.
+  \end{itemize}
+  \pause
+  {\small This rotation invariance underlies the Box--Muller method for simulating normal variables,
+  and many proofs in Probability Theory and Statistics.\par}
+\end{frame}
+
+\begin{frame}{The volume of a ball in $n$ dimensions}
+  Let $V_n$ be the volume of the unit ball in $\R^n$; the ball of radius $r$ has volume $V_n r^n$.
+  \pause
+  \begin{itemize}
+    \item As a product: \ $\displaystyle \int_{\R^n} e^{-\norm{\vx}^2} \dV = \Bigl(\int_{-\infty}^\infty e^{-x^2}\, dx\Bigr)^n = \pi^{n/2}$.
+    \pause
+    \item In shells: the shell $r \le \norm{\vx} \le r + dr$ has volume $n V_n r^{n-1}\, dr$, so
+      \[ \int_{\R^n} e^{-\norm{\vx}^2} \dV = \int_0^\infty e^{-r^2}\, n V_n r^{n-1}\, dr
+         = n V_n \cdot \tfrac12 \Gamma\bigl(\tfrac n2\bigr) = V_n\, \Gamma\bigl(\tfrac n2 + 1\bigr) . \]
+  \end{itemize}
+  \pause
+  \begin{block}{Result}
+    \[ V_n = \frac{\pi^{n/2}}{\Gamma\bigl(\frac n2 + 1\bigr)} . \qquad
+       \text{Check: } V_2 = \pi, \quad V_3 = \frac{\pi^{3/2}}{\frac34\sqrt\pi} = \frac43\pi . \]
+  \end{block}
+\end{frame}
+
+\begin{frame}{Balls in high dimensions}
+  \begin{columns}[c]
+    \begin{column}{0.45\textwidth}
+      \centering
+      \begin{tabular}{rrr}
+        \toprule
+        $n$ & $V_n$ & $V_n / 2^n$ \\
+        \midrule
+        $1$  & $2$      & $1$ \\
+        $2$  & $3.1416$ & $0.785$ \\
+        $3$  & $4.1888$ & $0.524$ \\
+        $5$  & $5.2638$ & $0.164$ \\
+        $10$ & $2.5502$ & $0.0025$ \\
+        $20$ & $0.0258$ & $2.5 \cdot 10^{-8}$ \\
+        \bottomrule
+      \end{tabular}
+    \end{column}
+    \begin{column}{0.53\textwidth}
+      \begin{itemize}
+        \item $V_n$ grows up to $n = 5$, then tends to $0$: $\Gamma(\frac n2 + 1)$ grows faster than
+          $\pi^{n/2}$ (Stirling).
+        \pause
+        \item $V_n / 2^n$ is the fraction of the cube $[-1, 1]^n$ filled by the ball. In $20$
+          dimensions, a random point of the cube is almost never in the ball.
+        \pause
+        \item One face of the ``curse of dimensionality'': grids and rejection sampling fail in
+          high dimensions, and intuition from $\R^3$ misleads.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item $\int_{-\infty}^\infty e^{-x^2}\, dx = \sqrt\pi$: square it, then use polar coordinates. Hence
+      $\int e^{-ax^2} = \sqrt{\pi / a}$, the normal density, and $\Gamma(\frac12) = \sqrt\pi$.
+    \item Improper integrals of $f \ge 0$: limits over exhaustions, independent of the exhaustion.
+      Functions of both signs: require absolute convergence.
+    \item $\norm{\vx}^{-a}$ is integrable near $\infty$ iff $a > n$, near $\mathbf 0$ iff $a < n$.
+    \item Tonelli and Fubini: iterated improper integrals may be swapped for $f \ge 0$ or absolutely
+      integrable $f$.
+    \item $V_n = \pi^{n/2} / \Gamma(\frac n2 + 1)$, which tends to $0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Compute $\int_{-\infty}^\infty e^{-(x - 1)^2/8}\, dx$.
+    \item Compute $\int_0^\infty x^2 e^{-x^2}\, dx$.
+    \item Compute $\iint_{\R^2} e^{-(x^2 + 4y^2)} \dA$.
+    \item For which $p$ does $\iint_{x^2 + y^2 \ge 1} (x^2 + y^2)^{-p} \dA$ converge? Find its value.
+    \item Compute $\iint_{x^2 + y^2 \le 1} \ln(x^2 + y^2) \dA$.
+    \item Find $\Gamma(\frac52)$, and check the formula for $V_n$ with $n = 1$.
+    \item $X$, $Y$ are independent standard normal. Find $P(|Y| \le X)$.
+    \item Compute $\int_0^\infty \frac{e^{-x} - e^{-3x}}{x}\, dx$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $u = (x - 1)/(2\sqrt2)$: \ $2\sqrt2 \cdot \sqrt\pi = \sqrt{8\pi}$.
+    \item By parts, $\frac12 \int_0^\infty e^{-x^2}\, dx = \frac{\sqrt\pi}{4}$.
+    \item A product: $\sqrt\pi \cdot \sqrt{\pi / 4} = \frac\pi2$ \ (or substitute $y = v/2$).
+    \item $2\pi \int_1^\infty r^{1 - 2p}\, dr$: converges iff $p > 1$, with value $\frac{\pi}{p - 1}$.
+    \item $2\pi \int_0^1 2\ln r \cdot r\, dr = 4\pi \cdot \bigl(-\frac14\bigr) = -\pi$.
+    \item $\Gamma(\frac52) = \frac32 \cdot \frac12 \sqrt\pi = \frac34\sqrt\pi$. \ $V_1 = \sqrt\pi / \Gamma(\frac32) = 2$: the interval $[-1, 1]$.
+    \item The region $|y| \le x$ is a wedge of angle $\frac\pi2$; by rotation invariance the probability is
+      $\frac{\pi/2}{2\pi} = \frac14$.
+    \item $\int_1^3 \frac{dy}{y} = \ln 3$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 22 --- Vector fields and line integrals} (Unit 22)
+  \begin{itemize}
+    \item Vector fields: velocity, force, gradient fields
+    \item Integrating along a curve: arc length, mass of a wire, work done by a force
+    \item The fundamental theorem for line integrals, and conservative fields
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Sections 6.1--6.3.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

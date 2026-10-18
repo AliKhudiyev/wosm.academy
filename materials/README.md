@@ -41,7 +41,7 @@ TEXINPUTS=../../templates//: pdflatex lecture-01.tex     # twice, for the outlin
 Copy an existing lecture folder, rename the `.tex` file, and change the title block:
 
 ```latex
-\documentclass{wosm-slides}
+\documentclass[10pt]{wosm-slides}
 \course{MAT231-F27}{Calculus II}
 \title[L03 \textperiodcentered\ Short title]{Title}
 \subtitle{Subtitle}
@@ -55,8 +55,8 @@ Course, author, unit and semester come from the module description
 Each `\section` gets a numbered divider slide. Blocks: `definition`, `theorem`, `lemma`, `corollary`, `proposition`
 (teal), `example` (charcoal), `remark` (muted), `warning` (brick, `\begin{warning}[Common mistake]`), `proof`.
 
-The slides are 16:9 at 11 pt. A frame that is too full runs off the bottom silently in the PDF; the log reports it as
-`Overfull \vbox … too high`. Split such frames.
+The lectures use 16:9 slides at 10 pt (at 11 pt, Source Serif makes many frames too full). A frame that is too full
+runs off the bottom silently in the PDF; the log reports it as `Overfull \vbox … too high`. Split such frames.
 
 ## About `wosm.sty`
 

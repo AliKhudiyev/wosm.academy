@@ -1,0 +1,494 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 05 -- Karnaugh Maps (Unit 5)
+%  Follows Section 2.3.2 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-05
+% =============================================================
+\documentclass{wosm-slides}
+\usepackage{cs102-lectures}
+
+\title[Lecture 05 \textperiodcentered\ Karnaugh Maps]{Karnaugh Maps}
+\subtitle{Lecture 05: simplifying Boolean functions}
+
+% ---------- Helpers for this lecture --------------------------
+% Proof steps: an equation and the law that justifies it.
+\newenvironment{derivation}
+  {\begin{tabular}{@{}r@{\;}l@{\qquad}l@{}}}
+  {\end{tabular}}
+\newcommand*\by[1]{\wosmlabel{#1}}
+
+% Empty maps with their minterm numbers.
+% Three variables: rows xy, column z, as in the book.
+\newenvironment{kmapthree}
+  {\begin{kmap}{4}{2}{xy}{z}{00,01,11,10}{0,1}}
+  {\end{kmap}}
+\newcommand*\threeindices{%
+  \kindices{0}{0,1}\kindices{1}{2,3}\kindices{2}{6,7}\kindices{3}{4,5}}
+% Four variables: rows wx, columns yz.
+\newenvironment{kmapfour}
+  {\begin{kmap}{4}{4}{wx}{yz}{00,01,11,10}{00,01,11,10}}
+  {\end{kmap}}
+\newcommand*\fourindices{%
+  \kindices{0}{0,1,3,2}\kindices{1}{4,5,7,6}%
+  \kindices{2}{12,13,15,14}\kindices{3}{8,9,11,10}}
+
+% Group colours: the second and third group, and a group we do not need.
+\colorlet{group2}{wosm-brick}
+\colorlet{group3}{wosm-text}
+\tikzset{spare/.style={wosm-muted, dashed}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Why simplify?}
+
+\begin{frame}{Fewer gates}
+  The circuit below computes $f(x) = x'''$:
+  \begin{center}
+    \begin{tikzpicture}[gates]
+      \node (x) at (0,0) {$x$};
+      \node[not gate] (n1) at (1.2,0) {};
+      \node[not gate] (n2) at (2.6,0) {};
+      \node[not gate] (n3) at (4.0,0) {};
+      \node (f) at (5.3,0) {$f$};
+      \draw[wire] (x) -- (n1.input) (n1.output) -- (n2.input)
+        (n2.output) -- (n3.input) (n3.output) -- (f);
+    \end{tikzpicture}
+  \end{center}
+
+  Since $x'' = x$ (involution), $f(x) = x'$: one NOT gate does the same job.
+
+  \medskip
+  \begin{itemize}
+    \item Both circuits give the same output, but the long one needs three gates
+      instead of one: it costs more, and the signal is slower to pass through it.
+    \item Fewer and smaller gates mean cheaper and faster circuits. Minimising
+      Boolean functions is worth the effort.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Canonical forms are long}
+  \begin{itemize}
+    \item A \alert{literal} is a variable or its complement: $x$, $x'$, \dots
+    \item From Lecture 04:
+      $\sum m(1, 3, 5, 6, 7) = x'y'z + x'yz + xy'z + xyz' + xyz$ has 5 products and
+      15 literals.
+    \item The same function is $xy + z$: 2 products and 3 literals.
+  \end{itemize}
+
+  \medskip
+  The laws of Lecture 03 get you there, but you have to see which law to apply
+  next. A \alert{Karnaugh map} (K-map) turns the search into a picture.
+
+  \medskip
+  \wosmlabel{Introduced by Maurice Karnaugh in 1953.}
+\end{frame}
+
+% =============================================================
+\section{The Karnaugh map}
+
+\begin{frame}{Neighbours combine}
+  Two minterms that differ in exactly one variable combine into one shorter
+  product:
+
+  \medskip
+  \small
+  \begin{derivation}
+    $xyz' + xyz$ & $= xy(z' + z) = xy \cdot 1 = xy$
+      & \by{distributivity, complement, identity} \\
+  \end{derivation}
+
+  \medskip
+  \normalsize
+  And two such pairs, differing in one more variable, combine again:
+  \[ x'y'z + x'yz + xy'z + xyz = x'z + xz = z . \]
+
+  \begin{block}{The idea}
+    Draw the truth table as a grid in which cells next to each other differ in
+    exactly one input bit. Then the products that combine are the cells that sit
+    together.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Gray code}
+  To order the rows so that neighbours differ in one bit, do not count in binary:
+  \begin{center}
+    \begin{tabular}{@{}lccccc@{}}
+      binary order & 00 & 01 & 10 & 11 & \\
+      bits that change & & 1 & \alert{2} & 1 & \alert{2} back to 00 \\
+      \midrule
+      Gray code & 00 & 01 & 11 & 10 & \\
+      bits that change & & 1 & 1 & 1 & 1 back to 00 \\
+    \end{tabular}
+  \end{center}
+
+  \begin{definition}[Gray code]
+    A \emph{Gray code} lists the $n$-bit numbers so that each one differs from the
+    next in a single bit. For two bits: 00, 01, 11, 10.
+  \end{definition}
+
+  The last code also differs from the first in one bit: the order wraps around.
+\end{frame}
+
+\begin{frame}{A map of three variables}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmapthree}
+        \kshade{1}{0}\kshade{3}{0}\kshade{2}{1}
+        \threeindices
+        \node[font=\small] at (0.5,-2.5) {$\star$};
+      \end{kmapthree}
+    \column{0.6\textwidth}
+      \begin{itemize}
+        \item Rows: $xy$ in Gray-code order. Columns: $z$.
+        \item Each cell is one row of the truth table; the small number is its
+          minterm number.
+        \item The cell $\star$ is input 110. Its neighbours, shaded, are 010, 100
+          and 111: each differs from 110 in one bit.
+        \item The map \alert{wraps around}: the top row (00) and the bottom row
+          (10) are neighbours too.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Filling in the map}
+  Simplify $f(x, y, z) = (x + y + z)(x + y' + z)(x' + y' + z)(x' + y' + z')$.
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmapthree}
+        \threeindices
+        \only<1>{\kmaprow{0}{0,}\kmaprow{1}{0,}\kmaprow{2}{0,0}}
+        \only<2->{\kmaprow{0}{0,1}\kmaprow{1}{0,1}\kmaprow{2}{0,0}\kmaprow{3}{1,1}}
+      \end{kmapthree}
+    \column{0.6\textwidth}
+      \begin{enumerate}
+        \item The four maxterms are $M_0$, $M_2$, $M_6$ and $M_7$: write a 0 in
+          those cells.
+        \item<2-> Every other cell is a 1: $f = \sum m(1, 3, 4, 5)$.
+      \end{enumerate}
+  \end{columns}
+
+  \medskip
+  \uncover<2->{From a truth table, copy each row's output into its cell. Mind the
+  order of the rows: 00, 01, \alert{11, 10}.}
+\end{frame}
+
+% =============================================================
+\section{Grouping}
+
+\begin{frame}{Groups}
+  \begin{block}{Rules for groups}
+    \begin{itemize}
+      \item A group contains only 1s.
+      \item It is a rectangle of 1, 2, 4, 8, \dots{} cells: a power of two.
+      \item It may wrap around the edges of the map.
+      \item Groups may overlap.
+    \end{itemize}
+  \end{block}
+
+  \begin{itemize}
+    \item Make every group \alert{as large as possible}, and use \alert{as few
+      groups as possible} to cover all the 1s.
+    \item Each group becomes one product. Keep the variables that stay the same in
+      all its cells (as they are if 1, complemented if 0) and drop the others.
+    \item In a map of $n$ variables, a group of $2^k$ cells has $n - k$ literals.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Reading the groups}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmapthree}
+        \threeindices
+        \kmaprow{0}{0,1}\kmaprow{1}{0,1}\kmaprow{2}{0,0}\kmaprow{3}{1,1}
+        \kgroup{0}{1}{1}{1}
+        \kgroup[group2]{3}{0}{3}{1}
+      \end{kmapthree}
+    \column{0.6\textwidth}
+      \begin{itemize}
+        \item \textcolor{wosm-accent}{Teal}, cells 001 and 011: $x = 0$ and $z = 1$
+          stay the same, $y$ changes. Product: $x'z$.
+        \item \textcolor{group2}{Brick}, cells 100 and 101: $x = 1$ and $y = 0$ stay
+          the same, $z$ changes. Product: $xy'$.
+      \end{itemize}
+
+      \medskip
+      \[ f(x, y, z) = xy' + x'z \]
+      \wosmlabel{4 products and 12 literals became 2 and 4.}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Prime and essential prime implicants}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmapthree}
+        \threeindices
+        \kmaprow{0}{0,1}\kmaprow{1}{0,1}\kmaprow{2}{0,0}\kmaprow{3}{1,1}
+        \kgroup{0}{1}{1}{1}
+        \kgroup[group2]{3}{0}{3}{1}
+        \kgroup[spare]{-1}{1}{0}{1}\kgroup[spare]{3}{1}{4}{1}
+      \end{kmapthree}
+    \column{0.6\textwidth}
+      \small
+      \begin{definition}[Prime implicant]
+        A group of 1s that cannot be made any larger.
+      \end{definition}
+      \begin{definition}[Essential prime implicant]
+        A prime implicant that covers a 1 which no other prime implicant covers.
+      \end{definition}
+      The dashed group, cells 001 and 101 (wrapping around), is $y'z$. It is prime,
+      but not essential: both its 1s are covered already.
+  \end{columns}
+
+  \medskip
+  \wosmlabel{Coming back: $xy' + x'z + y'z = xy' + x'z$ is the consensus theorem of
+  Lecture 03, and $y'z$ is the consensus term.}
+\end{frame}
+
+\begin{frame}{The procedure}
+  \begin{enumerate}
+    \item Fill in the map from the truth table or the canonical form.
+    \item Find the prime implicants: the largest groups of 1s.
+    \item Take every essential prime implicant.
+    \item If any 1s are still uncovered, cover them with as few further prime
+      implicants as possible.
+    \item Write one product per group, and add them up.
+  \end{enumerate}
+
+  \bigskip
+  \begin{remark}
+    The result is a minimal sum of products. It need not be unique: sometimes two
+    different choices in step 4 are equally small.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Back to Lecture 04}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmapthree}
+        \threeindices
+        \kmaprow{0}{0,1}\kmaprow{1}{0,1}\kmaprow{2}{1,1}\kmaprow{3}{0,1}
+        \kgroup{0}{1}{3}{1}
+        \kgroup[group2]{2}{0}{2}{1}
+      \end{kmapthree}
+    \column{0.6\textwidth}
+      $f = \sum m(1, 3, 5, 6, 7)$.
+      \begin{itemize}
+        \item \textcolor{wosm-accent}{Teal}: the whole column $z = 1$, four cells.
+          Only $z$ stays the same: $z$.
+        \item \textcolor{group2}{Brick}: row 11, two cells: $xy$. It overlaps the
+          teal group, and that is fine.
+      \end{itemize}
+      \medskip
+      \[ f(x, y, z) = xy + z \]
+      \wosmlabel{The expression we started from in Lecture 04.}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Four variables}
+
+\begin{frame}{A map of four variables}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{kmapfour}
+        \fourindices
+      \end{kmapfour}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item Rows: $wx$; columns: $yz$; both in Gray-code order.
+        \item Cell number $= 4 \times$ row value $+$ column value: row 11, column 01
+          is $m_{13}$.
+        \item The map wraps around both ways: top and bottom rows are neighbours,
+          and so are the left and right columns.
+        \item So the four \alert{corners} are neighbours, and can form one group.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Example: wrap-around}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{kmapfour}
+        \fourindices
+        \kmaprow{0}{0,1,1,0}\kmaprow{1}{1,1,0,0}
+        \kmaprow{2}{1,1,0,0}\kmaprow{3}{0,1,1,0}
+        \kgroup{-1}{1}{0}{2}\kgroup{3}{1}{4}{2}
+        \kgroup[group2]{1}{0}{2}{1}
+        \only<2->{\kgroup[spare]{0}{1}{3}{1}}
+      \end{kmapfour}
+    \column{0.54\textwidth}
+      $f = \sum m(1, 3, 4, 5, 9, 11, 12, 13)$.
+      \begin{itemize}
+        \item \textcolor{wosm-accent}{Teal}, wrapping top to bottom: $x = 0$,
+          $z = 1$. Product: $x'z$.
+        \item \textcolor{group2}{Brick}: $x = 1$, $y = 0$. Product: $xy'$.
+        \item<2-> Dashed: the column $yz = 01$ is $y'z$, prime but not essential.
+      \end{itemize}
+      \medskip
+      \[ f(w, x, y, z) = x'z + xy' \]
+      \wosmlabel{Each group has 4 cells: $4 - 2 = 2$ literals.}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Example: the four corners}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{kmapfour}
+        \fourindices
+        \kmaprow{0}{1,0,0,1}\kmaprow{1}{0,1,1,0}
+        \kmaprow{2}{0,1,1,0}\kmaprow{3}{1,0,0,1}
+        \kgroup{-1}{-1}{0}{0}\kgroup{-1}{3}{0}{4}
+        \kgroup{3}{-1}{4}{0}\kgroup{3}{3}{4}{4}
+        \kgroup[group2]{1}{1}{2}{2}
+      \end{kmapfour}
+    \column{0.54\textwidth}
+      $f = \sum m(0, 2, 5, 7, 8, 10, 13, 15)$.
+      \begin{itemize}
+        \item \textcolor{wosm-accent}{Teal}, the four corners: $x = 0$, $z = 0$.
+          Product: $x'z'$.
+        \item \textcolor{group2}{Brick}, the centre: $x = 1$, $z = 1$. Product:
+          $xz$.
+      \end{itemize}
+      \medskip
+      \[ f(w, x, y, z) = x'z' + xz \]
+      \wosmlabel{$f$ is 1 when $x$ and $z$ are equal; $w$ and $y$ do not matter.}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Don't cares and products of sums}
+
+\begin{frame}{Don't-care conditions}
+  Sometimes some inputs never occur, or their output does not matter. Mark them X:
+  each X may be grouped as a 1 or left out, whichever makes the groups larger.
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{kmapfour}
+        \fourindices
+        \kmaprow{0}{0,0,0,0}\kmaprow{1}{0,1,1,1}
+        \kmaprow{2}{X,X,X,X}\kmaprow{3}{1,1,X,X}
+        \kgroup[group3]{2}{0}{3}{3}
+        \kgroup{1}{1}{2}{2}
+        \kgroup[group2]{1}{2}{2}{3}
+      \end{kmapfour}
+    \column{0.54\textwidth}
+      \small
+      The input $wxyz$ is a decimal digit, 0 to 9, in binary; inputs 10 to 15 never
+      occur. $f$ is 1 when the digit is 5 or more.
+      \begin{itemize}
+        \item With the X's: $f = w + xz + xy$.
+        \item Without them: $f = w'xz + w'xy + wx'y'$, three products of three
+          literals.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Products of sums from a map}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmapthree}
+        \threeindices
+        \kmaprow{0}{0,1}\kmaprow{1}{0,1}\kmaprow{2}{0,0}\kmaprow{3}{1,1}
+        \kgroup{0}{0}{1}{0}
+        \kgroup[group2]{2}{0}{2}{1}
+      \end{kmapthree}
+    \column{0.6\textwidth}
+      Group the \alert{0s} instead. Each group becomes one sum: keep the variables
+      that stay the same, as they are if 0 and complemented if 1.
+      \begin{itemize}
+        \item \textcolor{wosm-accent}{Teal}, cells 000 and 010: $x = 0$, $z = 0$.
+          Sum: $x + z$.
+        \item \textcolor{group2}{Brick}, cells 110 and 111: $x = 1$, $y = 1$. Sum:
+          $x' + y'$.
+      \end{itemize}
+      \[ f = (x + z)(x' + y') \]
+  \end{columns}
+
+  \medskip
+  \wosmlabel{Multiply out: $xy' + x'z + y'z$, and the consensus term $y'z$ drops: the
+  same $f = xy' + x'z$ as before.}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{kmapfour}
+        \fourindices
+        \kmaprow{0}{1,1,0,1}\kmaprow{1}{0,1,0,0}
+        \kmaprow{2}{0,0,0,0}\kmaprow{3}{1,1,0,1}
+        \only<2->{%
+          \kgroup{-1}{-1}{0}{0}\kgroup{-1}{3}{0}{4}
+          \kgroup{3}{-1}{4}{0}\kgroup{3}{3}{4}{4}
+          \kgroup[group2]{-1}{0}{0}{1}\kgroup[group2]{3}{0}{4}{1}
+          \kgroup[group3]{0}{1}{1}{1}}
+      \end{kmapfour}
+    \column{0.54\textwidth}
+      \begin{enumerate}
+        \item Minimise $f = \sum m(0, 1, 2, 5, 8, 9, 10)$.\par
+          \uncover<2->{\small $f = x'z' + x'y' + w'y'z$: the corners, a wrapped
+          group of four, and a pair.}
+        \item Minimise the majority function of Lecture 04, $\sum m(3, 5, 6, 7)$.\par
+          \uncover<3->{\small $xy + xz + yz$: three pairs, all essential.}
+      \end{enumerate}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Minimal expressions mean fewer gates: cheaper and faster circuits.
+    \item A K-map is a truth table arranged in Gray-code order, so that neighbouring
+      cells differ in one bit. It wraps around at the edges.
+    \item Group the 1s in rectangles of $2^k$ cells, as large and as few as
+      possible; each group is one product of $n - k$ literals.
+    \item Essential prime implicants are always needed; others only to cover what
+      is left.
+    \item Don't-cares (X) may be used as 1s. Grouping the 0s gives a product of sums.
+    \item K-maps work well up to four variables. Beyond that, computers minimise
+      functions, with methods such as Quine--McCluskey.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~2.3.2 of the book, \emph{Boolean Function Simplification with
+      Karnaugh Maps}.
+    \item Minimise $\sum m(0, 2, 4, 5, 6, 7)$ as a sum of products and as a product
+      of sums.
+    \item Minimise $\sum m(0, 1, 5, 7, 13, 15)$ in four variables, and find a
+      prime implicant you do not need.
+    \item Open Logisim-evolution and find the AND, OR and NOT gates.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{6}}
+    Logic gates: NOT, AND, OR, XOR, NAND, NOR, XNOR, and universal gate sets.
+  \end{block}
+\end{frame}
+
+\end{document}

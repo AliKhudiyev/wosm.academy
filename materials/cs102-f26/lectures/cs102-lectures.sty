@@ -27,4 +27,54 @@
   edgelabel/.style={font=\scriptsize, text=wosm-muted},
 }
 
+% ---------- Logic gates ---------------------------------------
+% \begin{tikzpicture}[gates] \node[and gate, inputs=nnn] (g) {}; ...
+\usetikzlibrary{circuits.logic.US}
+\tikzset{
+  gates/.style={circuit logic US, large circuit symbols, line width=0.6pt,
+    draw=wosm-text,
+    every circuit symbol/.append style={draw=wosm-text, line width=0.6pt}},
+  wire/.style={draw=wosm-text, line width=0.6pt},
+}
+
+% ---------- Karnaugh maps -------------------------------------
+% \begin{kmap}{<rows>}{<columns>}{<row variables>}{<column variables>}
+%             {<row labels>}{<column labels>}
+%   \kshade{<row>}{<column>}            shade a cell (before the values)
+%   \kmaprow{<row>}{<values, left to right>}
+%   \kindices{<row>}{<minterm numbers, left to right>}
+%   \kgroup[<colour>]{<top row>}{<left column>}{<bottom row>}{<right column>}
+% \end{kmap}
+% Rows and columns count from 0 at the top left. A group may run past the
+% edge of the map (row -1, column 4, ...) to show wrap-around: it is cut
+% off at the edge.
+\newcommand*\kmap@R{4}
+\newcommand*\kmap@C{2}
+\newenvironment{kmap}[6]{%
+  \def\kmap@R{#1}\def\kmap@C{#2}%
+  \begin{tikzpicture}[x=0.72cm, y=0.72cm, baseline=(current bounding box.center)]
+    \draw[wosm-text, line width=0.5pt, step=1] (0,-#1) grid (#2,0);
+    \draw[wosm-text, line width=0.5pt] (0,0) -- (-1,1);
+    \node[font=\scriptsize] at (-0.68,0.24) {$#3$};
+    \node[font=\scriptsize] at (-0.24,0.7) {$#4$};
+    \foreach \l [count=\i from 0] in {#5}
+      \node[font=\ttfamily\footnotesize] at (-0.45,-\i-0.5) {\l};
+    \foreach \l [count=\i from 0] in {#6}
+      \node[font=\ttfamily\footnotesize] at (\i+0.5,0.4) {\l};
+}{\end{tikzpicture}}
+\newcommand*\kshade[2]{%
+  \fill[wosm-rule] ({#2+0.04},{-(#1)-0.04}) rectangle ++(0.92,-0.92);}
+\newcommand*\kmaprow[2]{%
+  \foreach \v [count=\c from 0] in {#2} \node at (\c+0.5,{-(#1)-0.5}) {\v};}
+\newcommand*\kindices[2]{%
+  \foreach \v [count=\c from 0] in {#2}
+    \node[font=\tiny, text=wosm-muted, anchor=south east, inner sep=1.5pt]
+      at (\c+1,{-(#1)-1}) {\v};}
+\newcommand*\kgroup[5][wosm-accent]{%
+  \begin{scope}
+    \clip (-0.08,0.08) rectangle ({\kmap@C+0.08},{-\kmap@R-0.08});
+    \draw[#1, line width=1.2pt, rounded corners=5pt]
+      ({#3+0.12},{-(#2)-0.12}) rectangle ({#5+0.88},{-(#4)-0.88});
+  \end{scope}}
+
 \endinput

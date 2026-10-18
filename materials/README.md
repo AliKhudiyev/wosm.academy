@@ -30,5 +30,8 @@ committed. Files whose name starts with `_` are skipped.
 | CS102-F26 | `lecture-01.tex` — The Essence of Computing | 1 | Chapter 1 |
 | CS102-F26 | `lecture-02.tex` — Numeral Systems | 2 | Section 2.1 |
 | CS102-F26 | `lecture-03.tex` — Boolean Algebra | 3 | Section 2.2 |
+| CS102-F26 | `lecture-04.tex` — Boolean Functions | 4 | Sections 2.3, 2.3.1 |
+| CS102-F26 | `lecture-05.tex` — Karnaugh Maps | 5 | Section 2.3.2 |
 
-CS102-F26 lectures start with `\usepackage{cs102-lectures}` (`cs102-f26/lectures/cs102-lectures.sty`).
+CS102-F26 lectures start with `\usepackage{cs102-lectures}` (`cs102-f26/lectures/cs102-lectures.sty`), which also
+has helpers for logic gates (`gates` TikZ style) and Karnaugh maps (`kmap` environment).

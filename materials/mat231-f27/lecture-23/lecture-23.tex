@@ -1,0 +1,470 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 23
+%  Unit 23: First-order ODEs: separable and linear equations
+%
+%  Build from the repository root:   npm run materials -- lecture-23
+%  This writes lecture-23.pdf (slides, with overlays) and
+%  lecture-23-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\R}{\mathbb{R}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L23 \textperiodcentered\ First-order differential equations]{First-order differential equations}
+\subtitle{Separable and linear equations}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 23\enspace\textperiodcentered\enspace Unit 23\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item Vector fields; gradient fields; flow lines $\mathbf r' = \mathbf F(\mathbf r)$.
+    \item Line integrals $\int_C f\, ds$ and $\int_C \mathbf F \cdot d\mathbf r$; the fundamental theorem
+      $\int_C \nabla f \cdot d\mathbf r = f(B) - f(A)$.
+  \end{itemize}
+  \vskip0.6em
+  Flow lines are solutions of differential equations. The last three units of the module are about
+  such equations: today one unknown function and its first derivative; then second derivatives
+  (Lecture 24) and systems (Lecture 25).
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: Strang \& Herman, \emph{Calculus, Volume 2}, Sections 4.1--4.5.\par}
+\end{frame}
+
+% =============================================================
+\section{Differential equations}
+
+\begin{frame}{What is a differential equation?}
+  An equation relating an unknown function and its derivatives. Its \textbf{order} is the highest
+  derivative that appears.
+  \pause
+  \begin{itemize}
+    \item $y' = ky$: \ growth or decay at a rate proportional to the amount.
+    \item $P' = rP\,(1 - P/K)$: \ growth limited by a capacity $K$ (the logistic equation).
+    \item $T' = -k\,(T - A)$: \ Newton's law of cooling, in a room at temperature $A$.
+    \item $m\,x'' = -kx$: \ a mass on a spring (second order, Lecture 24).
+    \item $\mathbf x' = A\mathbf x$: \ a system of equations (Lecture 25).
+  \end{itemize}
+  \pause
+  A \textbf{solution} on an interval $I$ is a differentiable function that satisfies the equation at
+  every point of $I$. Equations with one independent variable are \textbf{ordinary} (ODEs); with
+  several, \textbf{partial} (PDEs).
+\end{frame}
+
+\begin{frame}{Initial value problems}
+  A first-order \textbf{initial value problem}: \ $y' = f(t, y)$, \ $y(t_0) = y_0$.
+  \pause
+  \begin{theorem}[Existence and uniqueness]
+    If $f$ and $\partial f / \partial y$ are continuous near $(t_0, y_0)$, the problem has exactly one
+    solution on some interval around $t_0$.
+  \end{theorem}
+  \pause
+  \begin{itemize}
+    \item \textbf{Non-uniqueness} without the hypothesis: $y' = 3y^{2/3}$, $y(0) = 0$ has the solutions
+      $y = 0$ and $y = t^3$. Here $\partial f/\partial y = 2y^{-1/3}$ blows up at $y = 0$.
+    \item \textbf{Only on some interval}: $y' = y^2$, $y(0) = 1$ has the solution $y = \frac{1}{1 - t}$,
+      which blows up at $t = 1$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Direction fields}
+  \begin{columns}[c]
+    \begin{column}{0.48\textwidth}
+      At each point $(t, y)$, the equation $y' = f(t, y)$ prescribes a \textbf{slope}. Draw short
+      segments with these slopes: solutions are the curves tangent to them.
+      \pause
+      \vskip0.4em
+      For $y' = y(1 - y)$:
+      \begin{itemize}
+        \item $y = 0$ and $y = 1$ are constant solutions (\textbf{equilibria});
+        \item solutions starting between them rise towards $1$;
+        \item above $1$ they fall towards $1$; below $0$ they fall away.
+      \end{itemize}
+      {\small $y = 1$ is \textbf{stable}, $y = 0$ is \textbf{unstable}.\par}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{scope}
+          \clip (0,-1.0) rectangle (5.1,3.3);
+          \draw[wosm-muted] (0.116,-0.673) -- (0.309,-0.927);
+          \draw[wosm-muted] (0.073,-0.321) -- (0.352,-0.479);
+          \draw[wosm-muted] (0.052,0.000) -- (0.372,0.000);
+          \draw[wosm-muted] (0.063,0.344) -- (0.362,0.456);
+          \draw[wosm-muted] (0.073,0.721) -- (0.352,0.879);
+          \draw[wosm-muted] (0.073,1.121) -- (0.352,1.279);
+          \draw[wosm-muted] (0.063,1.544) -- (0.362,1.656);
+          \draw[wosm-muted] (0.052,2.000) -- (0.372,2.000);
+          \draw[wosm-muted] (0.073,2.479) -- (0.352,2.321);
+          \draw[wosm-muted] (0.116,2.927) -- (0.309,2.673);
+          \draw[wosm-muted] (0.148,3.346) -- (0.277,3.054);
+          \draw[wosm-muted] (0.541,-0.673) -- (0.734,-0.927);
+          \draw[wosm-muted] (0.498,-0.321) -- (0.777,-0.479);
+          \draw[wosm-muted] (0.477,0.000) -- (0.797,0.000);
+          \draw[wosm-muted] (0.488,0.344) -- (0.787,0.456);
+          \draw[wosm-muted] (0.498,0.721) -- (0.777,0.879);
+          \draw[wosm-muted] (0.498,1.121) -- (0.777,1.279);
+          \draw[wosm-muted] (0.488,1.544) -- (0.787,1.656);
+          \draw[wosm-muted] (0.477,2.000) -- (0.797,2.000);
+          \draw[wosm-muted] (0.498,2.479) -- (0.777,2.321);
+          \draw[wosm-muted] (0.541,2.927) -- (0.734,2.673);
+          \draw[wosm-muted] (0.573,3.346) -- (0.702,3.054);
+          \draw[wosm-muted] (0.966,-0.673) -- (1.159,-0.927);
+          \draw[wosm-muted] (0.923,-0.321) -- (1.202,-0.479);
+          \draw[wosm-muted] (0.902,0.000) -- (1.222,0.000);
+          \draw[wosm-muted] (0.913,0.344) -- (1.212,0.456);
+          \draw[wosm-muted] (0.923,0.721) -- (1.202,0.879);
+          \draw[wosm-muted] (0.923,1.121) -- (1.202,1.279);
+          \draw[wosm-muted] (0.913,1.544) -- (1.212,1.656);
+          \draw[wosm-muted] (0.902,2.000) -- (1.222,2.000);
+          \draw[wosm-muted] (0.923,2.479) -- (1.202,2.321);
+          \draw[wosm-muted] (0.966,2.927) -- (1.159,2.673);
+          \draw[wosm-muted] (0.998,3.346) -- (1.127,3.054);
+          \draw[wosm-muted] (1.391,-0.673) -- (1.584,-0.927);
+          \draw[wosm-muted] (1.348,-0.321) -- (1.627,-0.479);
+          \draw[wosm-muted] (1.328,0.000) -- (1.647,0.000);
+          \draw[wosm-muted] (1.338,0.344) -- (1.637,0.456);
+          \draw[wosm-muted] (1.348,0.721) -- (1.627,0.879);
+          \draw[wosm-muted] (1.348,1.121) -- (1.627,1.279);
+          \draw[wosm-muted] (1.338,1.544) -- (1.637,1.656);
+          \draw[wosm-muted] (1.328,2.000) -- (1.647,2.000);
+          \draw[wosm-muted] (1.348,2.479) -- (1.627,2.321);
+          \draw[wosm-muted] (1.391,2.927) -- (1.584,2.673);
+          \draw[wosm-muted] (1.423,3.346) -- (1.552,3.054);
+          \draw[wosm-muted] (1.816,-0.673) -- (2.009,-0.927);
+          \draw[wosm-muted] (1.773,-0.321) -- (2.052,-0.479);
+          \draw[wosm-muted] (1.752,0.000) -- (2.072,0.000);
+          \draw[wosm-muted] (1.763,0.344) -- (2.062,0.456);
+          \draw[wosm-muted] (1.773,0.721) -- (2.052,0.879);
+          \draw[wosm-muted] (1.773,1.121) -- (2.052,1.279);
+          \draw[wosm-muted] (1.763,1.544) -- (2.062,1.656);
+          \draw[wosm-muted] (1.752,2.000) -- (2.072,2.000);
+          \draw[wosm-muted] (1.773,2.479) -- (2.052,2.321);
+          \draw[wosm-muted] (1.816,2.927) -- (2.009,2.673);
+          \draw[wosm-muted] (1.848,3.346) -- (1.977,3.054);
+          \draw[wosm-muted] (2.241,-0.673) -- (2.434,-0.927);
+          \draw[wosm-muted] (2.198,-0.321) -- (2.477,-0.479);
+          \draw[wosm-muted] (2.177,0.000) -- (2.498,0.000);
+          \draw[wosm-muted] (2.188,0.344) -- (2.487,0.456);
+          \draw[wosm-muted] (2.198,0.721) -- (2.477,0.879);
+          \draw[wosm-muted] (2.198,1.121) -- (2.477,1.279);
+          \draw[wosm-muted] (2.188,1.544) -- (2.487,1.656);
+          \draw[wosm-muted] (2.177,2.000) -- (2.498,2.000);
+          \draw[wosm-muted] (2.198,2.479) -- (2.477,2.321);
+          \draw[wosm-muted] (2.241,2.927) -- (2.434,2.673);
+          \draw[wosm-muted] (2.273,3.346) -- (2.402,3.054);
+          \draw[wosm-muted] (2.666,-0.673) -- (2.859,-0.927);
+          \draw[wosm-muted] (2.623,-0.321) -- (2.902,-0.479);
+          \draw[wosm-muted] (2.602,0.000) -- (2.922,0.000);
+          \draw[wosm-muted] (2.613,0.344) -- (2.912,0.456);
+          \draw[wosm-muted] (2.623,0.721) -- (2.902,0.879);
+          \draw[wosm-muted] (2.623,1.121) -- (2.902,1.279);
+          \draw[wosm-muted] (2.613,1.544) -- (2.912,1.656);
+          \draw[wosm-muted] (2.602,2.000) -- (2.922,2.000);
+          \draw[wosm-muted] (2.623,2.479) -- (2.902,2.321);
+          \draw[wosm-muted] (2.666,2.927) -- (2.859,2.673);
+          \draw[wosm-muted] (2.698,3.346) -- (2.827,3.054);
+          \draw[wosm-muted] (3.091,-0.673) -- (3.284,-0.927);
+          \draw[wosm-muted] (3.048,-0.321) -- (3.327,-0.479);
+          \draw[wosm-muted] (3.027,0.000) -- (3.348,0.000);
+          \draw[wosm-muted] (3.038,0.344) -- (3.337,0.456);
+          \draw[wosm-muted] (3.048,0.721) -- (3.327,0.879);
+          \draw[wosm-muted] (3.048,1.121) -- (3.327,1.279);
+          \draw[wosm-muted] (3.038,1.544) -- (3.337,1.656);
+          \draw[wosm-muted] (3.027,2.000) -- (3.348,2.000);
+          \draw[wosm-muted] (3.048,2.479) -- (3.327,2.321);
+          \draw[wosm-muted] (3.091,2.927) -- (3.284,2.673);
+          \draw[wosm-muted] (3.123,3.346) -- (3.252,3.054);
+          \draw[wosm-muted] (3.516,-0.673) -- (3.709,-0.927);
+          \draw[wosm-muted] (3.473,-0.321) -- (3.752,-0.479);
+          \draw[wosm-muted] (3.452,0.000) -- (3.772,0.000);
+          \draw[wosm-muted] (3.463,0.344) -- (3.762,0.456);
+          \draw[wosm-muted] (3.473,0.721) -- (3.752,0.879);
+          \draw[wosm-muted] (3.473,1.121) -- (3.752,1.279);
+          \draw[wosm-muted] (3.463,1.544) -- (3.762,1.656);
+          \draw[wosm-muted] (3.452,2.000) -- (3.772,2.000);
+          \draw[wosm-muted] (3.473,2.479) -- (3.752,2.321);
+          \draw[wosm-muted] (3.516,2.927) -- (3.709,2.673);
+          \draw[wosm-muted] (3.548,3.346) -- (3.677,3.054);
+          \draw[wosm-muted] (3.941,-0.673) -- (4.134,-0.927);
+          \draw[wosm-muted] (3.898,-0.321) -- (4.177,-0.479);
+          \draw[wosm-muted] (3.877,0.000) -- (4.197,0.000);
+          \draw[wosm-muted] (3.888,0.344) -- (4.187,0.456);
+          \draw[wosm-muted] (3.898,0.721) -- (4.177,0.879);
+          \draw[wosm-muted] (3.898,1.121) -- (4.177,1.279);
+          \draw[wosm-muted] (3.888,1.544) -- (4.187,1.656);
+          \draw[wosm-muted] (3.877,2.000) -- (4.197,2.000);
+          \draw[wosm-muted] (3.898,2.479) -- (4.177,2.321);
+          \draw[wosm-muted] (3.941,2.927) -- (4.134,2.673);
+          \draw[wosm-muted] (3.973,3.346) -- (4.102,3.054);
+          \draw[wosm-muted] (4.366,-0.673) -- (4.559,-0.927);
+          \draw[wosm-muted] (4.323,-0.321) -- (4.602,-0.479);
+          \draw[wosm-muted] (4.302,0.000) -- (4.622,0.000);
+          \draw[wosm-muted] (4.313,0.344) -- (4.612,0.456);
+          \draw[wosm-muted] (4.323,0.721) -- (4.602,0.879);
+          \draw[wosm-muted] (4.323,1.121) -- (4.602,1.279);
+          \draw[wosm-muted] (4.313,1.544) -- (4.612,1.656);
+          \draw[wosm-muted] (4.302,2.000) -- (4.622,2.000);
+          \draw[wosm-muted] (4.323,2.479) -- (4.602,2.321);
+          \draw[wosm-muted] (4.366,2.927) -- (4.559,2.673);
+          \draw[wosm-muted] (4.398,3.346) -- (4.527,3.054);
+          \draw[wosm-muted] (4.791,-0.673) -- (4.984,-0.927);
+          \draw[wosm-muted] (4.748,-0.321) -- (5.027,-0.479);
+          \draw[wosm-muted] (4.728,0.000) -- (5.048,0.000);
+          \draw[wosm-muted] (4.738,0.344) -- (5.037,0.456);
+          \draw[wosm-muted] (4.748,0.721) -- (5.027,0.879);
+          \draw[wosm-muted] (4.748,1.121) -- (5.027,1.279);
+          \draw[wosm-muted] (4.738,1.544) -- (5.037,1.656);
+          \draw[wosm-muted] (4.728,2.000) -- (5.048,2.000);
+          \draw[wosm-muted] (4.748,2.479) -- (5.027,2.321);
+          \draw[wosm-muted] (4.791,2.927) -- (4.984,2.673);
+          \draw[wosm-muted] (4.823,3.346) -- (4.952,3.054);
+          \draw[wosm-accent, thick] plot coordinates {(0.000,0.100) (0.043,0.105) (0.086,0.110) (0.129,0.115) (0.171,0.121) (0.214,0.127) (0.257,0.133) (0.300,0.139) (0.343,0.146) (0.386,0.153) (0.429,0.160) (0.471,0.168) (0.514,0.176) (0.557,0.184) (0.600,0.193) (0.643,0.202) (0.686,0.211) (0.729,0.221) (0.771,0.231) (0.814,0.241) (0.857,0.252) (0.900,0.263) (0.943,0.275) (0.986,0.287) (1.029,0.300) (1.071,0.313) (1.114,0.327) (1.157,0.341) (1.200,0.355) (1.243,0.370) (1.286,0.386) (1.329,0.402) (1.371,0.418) (1.414,0.435) (1.457,0.452) (1.500,0.470) (1.543,0.489) (1.586,0.507) (1.629,0.527) (1.671,0.547) (1.714,0.567) (1.757,0.588) (1.800,0.609) (1.843,0.630) (1.886,0.652) (1.929,0.675) (1.971,0.697) (2.014,0.720) (2.057,0.744) (2.100,0.767) (2.143,0.791) (2.186,0.816) (2.229,0.840) (2.271,0.865) (2.314,0.890) (2.357,0.915) (2.400,0.940) (2.443,0.965) (2.486,0.990) (2.529,1.015) (2.571,1.040) (2.614,1.066) (2.657,1.091) (2.700,1.115) (2.743,1.140) (2.786,1.165) (2.829,1.189) (2.871,1.214) (2.914,1.237) (2.957,1.261) (3.000,1.284) (3.043,1.307) (3.086,1.330) (3.129,1.352) (3.171,1.374) (3.214,1.396) (3.257,1.417) (3.300,1.437) (3.343,1.458) (3.386,1.477) (3.429,1.496) (3.471,1.515) (3.514,1.533) (3.557,1.551) (3.600,1.569) (3.643,1.585) (3.686,1.602) (3.729,1.618) (3.771,1.633) (3.814,1.648) (3.857,1.662) (3.900,1.676) (3.943,1.690) (3.986,1.703) (4.029,1.715) (4.071,1.727) (4.114,1.739) (4.157,1.750) (4.200,1.761) (4.243,1.771) (4.286,1.781) (4.329,1.791) (4.371,1.800) (4.414,1.809) (4.457,1.818) (4.500,1.826) (4.543,1.834) (4.586,1.841) (4.629,1.848) (4.671,1.855) (4.714,1.862) (4.757,1.868) (4.800,1.874) (4.843,1.880) (4.886,1.886) (4.929,1.891) (4.971,1.896) (5.014,1.901) (5.057,1.906) (5.100,1.910)};
+          \draw[wosm-accent, thick] plot coordinates {(0.000,0.600) (0.043,0.621) (0.086,0.643) (0.129,0.665) (0.171,0.688) (0.214,0.711) (0.257,0.734) (0.300,0.758) (0.343,0.782) (0.386,0.806) (0.429,0.830) (0.471,0.855) (0.514,0.879) (0.557,0.904) (0.600,0.929) (0.643,0.955) (0.686,0.980) (0.729,1.005) (0.771,1.030) (0.814,1.055) (0.857,1.080) (0.900,1.105) (0.943,1.130) (0.986,1.155) (1.029,1.179) (1.071,1.204) (1.114,1.228) (1.157,1.252) (1.200,1.275) (1.243,1.298) (1.286,1.321) (1.329,1.343) (1.371,1.365) (1.414,1.387) (1.457,1.408) (1.500,1.429) (1.543,1.449) (1.586,1.469) (1.629,1.489) (1.671,1.508) (1.714,1.526) (1.757,1.544) (1.800,1.562) (1.843,1.579) (1.886,1.595) (1.929,1.611) (1.971,1.627) (2.014,1.642) (2.057,1.656) (2.100,1.670) (2.143,1.684) (2.186,1.697) (2.229,1.710) (2.271,1.722) (2.314,1.734) (2.357,1.746) (2.400,1.757) (2.443,1.767) (2.486,1.777) (2.529,1.787) (2.571,1.796) (2.614,1.806) (2.657,1.814) (2.700,1.823) (2.743,1.831) (2.786,1.838) (2.829,1.846) (2.871,1.853) (2.914,1.859) (2.957,1.866) (3.000,1.872) (3.043,1.878) (3.086,1.883) (3.129,1.889) (3.171,1.894) (3.214,1.899) (3.257,1.904) (3.300,1.908) (3.343,1.913) (3.386,1.917) (3.429,1.921) (3.471,1.924) (3.514,1.928) (3.557,1.931) (3.600,1.935) (3.643,1.938) (3.686,1.941) (3.729,1.944) (3.771,1.946) (3.814,1.949) (3.857,1.951) (3.900,1.954) (3.943,1.956) (3.986,1.958) (4.029,1.960) (4.071,1.962) (4.114,1.964) (4.157,1.966) (4.200,1.967) (4.243,1.969) (4.286,1.970) (4.329,1.972) (4.371,1.973) (4.414,1.974) (4.457,1.976) (4.500,1.977) (4.543,1.978) (4.586,1.979) (4.629,1.980) (4.671,1.981) (4.714,1.982) (4.757,1.983) (4.800,1.984) (4.843,1.984) (4.886,1.985) (4.929,1.986) (4.971,1.987) (5.014,1.987) (5.057,1.988) (5.100,1.988)};
+          \draw[wosm-accent, thick] plot coordinates {(0.000,3.200) (0.043,3.108) (0.086,3.026) (0.129,2.951) (0.171,2.884) (0.214,2.823) (0.257,2.767) (0.300,2.715) (0.343,2.669) (0.386,2.625) (0.429,2.586) (0.471,2.549) (0.514,2.515) (0.557,2.484) (0.600,2.454) (0.643,2.427) (0.686,2.402) (0.729,2.379) (0.771,2.357) (0.814,2.336) (0.857,2.317) (0.900,2.299) (0.943,2.282) (0.986,2.267) (1.029,2.252) (1.071,2.238) (1.114,2.225) (1.157,2.213) (1.200,2.201) (1.243,2.190) (1.286,2.180) (1.329,2.171) (1.371,2.161) (1.414,2.153) (1.457,2.145) (1.500,2.137) (1.543,2.130) (1.586,2.123) (1.629,2.117) (1.671,2.111) (1.714,2.105) (1.757,2.100) (1.800,2.094) (1.843,2.090) (1.886,2.085) (1.929,2.081) (1.971,2.077) (2.014,2.073) (2.057,2.069) (2.100,2.065) (2.143,2.062) (2.186,2.059) (2.229,2.056) (2.271,2.053) (2.314,2.051) (2.357,2.048) (2.400,2.046) (2.443,2.043) (2.486,2.041) (2.529,2.039) (2.571,2.037) (2.614,2.035) (2.657,2.033) (2.700,2.032) (2.743,2.030) (2.786,2.029) (2.829,2.027) (2.871,2.026) (2.914,2.025) (2.957,2.023) (3.000,2.022) (3.043,2.021) (3.086,2.020) (3.129,2.019) (3.171,2.018) (3.214,2.017) (3.257,2.016) (3.300,2.016) (3.343,2.015) (3.386,2.014) (3.429,2.013) (3.471,2.013) (3.514,2.012) (3.557,2.011) (3.600,2.011) (3.643,2.010) (3.686,2.010) (3.729,2.009) (3.771,2.009) (3.814,2.008) (3.857,2.008) (3.900,2.008) (3.943,2.007) (3.986,2.007) (4.029,2.007) (4.071,2.006) (4.114,2.006) (4.157,2.006) (4.200,2.005) (4.243,2.005) (4.286,2.005) (4.329,2.005) (4.371,2.004) (4.414,2.004) (4.457,2.004) (4.500,2.004) (4.543,2.004) (4.586,2.003) (4.629,2.003) (4.671,2.003) (4.714,2.003) (4.757,2.003) (4.800,2.003) (4.843,2.003) (4.886,2.002) (4.929,2.002) (4.971,2.002) (5.014,2.002) (5.057,2.002) (5.100,2.002)};
+          \draw[wosm-accent, thick] plot coordinates {(0.000,-0.100) (0.051,-0.107) (0.102,-0.114) (0.153,-0.121) (0.205,-0.129) (0.256,-0.137) (0.307,-0.147) (0.358,-0.156) (0.409,-0.167) (0.460,-0.178) (0.511,-0.190) (0.562,-0.203) (0.614,-0.217) (0.665,-0.232) (0.716,-0.249) (0.767,-0.266) (0.818,-0.285) (0.869,-0.305) (0.920,-0.327) (0.971,-0.351) (1.023,-0.377) (1.074,-0.405) (1.125,-0.436) (1.176,-0.469) (1.227,-0.505) (1.278,-0.545) (1.329,-0.589) (1.380,-0.637) (1.432,-0.690) (1.483,-0.749) (1.534,-0.814) (1.585,-0.887) (1.636,-0.969) (1.649,-0.991)};
+        \end{scope}
+        \draw[wosm-brick, densely dashed] (0,2) -- (5.1,2) node[right, font=\scriptsize] {$1$};
+        \draw[wosm-brick, densely dashed] (0,0) -- (5.1,0) node[right, font=\scriptsize] {$0$};
+        \draw[wosm-muted, -latex] (0,-1.0) -- (0,3.4) node[above, font=\scriptsize] {$y$};
+        \node[font=\scriptsize, wosm-muted] at (5.1,-0.85) {$t$};
+      \end{tikzpicture}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Euler's method}
+  Follow the direction field in small steps of length $h$:
+  \[ t_{k+1} = t_k + h, \qquad y_{k+1} = y_k + h\, f(t_k, y_k) . \]
+  \pause
+  \begin{example}[$y' = y$, $y(0) = 1$; the exact value $y(1) = e \approx 2.71828$]
+    $y_{k+1} = (1 + h)\, y_k$, so the estimate of $y(1)$ is $(1 + h)^{1/h}$:
+    \begin{center}
+      \begin{tabular}{rll}
+        $h = 0.5$: & $1.5^2$ & $= 2.25$ \\
+        $h = 0.1$: & $1.1^{10}$ & $\approx 2.5937$ \\
+        $h = 0.01$: & $1.01^{100}$ & $\approx 2.7048$
+      \end{tabular}
+    \end{center}
+  \end{example}
+  \pause
+  {\small The error is roughly proportional to $h$. Gradient descent (Lecture 15) is Euler's method for
+  the flow lines of $-\nabla f$, with step $h = \eta$.\par}
+\end{frame}
+
+% =============================================================
+\section{Separable equations}
+
+\begin{frame}{Separation of variables}
+  An equation is \textbf{separable} if $y' = g(t)\, h(y)$.
+  \pause
+  \begin{block}{Method}
+    \begin{enumerate}
+      \item Constant solutions: every $y_0$ with $h(y_0) = 0$ gives the solution $y = y_0$.
+      \item Elsewhere, divide by $h(y)$ and integrate: \
+        $\displaystyle \int \frac{dy}{h(y)} = \int g(t)\, dt + C$.
+      \item Solve for $y$ if possible, and use the initial condition to find $C$.
+    \end{enumerate}
+  \end{block}
+  \pause
+  {\small Why it works: if $H' = 1/h$, then by the chain rule
+  $\frac{d}{dt} H(y(t)) = \frac{y'(t)}{h(y(t))} = g(t)$. So $H(y(t)) = \int g\, dt + C$.\par}
+\end{frame}
+
+\begin{frame}{Exponential growth and decay}
+  $y' = ky$: \ $\displaystyle \int \frac{dy}{y} = \int k\, dt$ \ gives $\ln|y| = kt + C$, so
+  \[ y(t) = y_0\, e^{kt} \]
+  (this also covers the constant solution $y = 0$).
+  \pause
+  \begin{itemize}
+    \item $k > 0$: growth, doubling time $\frac{\ln 2}{k}$. \ $k < 0$: decay, half-life $\frac{\ln 2}{|k|}$.
+  \end{itemize}
+  \pause
+  \begin{example}[Newton's law of cooling, $T' = -k(T - A)$]
+    $T(t) = A + (T_0 - A)\, e^{-kt}$. A cup at $90^\circ$C in a room at $20^\circ$C is at $60^\circ$C
+    after $10$ minutes: \ $e^{-10k} = \frac47$. It reaches $40^\circ$C when $e^{-kt} = \frac27$:
+    \ $t = 10\, \frac{\ln(7/2)}{\ln(7/4)} \approx 22.4$ minutes.
+  \end{example}
+\end{frame}
+
+\begin{frame}{The logistic equation}
+  \begin{columns}[c]
+    \begin{column}{0.58\textwidth}
+      $P' = rP\,\bigl(1 - \frac PK\bigr)$, with $r, K > 0$. Separate, and use partial fractions:
+      \[ \int \Bigl(\frac1P + \frac{1}{K - P}\Bigr) dP = \int r\, dt , \]
+      \pause
+      so $\ln\frac{P}{K - P} = rt + C$ and
+      \[ P(t) = \frac{K}{1 + A\, e^{-rt}}, \qquad A = \frac{K - P_0}{P_0} . \]
+      \pause
+      {\small The \textbf{sigmoid} $\sigma(x) = \frac{1}{1 + e^{-x}}$ of logistic regression is the case
+      $r = K = 1$: \ $\sigma' = \sigma(1 - \sigma)$.\par}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[width=\linewidth, height=4.4cm, axis lines=left, axis line style={wosm-muted, -},
+            xmin=0, xmax=10, ymin=0, ymax=11.5, xtick=\empty, ytick={10}, yticklabels={$K$},
+            tick label style={font=\scriptsize, text=wosm-muted}, xlabel={$t$}, label style={font=\scriptsize, text=wosm-muted}]
+          \addplot[wosm-rule, dashed, domain=0:10] {10};
+          \addplot[wosm-accent, thick, domain=0:10, samples=80] {10/(1 + 19*exp(-x))};
+          \addplot[wosm-accent!60!wosm-bg, thick, domain=0:10, samples=80] {10/(1 + 3*exp(-x))};
+        \end{axis}
+      \end{tikzpicture}
+      \par\small Growth slows as $P$ approaches the capacity $K$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{A solution can blow up}
+  \begin{example}[$y' = t\, y^2$, \ $y(0) = 1$]
+    $\displaystyle \int \frac{dy}{y^2} = \int t\, dt$: \ $-\frac1y = \frac{t^2}{2} + C$, and $y(0) = 1$ gives
+    $C = -1$. So
+    \[ y(t) = \frac{2}{2 - t^2}, \qquad -\sqrt2 < t < \sqrt2 . \]
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item The formula makes sense for $|t| > \sqrt2$ too, but that is a different branch: the solution
+      of the initial value problem lives on the interval containing $t_0 = 0$.
+    \item Nothing in $f(t, y) = ty^2$ warns of this: nonlinear equations can blow up in finite time.
+      Linear equations cannot (next).
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{First-order linear equations}
+
+\begin{frame}{Linear equations and integrating factors}
+  A first-order \textbf{linear} equation: \ $y' + p(t)\, y = q(t)$.
+  \pause
+  \begin{block}{Integrating factor}
+    Let $P$ be an antiderivative of $p$, and $\mu(t) = e^{P(t)}$. Then $\mu' = p\mu$, so
+    \[ (\mu y)' = \mu y' + p\mu y = \mu q, \qquad\text{hence}\qquad
+       y(t) = \frac{1}{\mu(t)} \Bigl( \int \mu(t)\, q(t)\, dt + C \Bigr) . \]
+  \end{block}
+  \pause
+  \begin{example}[$y' + 2y = e^{-t}$, \ $y(0) = 0$]
+    $\mu = e^{2t}$: \ $(e^{2t} y)' = e^{t}$, \ so $e^{2t} y = e^t + C$ and $y = e^{-t} + C e^{-2t}$. \
+    $y(0) = 0$ gives $C = -1$: \ $y = e^{-t} - e^{-2t}$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Another example}
+  \begin{example}[$t\, y' + y = t^2$, \ $t > 0$]
+    In standard form $y' + \frac1t\, y = t$: \ $p = \frac1t$, $P = \ln t$, $\mu = t$. Indeed the left side
+    of the original equation is already $(ty)'$:
+    \[ (ty)' = t^2, \qquad ty = \frac{t^3}{3} + C, \qquad y = \frac{t^2}{3} + \frac Ct . \]
+  \end{example}
+  \pause
+  \begin{itemize}
+    \item If $p$ and $q$ are continuous on an interval, the solution exists on the whole interval: linear
+      equations do not blow up.
+    \item Here $p = \frac1t$ is continuous only for $t > 0$ (or $t < 0$); the solutions with $C \ne 0$ blow up
+      at $t = 0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Example: a mixing tank}
+  \begin{example}[A mixing tank]
+    A tank holds $100$ L of water. Brine with $0.5$ kg of salt per litre flows in at $2$ L/min; the
+    mixture flows out at $2$ L/min. With $S(t)$ the salt in kg:
+    \[ S' = \underbrace{0.5 \cdot 2}_{\text{in}} - \underbrace{\tfrac{S}{100} \cdot 2}_{\text{out}}
+       = 1 - \frac{S}{50}, \qquad S(0) = 0 . \]
+    \pause
+    $\mu = e^{t/50}$, and $S(t) = 50\bigl(1 - e^{-t/50}\bigr)$: the salt approaches $50$ kg, the amount at
+    the incoming concentration.
+  \end{example}
+\end{frame}
+
+\begin{frame}{The structure of the solutions}
+  The general solution of $y' + p y = q$ is
+  \[ y = y_p + C\, y_h , \]
+  where $y_p$ is one particular solution and $y_h = e^{-P(t)}$ solves the homogeneous equation
+  $y' + py = 0$.
+  \pause
+  \begin{itemize}
+    \item The map $y \mapsto y' + py$ is \textbf{linear}. So the difference of two solutions of
+      $y' + py = q$ solves $y' + py = 0$.
+    \item The same structure as for $A\mathbf x = \mathbf b$ in Linear Algebra: one particular solution
+      plus the null space.
+    \item Superposition: if $y_1$ solves the equation with $q_1$ and $y_2$ with $q_2$, then $y_1 + y_2$
+      solves it with $q_1 + q_2$.
+  \end{itemize}
+  \pause
+  {\small Second-order linear equations (Lecture 24) and linear systems (Lecture 25) have the same
+  structure, with a null space of dimension $2$, or $n$.\par}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item An initial value problem $y' = f(t, y)$, $y(t_0) = y_0$ has a unique solution near $t_0$ if $f$
+      and $f_y$ are continuous. Without that, uniqueness can fail; solutions can blow up.
+    \item Direction fields show solutions at a glance; Euler's method follows them numerically.
+    \item \textbf{Separable} $y' = g(t)h(y)$: \ $\int dy/h(y) = \int g\, dt$, plus the constant solutions.
+      Growth and decay, cooling, the logistic equation.
+    \item \textbf{Linear} $y' + py = q$: multiply by $\mu = e^{\int p}$, then $(\mu y)' = \mu q$.
+      Solutions: particular + homogeneous.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Solve $y' = -2ty$, $y(0) = 3$.
+    \item Solve $y' = 1 + y^2$, $y(0) = 0$. On which interval does the solution exist?
+    \item Solve $y' = e^{t - y}$, $y(0) = 1$.
+    \item A population follows $P' = P(1 - P/10)$ with $P(0) = 1$. When does it reach $5$?
+    \item Solve $y' - y = t$, $y(0) = 0$.
+    \item Solve $t\, y' + 2y = 1$ for $t > 0$.
+    \item Use Euler's method with $h = 0.25$ to estimate $y(1)$ for $y' = y$, $y(0) = 1$.
+    \item Show that $y' = 2\sqrt{|y|}$, $y(0) = 0$ has more than one solution. Which hypothesis of the
+      theorem fails?
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $\ln|y| = -t^2 + C$: \ $y = 3e^{-t^2}$.
+    \item $\arctan y = t$: \ $y = \tan t$, on $(-\frac\pi2, \frac\pi2)$.
+    \item $e^y\, dy = e^t\, dt$: \ $e^y = e^t + e - 1$, \ $y = \ln(e^t + e - 1)$.
+    \item $P = \frac{10}{1 + 9e^{-t}} = 5$ when $e^{-t} = \frac19$: \ $t = \ln 9 \approx 2.20$.
+    \item $\mu = e^{-t}$: \ $(e^{-t}y)' = te^{-t}$, \ $y = -t - 1 + Ce^t$, \ $C = 1$: \ $y = e^t - t - 1$.
+    \item $\mu = t^2$: \ $(t^2 y)' = t$, \ $y = \frac12 + \frac{C}{t^2}$.
+    \item $1.25^4 \approx 2.441$ \ (against $e \approx 2.718$).
+    \item $y = 0$, and $y = t^2$ for $t \ge 0$ (with $y = 0$ for $t < 0$). \ $\partial f / \partial y = 1/\sqrt{y}$
+      (for $y > 0$) is unbounded near $y = 0$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 24 --- Second-order linear equations} (Unit 24)
+  \begin{itemize}
+    \item $ay'' + by' + cy = 0$: the characteristic equation and its three cases
+    \item Oscillations: springs, damping, and Euler's formula $e^{i\theta} = \cos\theta + i\sin\theta$
+    \item Forced oscillations: undetermined coefficients, and resonance
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Sections 7.1--7.3.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

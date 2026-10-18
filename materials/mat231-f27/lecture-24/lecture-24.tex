@@ -1,0 +1,362 @@
+% =============================================================
+%  MAT231-F27 Calculus II — Lecture 24
+%  Unit 24: Second-order linear ODEs with constant coefficients
+%
+%  Build from the repository root:   npm run materials -- lecture-24
+%  This writes lecture-24.pdf (slides, with overlays) and
+%  lecture-24-handout.pdf (print version) into this folder.
+% =============================================================
+\documentclass{wosm-slides}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfplotsset{wosm axis/.style={
+  axis lines=left, axis line style={wosm-muted, -},
+  tick style={wosm-muted}, tick label style={font=\scriptsize, text=wosm-muted},
+  label style={font=\scriptsize, text=wosm-muted},
+  legend style={draw=none, fill=none, font=\scriptsize, text=wosm-text},
+  legend cell align=left}}
+
+\newcommand{\R}{\mathbb{R}}
+
+\course{MAT231-F27}{Calculus II}
+\title[L24 \textperiodcentered\ Second-order linear equations]{Second-order linear equations}
+\subtitle{Constant coefficients, oscillations and resonance}
+\author{Dr.\ Ali Khudiyev}
+\institute{WoSM Academy}
+\date{Lecture 24\enspace\textperiodcentered\enspace Unit 24\enspace\textperiodcentered\enspace Fall 2027}
+
+\begin{document}
+
+\maketitle
+
+% -------------------------------------------------------------
+\begin{frame}{Last time}
+  \begin{itemize}
+    \item Initial value problems $y' = f(t, y)$; existence and uniqueness; direction fields; Euler's method.
+    \item Separable equations: $\int dy / h(y) = \int g(t)\, dt$.
+    \item Linear equations $y' + py = q$: the integrating factor $e^{\int p}$; solutions are particular
+      plus homogeneous.
+  \end{itemize}
+  \vskip0.6em
+  Newton's law $F = ma$ involves the second derivative of position. Today: second-order linear
+  equations with constant coefficients --- springs, circuits, and anything that oscillates.
+\end{frame}
+
+\begin{frame}{This lecture}
+  \tableofcontents
+  \vskip1em
+  {\small\color{wosm-muted}
+  Reading: Strang \& Herman, \emph{Calculus, Volume 3}, Sections 7.1--7.3.\par}
+\end{frame}
+
+% =============================================================
+\section{Second-order linear equations}
+
+\begin{frame}{A mass on a spring}
+  A mass $m$ on a spring with stiffness $k$, a damper with coefficient $c \ge 0$, and an external
+  force $F(t)$. With $x(t)$ the displacement from equilibrium, Newton's law gives
+  \[ m\, x'' = \underbrace{-kx}_{\text{spring}} \ \underbrace{-\, c\, x'}_{\text{damping}} + F(t),
+     \qquad\text{that is}\qquad m x'' + c x' + k x = F(t) . \]
+  \pause
+  \begin{itemize}
+    \item An electric circuit with inductance $L$, resistance $R$ and capacitance $C$ gives the same
+      equation for the charge: $L q'' + R q' + \frac1C q = E(t)$.
+    \item In general: $a y'' + b y' + c y = g(t)$, with constants $a \ne 0$, $b$, $c$. It is
+      \textbf{homogeneous} if $g = 0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The space of solutions}
+  \begin{theorem}
+    For any $t_0$, $y_0$, $v_0$, the equation $a y'' + b y' + c y = g(t)$ (with $g$ continuous) has exactly
+    one solution with $y(t_0) = y_0$ and $y'(t_0) = v_0$, defined for all $t$.
+  \end{theorem}
+  {\small Two initial conditions for a second-order equation: position and velocity.\par}
+  \pause
+  \begin{itemize}
+    \item \textbf{Superposition}: if $y_1$, $y_2$ solve the homogeneous equation, so does $C_1 y_1 + C_2 y_2$.
+    \pause
+    \item The homogeneous solutions form a vector space of \textbf{dimension $2$}: the map
+      $y \mapsto \bigl(y(0), y'(0)\bigr)$ is linear, and by the theorem a bijection onto $\R^2$.
+    \item So if $y_1$, $y_2$ are two independent solutions, every solution is $C_1 y_1 + C_2 y_2$.
+      They are independent if the \textbf{Wronskian} $W = y_1 y_2' - y_1' y_2$ is not $0$.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{The characteristic equation}
+
+\begin{frame}{Try an exponential}
+  For $a y'' + b y' + c y = 0$, try $y = e^{rt}$:
+  \[ a r^2 e^{rt} + b r e^{rt} + c e^{rt} = (a r^2 + b r + c)\, e^{rt} = 0 . \]
+  \pause
+  So $e^{rt}$ is a solution exactly when $r$ solves the \textbf{characteristic equation}
+  \[ a r^2 + b r + c = 0 . \]
+  \pause
+  Three cases, according to the discriminant $b^2 - 4ac$:
+  \begin{itemize}
+    \item $> 0$: two real roots $r_1 \ne r_2$;
+    \item $= 0$: one double root $r$;
+    \item $< 0$: two complex roots $\alpha \pm i\beta$.
+  \end{itemize}
+  {\small In each case: find the roots, read off two independent solutions, and fit $C_1$, $C_2$ to the
+  initial conditions.\par}
+\end{frame}
+
+\begin{frame}{Two real roots}
+  \begin{block}{Two real roots $r_1 \ne r_2$}
+    \[ y = C_1 e^{r_1 t} + C_2 e^{r_2 t} . \]
+    The two solutions are independent: their Wronskian is $(r_2 - r_1)\, e^{(r_1 + r_2)t} \ne 0$.
+  \end{block}
+  \pause
+  \begin{example}[$y'' - y' - 2y = 0$, \ $y(0) = 1$, $y'(0) = 2$]
+    $r^2 - r - 2 = (r - 2)(r + 1)$, so $y = C_1 e^{2t} + C_2 e^{-t}$.
+    \\[0.2em]
+    $C_1 + C_2 = 1$ and $2C_1 - C_2 = 2$ give $C_1 = 1$, $C_2 = 0$: \ $y = e^{2t}$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{A double root}
+  \begin{block}{A double root $r = -\frac{b}{2a}$}
+    \[ y = (C_1 + C_2 t)\, e^{rt} . \]
+  \end{block}
+  \pause
+  Why $te^{rt}$ is a solution: with $p(r) = ar^2 + br + c$, a short computation gives
+  \[ a\,(te^{rt})'' + b\,(te^{rt})' + c\,te^{rt} = p(r)\, t e^{rt} + p'(r)\, e^{rt} , \]
+  and a double root has $p(r) = p'(r) = 0$.
+  \pause
+  \begin{example}[$y'' + 2y' + y = 0$]
+    $r^2 + 2r + 1 = (r + 1)^2$: \ $y = (C_1 + C_2 t)\, e^{-t}$.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Complex exponentials}
+  The Taylor series of $e^x$ (Lecture 6) also converges for complex $x$. With $x = i\theta$, and
+  $i^2 = -1$, the even and odd terms separate:
+  \[ e^{i\theta} = \Bigl(1 - \frac{\theta^2}{2!} + \frac{\theta^4}{4!} - \dots\Bigr)
+     + i\Bigl(\theta - \frac{\theta^3}{3!} + \dots\Bigr) = \cos\theta + i\sin\theta . \]
+  \pause
+  \begin{itemize}
+    \item This is \textbf{Euler's formula}. So $e^{(\alpha + i\beta)t} = e^{\alpha t}(\cos\beta t + i\sin\beta t)$,
+      and its derivative is $(\alpha + i\beta)\, e^{(\alpha + i\beta)t}$, by the product rule.
+    \pause
+    \item If $r = \alpha + i\beta$ is a root of $ar^2 + br + c$, then $e^{rt}$ is a complex solution. Since
+      $a$, $b$, $c$ are real, its real and imaginary parts are real solutions:
+      \[ e^{\alpha t}\cos\beta t \qquad\text{and}\qquad e^{\alpha t}\sin\beta t . \]
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Complex roots}
+  \begin{block}{Two complex roots $\alpha \pm i\beta$ ($\beta \ne 0$)}
+    $y = e^{\alpha t}\bigl(C_1 \cos\beta t + C_2 \sin\beta t\bigr)$.
+  \end{block}
+  \pause
+  \begin{example}[$y'' + 4y = 0$, \ $y(0) = 1$, $y'(0) = 2$]
+    $r = \pm 2i$: \ $y = C_1\cos 2t + C_2 \sin 2t$. \ $y(0) = C_1 = 1$, \ $y'(0) = 2C_2 = 2$:
+    \ $y = \cos 2t + \sin 2t$.
+  \end{example}
+  \pause
+  \begin{example}[$y'' + 2y' + 5y = 0$: an oscillation that dies out]
+    $r = -1 \pm 2i$: \ $y = e^{-t}\bigl(C_1 \cos 2t + C_2 \sin 2t\bigr)$.
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{Oscillations}
+
+\begin{frame}{Free undamped oscillation}
+  $m x'' + k x = 0$, \ that is $x'' + \omega_0^2\, x = 0$ with $\omega_0 = \sqrt{k/m}$. \ Roots $\pm i\omega_0$:
+  \[ x(t) = C_1 \cos\omega_0 t + C_2 \sin\omega_0 t = A\cos(\omega_0 t - \delta) , \]
+  with \textbf{amplitude} $A = \sqrt{C_1^2 + C_2^2}$ and phase $\delta$ ($\cos\delta = C_1/A$, $\sin\delta = C_2/A$).
+  \pause
+  \begin{itemize}
+    \item Simple harmonic motion with \textbf{natural frequency} $\omega_0$ and period $2\pi/\omega_0$.
+    \item A stiffer spring (larger $k$) or lighter mass (smaller $m$) oscillates faster.
+    \item The energy $\frac12 m (x')^2 + \frac12 k x^2$ is constant: differentiate it and use the equation.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Damping}
+  $m x'' + c x' + k x = 0$ with $c > 0$: \ roots $\dfrac{-c \pm \sqrt{c^2 - 4mk}}{2m}$, both with negative real part.
+  \begin{columns}[c]
+    \begin{column}{0.48\textwidth}
+      \pause
+      \begin{itemize}
+        \item $c^2 > 4mk$: \textbf{overdamped}. Two negative real roots: a slow return, no oscillation.
+        \item $c^2 = 4mk$: \textbf{critically damped}: the fastest return without overshoot.
+        \item $c^2 < 4mk$: \textbf{underdamped}. A decaying oscillation $e^{-ct/2m}\cos(\mu t - \delta)$.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=5cm, xmin=0, xmax=12, ymin=-0.7, ymax=1.1,
+            xlabel={$t$}, ytick={0, 1}, xtick={0, 4, 8, 12}, legend pos=north east]
+          \addplot[wosm-muted, thick, domain=0:12, samples=100] {1.1708*exp(-0.38197*x) - 0.1708*exp(-2.61803*x)};
+          \addplot[wosm-accent, thick, domain=0:12, samples=100] {(1 + x)*exp(-x)};
+          \addplot[wosm-brick, thick, domain=0:12, samples=150] {exp(-0.25*x)*(cos(deg(0.96825*x)) + 0.25820*sin(deg(0.96825*x)))};
+          \addplot[wosm-rule, domain=0:12] {0};
+          \legend{$c = 3$, $c = 2$, $c = 0.5$}
+        \end{axis}
+      \end{tikzpicture}
+      \par\small $m = k = 1$, \ $x(0) = 1$, $x'(0) = 0$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Forced oscillations}
+
+\begin{frame}{Nonhomogeneous equations}
+  \begin{theorem}
+    The general solution of $a y'' + b y' + c y = g(t)$ is $y = y_p + C_1 y_1 + C_2 y_2$: one particular
+    solution plus the general homogeneous solution. (The difference of two solutions solves the
+    homogeneous equation.)
+  \end{theorem}
+  \pause
+  \textbf{Undetermined coefficients}: guess $y_p$ of the same form as $g$.
+  \begin{center}
+    \begin{tabular}{ll}
+      \toprule
+      $g(t)$ & try $y_p$ \\
+      \midrule
+      polynomial of degree $n$ & polynomial of degree $n$ \\
+      $e^{kt}$ & $A e^{kt}$ \\
+      $\cos\omega t$ or $\sin\omega t$ & $A\cos\omega t + B\sin\omega t$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  If the guess solves the homogeneous equation, multiply it by $t$ (again, if necessary).
+\end{frame}
+
+\begin{frame}{Examples}
+  \begin{example}[$y'' - y' - 2y = 4t$]
+    Try $y_p = At + B$: \ $0 - A - 2(At + B) = 4t$, so $A = -2$ and $B = 1$. \ With the homogeneous
+    solutions from before:
+    \[ y = C_1 e^{2t} + C_2 e^{-t} - 2t + 1 . \]
+  \end{example}
+  \pause
+  \begin{example}[$y'' + 4y = 3\cos t$]
+    Try $y_p = A\cos t$ (no $\sin t$ is needed, as there is no $y'$ term): \ $-A + 4A = 3$, so $A = 1$:
+    \[ y = \cos t + C_1 \cos 2t + C_2 \sin 2t . \]
+  \end{example}
+\end{frame}
+
+\begin{frame}{Resonance}
+  \begin{columns}[c]
+    \begin{column}{0.52\textwidth}
+      $x'' + \omega_0^2\, x = \cos\omega t$: a spring pushed at frequency $\omega$.
+      \pause
+      \begin{itemize}
+        \item $\omega \ne \omega_0$: \ $x_p = \dfrac{\cos\omega t}{\omega_0^2 - \omega^2}$, which grows as
+          $\omega \to \omega_0$.
+        \pause
+        \item $\omega = \omega_0$: the guess $A\cos\omega_0 t$ solves the homogeneous equation; multiplying by
+          $t$ gives
+          \[ x_p = \frac{t \sin\omega_0 t}{2\omega_0} , \]
+          which grows without bound: \textbf{resonance}.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=4.6cm, xmin=0, xmax=30, ymin=-16, ymax=16,
+            xlabel={$t$}, ytick={0}, xtick={0, 10, 20, 30}]
+          \addplot[wosm-rule, dashed, domain=0:30] {x/2};
+          \addplot[wosm-rule, dashed, domain=0:30] {-x/2};
+          \addplot[wosm-brick, thick, domain=0:30, samples=300] {x*sin(deg(x))/2};
+        \end{axis}
+      \end{tikzpicture}
+      \par\small $x'' + x = \cos t$, \ $x_p = \frac12 t\sin t$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Damping keeps the response bounded}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      $m x'' + c x' + k x = \cos\omega t$ with $c > 0$ has a solution $A\cos\omega t + B\sin\omega t$ of
+      amplitude
+      \[ \frac{1}{\sqrt{(k - m\omega^2)^2 + c^2\omega^2}} . \]
+      \pause
+      \begin{itemize}
+        \item The homogeneous part decays: every solution approaches this \textbf{steady state}.
+        \item It peaks near $\omega_0 = \sqrt{k/m}$, higher for smaller $c$.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \begin{axis}[wosm axis, width=\linewidth, height=4.4cm, xmin=0, xmax=2.5, ymin=0, ymax=5.5,
+            xlabel={forcing frequency $\omega$}, xtick={0, 1, 2}, xticklabels={$0$, $\omega_0$, $2\omega_0$},
+            ytick={0, 1, 5}, legend pos=north east]
+          \addplot[wosm-brick, thick, domain=0:2.5, samples=200] {1/sqrt((1 - x^2)^2 + 0.04*x^2)};
+          \addplot[wosm-accent, thick, domain=0:2.5, samples=200] {1/sqrt((1 - x^2)^2 + 0.25*x^2)};
+          \addplot[wosm-muted, thick, domain=0:2.5, samples=200] {1/sqrt((1 - x^2)^2 + x^2)};
+          \legend{$c = 0.2$, $c = 0.5$, $c = 1$}
+        \end{axis}
+      \end{tikzpicture}
+      \par\small Amplitude, $m = k = 1$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Summary and practice}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item $a y'' + b y' + c y = 0$: solutions form a $2$-dimensional space; two initial conditions fix one.
+    \item Characteristic equation $ar^2 + br + c = 0$. \ Real roots: $C_1 e^{r_1 t} + C_2 e^{r_2 t}$; \
+      double root: $(C_1 + C_2 t) e^{rt}$; \ complex roots $\alpha \pm i\beta$:
+      $e^{\alpha t}(C_1\cos\beta t + C_2\sin\beta t)$, by Euler's formula.
+    \item Springs: simple harmonic motion; over-, critically and underdamped motion.
+    \item Forced: $y = y_p + y_h$; undetermined coefficients; resonance when the forcing matches the
+      natural frequency.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Practice}
+  \small
+  \begin{enumerate}
+    \item Solve $y'' - 5y' + 6y = 0$, $y(0) = 1$, $y'(0) = 0$.
+    \item Solve $y'' - 4y' + 4y = 0$, $y(0) = 1$, $y'(0) = 0$.
+    \item Find the general solution of $y'' + 2y' + 10y = 0$.
+    \item A mass $m = 1$ hangs on a spring with $k = 4$. For which damping coefficients $c$ is the motion
+      underdamped, critically damped, overdamped?
+    \item Find the general solution of $y'' + y' - 2y = 2e^{3t}$.
+    \item Find a particular solution of $y'' + 9y = \sin 3t$.
+    \item Show that the Wronskian of $e^{r_1 t}$ and $e^{r_2 t}$ is $(r_2 - r_1)\, e^{(r_1 + r_2)t}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Answers}
+  \small
+  \begin{enumerate}
+    \item $r = 2, 3$: \ $C_1 + C_2 = 1$, $2C_1 + 3C_2 = 0$: \ $y = 3e^{2t} - 2e^{3t}$.
+    \item $r = 2$ (double): \ $y = (1 + C_2 t)e^{2t}$, \ $y'(0) = 2 + C_2 = 0$: \ $y = (1 - 2t)\, e^{2t}$.
+    \item $r = -1 \pm 3i$: \ $y = e^{-t}(C_1\cos 3t + C_2\sin 3t)$.
+    \item $c^2 - 16$: \ underdamped for $c < 4$, critical for $c = 4$, overdamped for $c > 4$.
+    \item $r = 1, -2$; \ $y_p = Ae^{3t}$ with $(9 + 3 - 2)A = 2$: \ $y = C_1 e^t + C_2 e^{-2t} + \frac15 e^{3t}$.
+    \item Resonance: try $t(A\cos 3t + B\sin 3t)$; \ $y_p = -\frac{t\cos 3t}{6}$.
+    \item $W = e^{r_1 t} \cdot r_2 e^{r_2 t} - r_1 e^{r_1 t} \cdot e^{r_2 t} = (r_2 - r_1)\, e^{(r_1 + r_2)t}$.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Next time}
+  \textbf{Lecture 25 --- Systems of linear differential equations} (Unit 25)
+  \begin{itemize}
+    \item $\mathbf x' = A\mathbf x$: solutions from eigenvalues and eigenvectors
+    \item Phase portraits: saddles, nodes, spirals; stability
+    \item The matrix exponential, and a look back at the module
+  \end{itemize}
+  \vskip1em
+  {\small
+  Reading: Apostol, \emph{Calculus, Volume 2}, Chapter 7.\\[0.4em]
+  Questions: the module channel on Discord, or office hours,
+  Monday--Friday, 10:00--17:00 (Baku time, UTC+4),
+  \href{mailto:ali.khudiyev@wosm.academy}{ali.khudiyev@wosm.academy}.\par}
+\end{frame}
+
+\end{document}

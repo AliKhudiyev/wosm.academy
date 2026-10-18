@@ -1,0 +1,30 @@
+% =============================================================
+%  cs102-lectures.sty — shared settings for the CS102-F26 lectures
+%  Course, author, semester and a few helpers used in every lecture.
+%  The look itself comes from wosm-slides.cls: do not restyle it here.
+%
+%    \documentclass{wosm-slides}
+%    \usepackage{cs102-lectures}
+% =============================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cs102-lectures}[2026/10/18 CS102-F26 lecture settings]
+
+\RequirePackage{array}
+
+\course{CS102-F26}{Digital Design and Computer Architecture I}
+\author{Dr.\ Ali Khudiyev}
+\date{Fall 2026}
+
+% "(Unit 3)": where a topic comes back later in the module.
+\newcommand*\unitref[1]{\wosmlabel{(Unit~#1)}}
+
+\tikzset{
+  arrow/.style={-{Stealth[length=5pt]}, draw=wosm-text, line width=0.6pt},
+  st/.style={draw=wosm-text, line width=0.6pt, circle, minimum size=1.15cm,
+    inner sep=1pt, font=\small},
+  box/.style={draw=wosm-text, line width=0.6pt, minimum width=1.25cm,
+    minimum height=0.8cm, inner sep=2pt},
+  edgelabel/.style={font=\scriptsize, text=wosm-muted},
+}
+
+\endinput

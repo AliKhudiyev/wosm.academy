@@ -1,0 +1,596 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 03 -- Boolean Algebra (Unit 3)
+%  Follows Section 2.2 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-03
+% =============================================================
+\documentclass{wosm-slides}
+\usepackage{cs102-lectures}
+
+\title[Lecture 03 \textperiodcentered\ Boolean Algebra]{Boolean Algebra}
+\subtitle{Lecture 03: the laws and theorems of an algebra of 0 and 1}
+
+% ---------- Helpers for this lecture --------------------------
+% A law or theorem in a table: name, then the pair of equations.
+\newcommand*\lawrow[3]{#1 & \ensuremath{#2} & \ensuremath{#3} \\}
+
+% A switch drawn from #1 to the right, labelled #2, closed if #3 = 1.
+\newcommand*\switch[2]{%
+  \fill[wosm-text] (#1) circle (1.6pt) ++(0.9,0) circle (1.6pt);
+  \draw[wosm-text, line width=0.8pt] (#1) -- ++(0.8,0.38);
+  \node[edgelabel, above] at ($(#1)+(0.45,0.3)$) {$#2$};}
+
+% Proof steps: an equation and the law that justifies it.
+\newenvironment{derivation}
+  {\begin{tabular}{@{}r@{\;}l@{\qquad}l@{}}}
+  {\end{tabular}}
+\newcommand*\by[1]{\wosmlabel{#1}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{An algebra of 0 and 1}
+
+\begin{frame}{From school algebra to Boolean algebra}
+  School algebra works with numbers, variables and many operations:
+  \[ 3x^2 - \frac{4y}{z} + \frac{2}{7}\,x z^3, \qquad x, y, z \in \mathbb{R}. \]
+
+  In \alert{Boolean algebra} we restrict both:
+  \begin{itemize}
+    \item the values to the set $\{0, 1\}$;
+    \item the operations to addition ($+$), multiplication ($\cdot$) and
+      negation ($'$).
+  \end{itemize}
+
+  \medskip
+  Some laws are the same as in school, some are new. For example, with $x = y = 1$,
+  school algebra gives $x + y = 2$. There is no 2 in $\{0, 1\}$: in Boolean algebra
+  $1 + 1 = 1$.
+
+  \medskip
+  \wosmlabel{Named after George Boole, The Laws of Thought (1854); see Lecture 01.}
+\end{frame}
+
+\begin{frame}{The three operations}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.3\textwidth}
+      \centering
+      \begin{tabular}{@{}cc|c@{}}
+        $a$ & $b$ & $a + b$ \\
+        \midrule
+        0 & 0 & 0 \\
+        0 & 1 & 1 \\
+        1 & 0 & 1 \\
+        1 & 1 & 1 \\
+      \end{tabular}\par\medskip
+      \wosmlabel{OR}
+    \column{0.3\textwidth}
+      \centering
+      \begin{tabular}{@{}cc|c@{}}
+        $a$ & $b$ & $a \cdot b$ \\
+        \midrule
+        0 & 0 & 0 \\
+        0 & 1 & 0 \\
+        1 & 0 & 0 \\
+        1 & 1 & 1 \\
+      \end{tabular}\par\medskip
+      \wosmlabel{AND}
+    \column{0.3\textwidth}
+      \centering
+      \begin{tabular}{@{}c|c@{}}
+        $a$ & $a'$ \\
+        \midrule
+        0 & 1 \\
+        1 & 0 \\
+      \end{tabular}\par\medskip
+      \wosmlabel{NOT}
+  \end{columns}
+
+  \bigskip
+  \begin{itemize}
+    \item $a + b$ is 1 when \emph{at least one} of $a$, $b$ is 1.
+    \item $a \cdot b$ is 1 only when \emph{both} are 1.
+    \item $a'$ is the \emph{complement} of $a$.
+  \end{itemize}
+  \wosmlabel{As logic gates, these are the OR, AND and NOT gates (Unit 6).}
+\end{frame}
+
+\begin{frame}{Notation and precedence}
+  \begin{itemize}
+    \item The complement has three common notations: $a'$, $\lnot a$ and
+      $\overline{a}$. These slides use $a'$, as the book does.
+    \item The dot is often left out: $ab$ means $a \cdot b$.
+    \item As in school, multiplication binds more tightly than addition, and the
+      complement binds most tightly of all:
+      \[ a + b'c \;=\; a + \bigl((b') \cdot c\bigr). \]
+    \item To complement more than one variable, use brackets: $(ab)'$ is not
+      $a'b'$.
+  \end{itemize}
+
+  \begin{warning}
+    $(ab)'$ and $a'b'$ are different functions: for $a = 1$, $b = 0$ the first is 1
+    and the second is 0.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{Switches: series and parallel}
+  Claude Shannon (1937): Boolean algebra describes circuits of switches. Let 1 mean
+  a closed switch, or current flowing.
+
+  \medskip
+  \begin{columns}[b, totalwidth=\textwidth]
+    \column{0.47\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \coordinate (A) at (0,0);
+        \draw[wosm-text, line width=0.6pt] (-0.6,0) -- (A);
+        \switch{A}{a}
+        \coordinate (B) at (1.5,0);
+        \draw[wosm-text, line width=0.6pt] (0.9,0) -- (B);
+        \switch{B}{b}
+        \draw[wosm-text, line width=0.6pt] (2.4,0) -- (3.0,0);
+      \end{tikzpicture}\par\medskip
+      \textbf{Series}: current flows only if $a$ \emph{and} $b$ are closed:
+      $a \cdot b$.
+    \column{0.47\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \coordinate (A) at (0,0.45);
+        \coordinate (B) at (0,-0.45);
+        \draw[wosm-text, line width=0.6pt]
+          (-1,0) -- (-0.5,0) -- (-0.5,0.45) -- (A)
+          (-0.5,0) -- (-0.5,-0.45) -- (B)
+          (0.9,0.45) -- (1.4,0.45) -- (1.4,-0.45) -- (0.9,-0.45)
+          (1.4,0) -- (1.9,0);
+        \switch{A}{a}
+        \switch{B}{b}
+      \end{tikzpicture}\par\medskip
+      \textbf{Parallel}: current flows if $a$ \emph{or} $b$ is closed: $a + b$.
+  \end{columns}
+
+  \bigskip
+  Two switches in parallel, both closed, still carry current: $1 + 1 = 1$.
+\end{frame}
+
+% =============================================================
+\section{The seven laws}
+
+\begin{frame}{Laws 1--3}
+  \begin{definition}[Commutativity]
+    The order does not matter:
+    \quad $a + b = b + a$, \quad $a \cdot b = b \cdot a$.
+  \end{definition}
+
+  \begin{definition}[Associativity]
+    The grouping does not matter:
+    \quad $(a + b) + c = a + (b + c)$, \quad $(ab)c = a(bc)$.
+  \end{definition}
+
+  \begin{definition}[Distributivity]
+    Expand or factor:
+    \quad $a(b + c) = ab + ac$, \quad $a + bc = (a + b)(a + c)$.
+  \end{definition}
+\end{frame}
+
+\begin{frame}{Laws 4--7}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.485\textwidth}
+      \begin{definition}[Identity]
+        0 is the identity for $+$, and 1 for $\cdot$:\par
+        \centering $a + 0 = a$, \quad $a \cdot 1 = a$
+      \end{definition}
+    \column{0.485\textwidth}
+      \begin{definition}[Idempotence]
+        An operand combined with itself:\par
+        \centering $a + a = a$, \quad $a \cdot a = a$
+      \end{definition}
+  \end{columns}
+
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.485\textwidth}
+      \begin{definition}[Complement]
+        With its complement, the sum is 1 and the product is 0:\par
+        \centering $a + a' = 1$, \quad $a \cdot a' = 0$
+      \end{definition}
+    \column{0.485\textwidth}
+      \begin{definition}[Domination]
+        Adding 1 gives 1; multiplying by 0 gives 0:\par
+        \centering $a + 1 = 1$, \quad $a \cdot 0 = 0$
+      \end{definition}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Not your school algebra}
+  \begin{itemize}
+    \item $a + a = a$, not $2a$; \quad $a + 1 = 1$, not $a + 1$.
+    \item The second distributive law, $a + bc = (a + b)(a + c)$, is new. With
+      ordinary numbers it fails: $1 + 2 \cdot 3 = 7$, but $(1 + 2)(1 + 3) = 12$.
+    \item There is no subtraction or division, so you cannot cancel:
+      $a + b = a + c$ does not mean $b = c$. Try $a = 1$, $b = 0$, $c = 1$.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    The laws are the axioms of Boolean algebra: we accept them as they are stated,
+    and everything else is derived from them.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Duality}
+  Look again at the laws: each one is a \alert{pair}. The second equation comes from
+  the first by swapping $+ \leftrightarrow \cdot$ and $0 \leftrightarrow 1$.
+
+  \medskip
+
+  \begin{center}
+    \small
+    \begin{tabular}{@{}lll@{}}
+      \toprule
+      Law & Equation & Its dual \\
+      \midrule
+      \lawrow{Identity}{a + 0 = a}{a \cdot 1 = a}
+      \lawrow{Complement}{a + a' = 1}{a \cdot a' = 0}
+      \lawrow{Distributivity}{a (b + c) = ab + ac}{a + bc = (a + b)(a + c)}
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  \begin{block}{The duality principle}
+    If an equation follows from the laws, so does its dual. Every proof gives you a
+    second theorem for free.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Checking a law by exhaustion}
+  A variable has only two values, so we can try them all. For
+  $a + bc = (a + b)(a + c)$:
+
+  \medskip
+  \begin{center}
+    \small
+    \begin{tabular}{@{}ccc|cc|ccc@{}}
+      $a$ & $b$ & $c$ & $bc$ & $a + bc$ & $a + b$ & $a + c$ & $(a + b)(a + c)$ \\
+      \midrule
+      0 & 0 & 0 & 0 & \textbf{0} & 0 & 0 & \textbf{0} \\
+      0 & 0 & 1 & 0 & \textbf{0} & 0 & 1 & \textbf{0} \\
+      0 & 1 & 0 & 0 & \textbf{0} & 1 & 0 & \textbf{0} \\
+      0 & 1 & 1 & 1 & \textbf{1} & 1 & 1 & \textbf{1} \\
+      1 & 0 & 0 & 0 & \textbf{1} & 1 & 1 & \textbf{1} \\
+      1 & 0 & 1 & 0 & \textbf{1} & 1 & 1 & \textbf{1} \\
+      1 & 1 & 0 & 0 & \textbf{1} & 1 & 1 & \textbf{1} \\
+      1 & 1 & 1 & 1 & \textbf{1} & 1 & 1 & \textbf{1} \\
+    \end{tabular}
+  \end{center}
+
+  The two bold columns agree on every row, so the equation holds.
+  With $n$ variables there are $2^n$ rows (Lecture 02).
+\end{frame}
+
+% =============================================================
+\section{Theorems}
+
+\begin{frame}{Two ways to prove an equation}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.47\textwidth}
+      \textbf{Proof by exhaustion}
+      \begin{itemize}
+        \item Compute both sides for every combination of values.
+        \item Always works, but needs $2^n$ rows: fine for 3 variables, not for 30.
+      \end{itemize}
+    \column{0.47\textwidth}
+      \textbf{Algebraic proof}
+      \begin{itemize}
+        \item Turn one side into the other, one law per step.
+        \item Short when you see the way; and each step shows \emph{why}.
+      \end{itemize}
+  \end{columns}
+
+  \medskip
+  \begin{example}[Idempotence follows from the other laws]
+    \small
+    \begin{derivation}
+      $a + a$ & $= (a + a) \cdot 1$ & \by{identity} \\
+              & $= (a + a)(a + a')$ & \by{complement} \\
+              & $= a + a a'$ & \by{distributivity} \\
+              & $= a + 0 = a$ & \by{complement, identity} \\
+    \end{derivation}
+  \end{example}
+\end{frame}
+
+\begin{frame}{De Morgan's theorem}
+  \begin{theorem}[De Morgan]
+    The complement of a sum is the product of the complements, and the complement
+    of a product is the sum of the complements:
+    \[ (a + b)' = a' \cdot b', \qquad (a \cdot b)' = a' + b'. \]
+  \end{theorem}
+
+  \begin{center}
+    \small
+    \begin{tabular}{@{}cc|ll|ll@{}}
+      $a$ & $b$ & $(a + b)'$ & $a' \cdot b'$ & $(a \cdot b)'$ & $a' + b'$ \\
+      \midrule
+      0 & 0 & $0' = 1$ & $1 \cdot 1 = 1$ & $0' = 1$ & $1 + 1 = 1$ \\
+      0 & 1 & $1' = 0$ & $1 \cdot 0 = 0$ & $0' = 1$ & $1 + 0 = 1$ \\
+      1 & 0 & $1' = 0$ & $0 \cdot 1 = 0$ & $0' = 1$ & $0 + 1 = 1$ \\
+      1 & 1 & $1' = 0$ & $0 \cdot 0 = 0$ & $1' = 0$ & $0 + 0 = 0$ \\
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Using De Morgan}
+  \begin{itemize}
+    \item It works for any number of variables:
+      $(a + b + c)' = a'b'c'$ and $(abc)' = a' + b' + c'$.
+    \item To complement an expression: swap $+$ and $\cdot$, and complement every
+      variable. Keep the original grouping with brackets.
+  \end{itemize}
+
+  \begin{example}[Complement of $ab + c$]
+    \small
+    \begin{derivation}
+      $(ab + c)'$ & $= (ab)' \cdot c'$ & \by{De Morgan} \\
+                  & $= (a' + b') \cdot c'$ & \by{De Morgan} \\
+    \end{derivation}
+  \end{example}
+
+  \wosmlabel{Coming back: De Morgan's theorem is why a single kind of gate, NAND or
+  NOR, can build every circuit (Unit 6).}
+\end{frame}
+
+\begin{frame}{Absorption}
+  \begin{theorem}[Absorption]
+    \[ a + a \cdot b = a, \qquad a \cdot (a + b) = a. \]
+  \end{theorem}
+
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.47\textwidth}
+      \small
+      \begin{derivation}
+        $a + ab$ & $= a \cdot 1 + a \cdot b$ & \by{identity} \\
+                 & $= a \cdot (1 + b)$ & \by{distributivity} \\
+                 & $= a \cdot 1$ & \by{domination} \\
+                 & $= a$ & \by{identity} \\
+      \end{derivation}
+    \column{0.47\textwidth}
+      \small
+      \begin{derivation}
+        $a(a + b)$ & $= aa + ab$ & \by{distributivity} \\
+                   & $= a + ab$ & \by{idempotence} \\
+                   & $= a$ & \by{the left proof} \\
+      \end{derivation}
+  \end{columns}
+
+  \bigskip
+  In words: if $a$ is 1, both sides are 1; if $a$ is 0, both sides are 0. The value of
+  $b$ never matters.
+\end{frame}
+
+\begin{frame}{Consensus}
+  \begin{theorem}[Consensus]
+    \[ a \cdot b + a' \cdot c + b \cdot c = a \cdot b + a' \cdot c \]
+  \end{theorem}
+
+  The term $bc$ is redundant: whenever $b = c = 1$, either $a = 1$ and $ab = 1$, or
+  $a = 0$ and $a'c = 1$.
+
+  \medskip
+  \small
+  \begin{derivation}
+    $ab + a'c + bc$ & $= ab + a'c + bc(a + a')$ & \by{identity, complement} \\
+                    & $= ab + abc + a'c + a'bc$ & \by{distributivity, commutativity} \\
+                    & $= ab + a'c$ & \by{absorption, twice} \\
+  \end{derivation}
+
+  \medskip
+  \normalsize
+  Its dual: $(a + b)(a' + c)(b + c) = (a + b)(a' + c)$.
+\end{frame}
+
+\begin{frame}{Consensus by exhaustion}
+  \begin{center}
+    \small
+    \begin{tabular}{@{}ccc|ccc|c|c@{}}
+      $a$ & $b$ & $c$ & $ab$ & $a'c$ & $bc$ & $ab + a'c + bc$ & $ab + a'c$ \\
+      \midrule
+      0 & 0 & 0 & 0 & 0 & 0 & \textbf{0} & \textbf{0} \\
+      0 & 0 & 1 & 0 & 1 & 0 & \textbf{1} & \textbf{1} \\
+      0 & 1 & 0 & 0 & 0 & 0 & \textbf{0} & \textbf{0} \\
+      0 & 1 & 1 & 0 & 1 & \alert{1} & \textbf{1} & \textbf{1} \\
+      1 & 0 & 0 & 0 & 0 & 0 & \textbf{0} & \textbf{0} \\
+      1 & 0 & 1 & 0 & 0 & 0 & \textbf{0} & \textbf{0} \\
+      1 & 1 & 0 & 1 & 0 & 0 & \textbf{1} & \textbf{1} \\
+      1 & 1 & 1 & 1 & 0 & \alert{1} & \textbf{1} & \textbf{1} \\
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  In both rows where $bc = 1$, another term is already 1, so dropping $bc$ changes
+  nothing.
+\end{frame}
+
+\begin{frame}{Transposition}
+  \begin{theorem}[Transposition]
+    \[ (a + b) \cdot (a' + c) = a \cdot c + a' \cdot b \]
+  \end{theorem}
+
+  \small
+  \begin{derivation}
+    $(a + b)(a' + c)$ & $= (a + b)\,a' + (a + b)\,c$ & \by{distributivity} \\
+                      & $= a'a + a'b + ac + bc$ & \by{distributivity, commutativity} \\
+                      & $= 0 + a'b + ac + bc$ & \by{complement} \\
+                      & $= ac + a'b + bc$ & \by{identity, commutativity} \\
+                      & $= ac + a'b$ & \by{consensus} \\
+  \end{derivation}
+
+  \medskip
+  \normalsize
+  The last step is consensus with the roles of $b$ and $c$ swapped. The book shows
+  it by case analysis on $bc$: if $bc = 1$ then $b = c = 1$, and
+  $ac + a'b = a + a' = 1$ as well.
+\end{frame}
+
+\begin{frame}{Involution}
+  \begin{theorem}[Involution]
+    \[ (a')' = a \]
+  \end{theorem}
+
+  \begin{center}
+    \begin{tabular}{@{}c|l@{}}
+      $a$ & $(a')'$ \\
+      \midrule
+      0 & $(0')' = 1' = 0$ \\
+      1 & $(1')' = 0' = 1$ \\
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  Complementing twice gives back what you started with: two NOT gates in a row
+  change nothing \unitref{6}.
+\end{frame}
+
+\begin{frame}{All in one place}
+  \footnotesize
+  \begin{center}
+    \begin{tabular}{@{}lll@{}}
+      \toprule
+      & & Dual \\
+      \midrule
+      \lawrow{Commutativity}{a + b = b + a}{ab = ba}
+      \lawrow{Associativity}{(a + b) + c = a + (b + c)}{(ab)c = a(bc)}
+      \lawrow{Distributivity}{a(b + c) = ab + ac}{a + bc = (a + b)(a + c)}
+      \lawrow{Identity}{a + 0 = a}{a \cdot 1 = a}
+      \lawrow{Idempotence}{a + a = a}{a a = a}
+      \lawrow{Complement}{a + a' = 1}{a a' = 0}
+      \lawrow{Domination}{a + 1 = 1}{a \cdot 0 = 0}
+      \midrule
+      \lawrow{De Morgan}{(a + b)' = a'b'}{(ab)' = a' + b'}
+      \lawrow{Absorption}{a + ab = a}{a(a + b) = a}
+      \lawrow{Consensus}{ab + a'c + bc = ab + a'c}{(a + b)(a' + c)(b + c) = (a + b)(a' + c)}
+      \lawrow{Transposition}{(a + b)(a' + c) = ac + a'b}{}
+      \lawrow{Involution}{(a')' = a}{}
+      \bottomrule
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+% =============================================================
+\section{Simplifying expressions}
+
+\begin{frame}{Two quick ones}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.49\textwidth}
+      \small
+      \begin{derivation}
+        $ab + ab'$ & $= a(b + b')$ & \by{distributivity} \\
+                   & $= a \cdot 1$ & \by{complement} \\
+                   & $= a$ & \by{identity} \\
+      \end{derivation}
+    \column{0.49\textwidth}
+      \small
+      \begin{derivation}
+        $(a + b)(a + b')$ & $= a + bb'$ & \by{distributivity} \\
+                          & $= a + 0$ & \by{complement} \\
+                          & $= a$ & \by{identity} \\
+      \end{derivation}
+  \end{columns}
+
+  \bigskip
+  The two are duals of each other. Whatever $b$ is, the result depends only on $a$.
+
+  \begin{remark}[Coming back]
+    Combining two terms that differ in one variable, like $ab$ and $ab'$, is the idea
+    behind Karnaugh maps \unitref{5}.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{A longer one}
+  Simplify $f = a'b + ab + ab'$.
+
+  \medskip
+  \small
+  \begin{derivation}
+    $a'b + ab + ab'$ & $= a'b + a(b + b')$ & \by{distributivity} \\
+                     & $= a'b + a \cdot 1 = a'b + a$ & \by{complement, identity} \\
+                     & $= a + a'b$ & \by{commutativity} \\
+                     & $= (a + a')(a + b)$ & \by{distributivity} \\
+                     & $= 1 \cdot (a + b) = a + b$ & \by{complement, identity} \\
+  \end{derivation}
+
+  \medskip
+  \normalsize
+  Three products and two sums became one sum. Check one row: $a = 0$, $b = 1$ gives
+  $1 + 0 + 0 = 1$ on the left and $0 + 1 = 1$ on the right.
+\end{frame}
+
+\begin{frame}{Why simplify?}
+  \begin{itemize}
+    \item Each operation will become a logic gate \unitref{6}. A simpler expression
+      is a smaller, cheaper and often faster circuit.
+    \item $a'b + ab + ab'$ needs two NOTs, three ANDs and two ORs;
+      $a + b$ needs one OR.
+    \item Algebra finds simplifications, but you have to see them. Karnaugh maps
+      give a systematic way for small functions \unitref{5}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Try it}
+  Simplify, naming the law for each step.
+  \begin{enumerate}
+    \item $a + a'b$\par
+      \uncover<2->{\wosmlabel{Answer:} $(a + a')(a + b) = 1 \cdot (a + b) = a + b$
+      \quad (distributivity, complement, identity)}
+    \item $a(a' + b)$\par
+      \uncover<3->{\wosmlabel{Answer:} $aa' + ab = 0 + ab = ab$
+      \quad (distributivity, complement, identity)}
+    \item $(a' + b')'$\par
+      \uncover<4->{\wosmlabel{Answer:} $(a')'(b')' = ab$
+      \quad (De Morgan, involution)}
+  \end{enumerate}
+
+  \uncover<5->{\begin{remark}
+    The first two are a pair of duals; compare them with absorption.
+  \end{remark}}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Boolean algebra: the values 0 and 1, and the operations $+$ (OR),
+      $\cdot$ (AND) and $'$ (NOT).
+    \item Seven laws: commutativity, associativity, distributivity, identity,
+      idempotence, complement and domination. Each comes as a dual pair.
+    \item Theorems: De Morgan, absorption, consensus, transposition and involution.
+    \item Prove equations by exhaustion ($2^n$ rows) or algebraically, one law per
+      step.
+    \item Simplifying an expression simplifies the circuit that computes it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~2.2 of the book, \emph{Boolean Algebra}.
+    \item Prove the dual of absorption, $a(a + b) = a$, by exhaustion.
+    \item Prove the dual of consensus,
+      $(a + b)(a' + c)(b + c) = (a + b)(a' + c)$, by the duality principle and by
+      exhaustion.
+    \item Simplify $abc + abc' + ab'$.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{4}}
+    Boolean functions: truth tables, and the canonical sum-of-products and
+    product-of-sums forms.
+  \end{block}
+\end{frame}
+
+\end{document}

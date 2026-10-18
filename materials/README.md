@@ -6,7 +6,7 @@ are uploaded to the course pages on Moodle.
 | Folder | What it holds |
 |---|---|
 | `latex/` | The shared look: `wosm.sty`, `wosm-slides.cls` (lectures), `wosm-article.cls` (exercise sheets, project briefs). Change these for every course or not at all. |
-| `<course>/lectures/` | One `lecture-NN.tex` per lecture, with its compiled PDFs; images in `figures/` |
+| `<course>/lectures/` | One `lecture-NN.tex` per lecture, with its compiled PDFs; images in `figures/`; settings shared by the course's lectures (course, author, semester, helpers) in a `.sty` file |
 
 `<course>` is the lower-cased course code, as in `src/content/courses/` (e.g. `cs102-f26`).
 
@@ -28,3 +28,7 @@ committed. Files whose name starts with `_` are skipped.
 | Course | Lecture | Unit | Book |
 |---|---|---|---|
 | CS102-F26 | `lecture-01.tex` — The Essence of Computing | 1 | Chapter 1 |
+| CS102-F26 | `lecture-02.tex` — Numeral Systems | 2 | Section 2.1 |
+| CS102-F26 | `lecture-03.tex` — Boolean Algebra | 3 | Section 2.2 |
+
+CS102-F26 lectures start with `\usepackage{cs102-lectures}` (`cs102-f26/lectures/cs102-lectures.sty`).

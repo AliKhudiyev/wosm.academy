@@ -1,0 +1,483 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 02 -- Numeral Systems (Unit 2)
+%  Follows Section 2.1 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-02
+% =============================================================
+\documentclass{wosm-slides}
+\usepackage{cs102-lectures}
+
+\title[Lecture 02 \textperiodcentered\ Numeral Systems]{Numeral Systems}
+\subtitle{Lecture 02: additive and positional systems; binary, octal and hexadecimal}
+
+% ---------- Helpers for this lecture --------------------------
+% A numeral in a given base, digits upright: \base{2F}{16}.
+\newcommand*\base[2]{\ensuremath{\mathrm{#1}_{#2}}}
+
+% Steps of a conversion, one row each.
+\newenvironment{steps}[1]
+  {\begin{tabular}{@{}#1@{}}\toprule}
+  {\bottomrule\end{tabular}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Ways of counting}
+
+\begin{frame}{Numbers and numerals}
+  Counting is an unavoidable part of human life, and people have invented many
+  different ways of writing counts down.
+
+  \begin{definition}[Numeral system]
+    A \emph{numeral system} is a way of writing numbers with symbols. A
+    \emph{numeral} is one number written in that way.
+  \end{definition}
+
+  \medskip
+  One number, four numerals:
+  \begin{center}
+    \begin{tabular}{@{}cccc@{}}
+      $|\,|\,|\,|\,|\,|$ & VI & 6 & \base{110}{2} \\[2pt]
+      \wosmlabel{tally} & \wosmlabel{Roman} & \wosmlabel{decimal} & \wosmlabel{binary} \\
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  There are two big families: \alert{additive} and \alert{positional} systems.
+\end{frame}
+
+\begin{frame}{Additive systems}
+  In an additive system, each symbol has a fixed value, and the number is the sum
+  of the symbols. Where a symbol stands does not change its magnitude.
+
+  \medskip
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.4\textwidth}
+      \textbf{Roman numerals}\par\smallskip
+      \footnotesize
+      \begin{tabular}{@{}*{7}{c}@{}}
+        \toprule
+        I & V & X & L & C & D & M \\
+        \midrule
+        1 & 5 & 10 & 50 & 100 & 500 & 1000 \\
+        \bottomrule
+      \end{tabular}
+    \column{0.56\textwidth}
+      \begin{itemize}
+        \item $\mathrm{VI} = 5 + 1 = 6$
+        \item $\mathrm{IV} = -1 + 5 = 4$: a smaller symbol before a larger one is
+          subtracted, but its magnitude is still 1
+        \item $\mathrm{MMXXVI} = 1000 + 1000 + 10 + 10 + 5 + 1 = 2026$
+      \end{itemize}
+  \end{columns}
+
+  \bigskip
+  Tally marks are additive too: every mark is worth 1, wherever it is.
+\end{frame}
+
+\begin{frame}{The trouble with additive systems}
+  \begin{itemize}
+    \item There is no symbol for zero.
+    \item Larger numbers need new symbols, or very long numerals:
+      $3888 = \mathrm{MMMDCCCLXXXVIII}$ takes 15 symbols.
+    \item Written arithmetic is awkward. Try multiplying XLVII by XXXVIII on paper.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    Positional systems are far more useful in almost every area of mathematics and
+    in digital logic design. From now on we work only with them.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Positional systems}
+  In a positional system, the \alert{place} of a digit decides its magnitude.
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{@{}r@{\quad}c@{\quad}l@{}}
+      123 & $=$ & $100 + 20 + 3$ \\
+      321 & $=$ & $300 + 20 + 1$ \\
+    \end{tabular}
+  \end{center}
+  The same three digits, three different numbers.
+  \begin{itemize}
+    \item Zero holds a place: 105 and 15 differ only by the 0.
+    \item Our decimal digits are positional with ten digits. Other choices are just
+      as possible.
+  \end{itemize}
+
+  \begin{example}[Base 60, still in use]
+    The Babylonians counted in base 60, and we still do for time:
+    1\,h 15\,min 30\,s is $1 \cdot 60^2 + 15 \cdot 60 + 30 = 4530$ seconds.
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{The radix}
+
+\begin{frame}{Radix and digits}
+  \begin{definition}[Radix]
+    The \emph{radix}, or \emph{base}, $b$ of a positional system is the number of
+    elementary symbols, the \emph{digits}, that all its numerals are made of. The
+    digits stand for $0, 1, \dots, b - 1$.
+  \end{definition}
+
+  Each digit is multiplied by the power of $b$ for its position, counted from 0 on
+  the right, and the results are added:
+  \[
+    \overline{d_n d_{n-1} \dots d_0}_{\,b}
+      = d_n \cdot b^n + d_{n-1} \cdot b^{n-1} + \dots + d_0 \cdot b^0 .
+  \]
+
+  \begin{example}[Decimal, $b = 10$]
+    $2026 = 2 \cdot 10^3 + 0 \cdot 10^2 + 2 \cdot 10^1 + 6 \cdot 10^0$
+  \end{example}
+\end{frame}
+
+\begin{frame}{Binary, octal and hexadecimal}
+  \begin{center}
+    \begin{tabular}{@{}llll@{}}
+      \toprule
+      System & Radix & Digits & Example \\
+      \midrule
+      binary & 2 & 0, 1 & $\base{101101}{2} = 45$ \\
+      octal & 8 & 0, 1, \dots, 7 & $\base{55}{8} = 45$ \\
+      decimal & 10 & 0, 1, \dots, 9 & $\base{45}{10} = 45$ \\
+      hexadecimal & 16 & 0, 1, \dots, 9, A, B, C, D, E, F & $\base{2D}{16} = 45$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  \begin{itemize}
+    \item Hexadecimal needs sixteen digits, for the values 0 to 15. After 9 come
+      the letters: A $= 10$, B $= 11$, \dots, F $= 15$.
+    \item The value formula is the same for every radix:
+      $\overline{b_n \dots b_0}_{\,2} = b_n \cdot 2^n + \dots + b_0$, and so on.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Counting in four bases}
+  \small
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.47\textwidth}
+      \centering
+      \begin{tabular}{@{}rrrr@{}}
+        \toprule
+        dec & bin & oct & hex \\
+        \midrule
+        0 & 0000 & 0 & 0 \\
+        1 & 0001 & 1 & 1 \\
+        2 & 0010 & 2 & 2 \\
+        3 & 0011 & 3 & 3 \\
+        4 & 0100 & 4 & 4 \\
+        5 & 0101 & 5 & 5 \\
+        6 & 0110 & 6 & 6 \\
+        7 & 0111 & 7 & 7 \\
+        \bottomrule
+      \end{tabular}
+    \column{0.47\textwidth}
+      \centering
+      \begin{tabular}{@{}rrrr@{}}
+        \toprule
+        dec & bin & oct & hex \\
+        \midrule
+        8 & 1000 & 10 & 8 \\
+        9 & 1001 & 11 & 9 \\
+        10 & 1010 & 12 & A \\
+        11 & 1011 & 13 & B \\
+        12 & 1100 & 14 & C \\
+        13 & 1101 & 15 & D \\
+        14 & 1110 & 16 & E \\
+        15 & 1111 & 17 & F \\
+        \bottomrule
+      \end{tabular}
+  \end{columns}
+
+  \medskip
+  \normalsize
+  In every base, counting works like an odometer: when a digit passes its largest
+  value, it goes back to 0 and the next digit goes up by one ($\base{1111}{2} + 1 =
+  \base{10000}{2} = 16$).
+\end{frame}
+
+\begin{frame}{Why binary?}
+  A switch is on or off: two states, so two digits (Lecture 01).
+
+  \begin{itemize}
+    \item One binary digit is a \alert{bit}. Eight bits are a \alert{byte}; four bits
+      are a \emph{nibble}, exactly one hexadecimal digit.
+    \item $n$ bits have $2^n$ states, so they can stand for the numbers $0$ to
+      $2^n - 1$.
+  \end{itemize}
+
+  \medskip
+  \begin{center}
+    \small
+    \begin{tabular}{@{}l*{11}{r}@{}}
+      \toprule
+      $n$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 \\
+      $2^n$ & 1 & 2 & 4 & 8 & 16 & 32 & 64 & 128 & 256 & 512 & 1024 \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  How many bits do you need for the numbers 0 to 999?
+  \uncover<2->{$2^9 = 512$ is too few and $2^{10} = 1024$ is enough: 10 bits.}
+\end{frame}
+
+\begin{frame}{Writing the base}
+  The digits alone do not say which base is meant: is 10 ten, two, eight or
+  sixteen?
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{@{}lllll@{}}
+      \toprule
+      Where & Binary & Octal & Decimal & Hexadecimal \\
+      \midrule
+      these slides & \base{1011}{2} & \base{13}{8} & 11 & \base{B}{16} \\
+      many programming languages & \texttt{0b1011} & \texttt{0o13} & \texttt{11}
+        & \texttt{0xB} \\
+      Verilog (4 bits) & \texttt{4'b1011} & \texttt{4'o13} & \texttt{4'd11}
+        & \texttt{4'hB} \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  The book writes $\overline{d_n \dots d_0}_{\,b}$, with a bar over the digits.
+  Numbers without a base are decimal.
+\end{frame}
+
+% =============================================================
+\section{Converting between bases}
+
+\begin{frame}{To decimal: expand}
+  Multiply each digit by its power of the base and add.
+
+  \medskip
+  \begin{align*}
+    \base{101101}{2} &= 1 \cdot 32 + 0 \cdot 16 + 1 \cdot 8 + 1 \cdot 4
+      + 0 \cdot 2 + 1 \cdot 1 = 45 \\
+    \base{57}{8} &= 5 \cdot 8 + 7 = 47 \\
+    \base{2F}{16} &= 2 \cdot 16 + 15 = 47
+  \end{align*}
+
+  \medskip
+  \begin{remark}[A shortcut for binary]
+    Every binary digit is 0 or 1, so just add up the powers of 2 where the bits are
+    1: $\base{101101}{2} = 32 + 8 + 4 + 1 = 45$.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{To decimal: Horner's rule}
+  Read the digits from the left. Keep one number $v$, starting at 0, and for each
+  digit $d$: \quad $v \leftarrow v \cdot b + d$.
+
+  \medskip
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.4\textwidth}
+      \small
+      \begin{steps}{lrl}
+        Digit & $v$ & \\
+        \midrule
+        1 & 1 & $= 0 \cdot 2 + 1$ \\
+        0 & 2 & $= 1 \cdot 2 + 0$ \\
+        1 & 5 & $= 2 \cdot 2 + 1$ \\
+        1 & 11 & $= 5 \cdot 2 + 1$ \\
+        0 & 22 & $= 11 \cdot 2 + 0$ \\
+        1 & 45 & $= 22 \cdot 2 + 1$ \\
+      \end{steps}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item Converting \base{101101}{2}: no powers to compute, one
+          multiplication and one addition per digit.
+        \item A computation in the sense of Lecture 01: the state is $v$, the input
+          is the next digit.
+      \end{itemize}
+  \end{columns}
+
+  \medskip
+  It works because the powers can be factored out:\par\smallskip
+  \centering
+  $\base{101101}{2} = ((((1 \cdot 2 + 0) \cdot 2 + 1) \cdot 2 + 1) \cdot 2 + 0)
+   \cdot 2 + 1$\par
+\end{frame}
+
+\begin{frame}{From decimal: repeated division}
+  Divide by the base and write down the remainder; repeat with the quotient until
+  it is 0. The remainders, read from the \alert{last to the first}, are the digits.
+
+  \medskip
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.4\textwidth}
+      \small
+      \begin{steps}{rrr}
+        $N$ & $N \div 2$ & remainder \\
+        \midrule
+        45 & 22 & 1 \\
+        22 & 11 & 0 \\
+        11 & 5 & 1 \\
+        5 & 2 & 1 \\
+        2 & 1 & 0 \\
+        1 & 0 & 1 \\
+      \end{steps}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item Read upwards: $45 = \base{101101}{2}$.
+        \item Why it works: $N = q \cdot b + d_0$, so the remainder is the last
+          digit $d_0$, and the quotient $q$ has the remaining digits
+          $d_n \dots d_1$.
+        \item The same method works for any base.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Example: 2026 in hexadecimal}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.44\textwidth}
+      \small
+      \begin{steps}{rrrl}
+        $N$ & $N \div 16$ & remainder & \\
+        \midrule
+        2026 & 126 & 10 & A \\
+        126 & 7 & 14 & E \\
+        7 & 0 & 7 & 7 \\
+      \end{steps}
+    \column{0.5\textwidth}
+      Read upwards: $2026 = \base{7EA}{16}$.
+
+      \medskip
+      Check by expanding:
+      \[
+        7 \cdot 256 + 14 \cdot 16 + 10 = 1792 + 224 + 10 = 2026 .
+      \]
+  \end{columns}
+
+  \bigskip
+  \begin{warning}[Common mistake]
+    Reading the remainders from the top gives \base{AE7}{16}, which is 2791. The
+    first remainder is the \emph{last} digit.
+  \end{warning}
+\end{frame}
+
+\begin{frame}{Binary to octal and hexadecimal: group the bits}
+  Since $8 = 2^3$ and $16 = 2^4$, every octal digit is exactly 3 bits and every
+  hexadecimal digit exactly 4 bits. Group the bits from the \alert{right}.
+
+  \medskip
+  Take \base{1011010111}{2}:
+  \begin{center}
+    \begin{tabular}{@{}lccccc@{}}
+      \toprule
+      groups of 4 & & 0010 & 1101 & 0111 & \\
+      hexadecimal & & 2 & D & 7 & $= \base{2D7}{16}$ \\
+      \midrule
+      groups of 3 & 001 & 011 & 010 & 111 & \\
+      octal & 1 & 3 & 2 & 7 & $= \base{1327}{8}$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  All three are 727. Pad the leftmost group with zeros if it is short.
+\end{frame}
+
+\begin{frame}{And back again}
+  \begin{itemize}
+    \item Hexadecimal to binary: write each digit as 4 bits.\par
+      $\base{C3}{16} = \texttt{1100}\;\texttt{0011} = \base{11000011}{2} = 195$
+    \item Octal to binary: write each digit as 3 bits.\par
+      $\base{57}{8} = \texttt{101}\;\texttt{111} = \base{101111}{2} = 47$
+    \item Octal to hexadecimal, or back: go through binary.\par
+      $\base{1327}{8} = \base{1011010111}{2} = \base{2D7}{16}$
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    This is why hexadecimal is everywhere in computing: it is a short way of writing
+    bits. One byte is always two hexadecimal digits, from \base{00}{16} to
+    \base{FF}{16}.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item Write 100 in binary, octal and hexadecimal.\par
+      \uncover<2->{\wosmlabel{Answer:} $100 = 64 + 32 + 4 = \base{1100100}{2}$;
+      $\texttt{1}\;\texttt{100}\;\texttt{100} = \base{144}{8}$;
+      $\texttt{0110}\;\texttt{0100} = \base{64}{16}$.}
+    \item What is \base{FF}{16} in binary and in decimal?\par
+      \uncover<3->{\wosmlabel{Answer:} $\base{11111111}{2} = 2^8 - 1 = 255$, the
+      largest number in one byte.}
+    \item Which is larger: \base{1000000}{2} or \base{77}{8}?\par
+      \uncover<4->{\wosmlabel{Answer:} $\base{1000000}{2} = 64$ and
+      $\base{77}{8} = 63$, so \base{1000000}{2}, by one.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Numbers in the DX8}
+
+\begin{frame}{Numbers in the DX8}
+  The computer we build in this module works with bits everywhere:
+  \begin{itemize}
+    \item it is an 8-bit computer: one byte holds a number from 0 to 255;
+    \item its 8 registers are selected by 3-bit addresses, \base{000}{2} to
+      \base{111}{2}, because $2^3 = 8$;
+    \item its RAM has $2^8 = 256$ bytes, so a memory address is one byte,
+      \base{00}{16} to \base{FF}{16};
+    \item an instruction is 16 bits: four hexadecimal digits.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}[Coming back]
+    So far every number is 0 or positive. Negative numbers in binary, and how to add
+    them, come with two's complement \unitref{16}.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item In an additive system each symbol has a fixed value; in a positional
+      system the place of a digit decides its magnitude.
+    \item With radix $b$: digits $0, \dots, b - 1$ and
+      $\overline{d_n \dots d_0}_{\,b} = \sum_i d_i \cdot b^i$.
+    \item To decimal: expand, or use Horner's rule $v \leftarrow v \cdot b + d$.
+      From decimal: divide repeatedly, read the remainders from the last.
+    \item Binary to octal or hexadecimal: group the bits by 3 or by 4, from the
+      right.
+    \item $n$ bits give $2^n$ numbers, from $0$ to $2^n - 1$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~2.1 of the book, \emph{Numeral Systems}.
+    \item Practise: write your year of birth in binary, octal and hexadecimal, and
+      check each answer by converting it back.
+    \item Count from 0 to 31 in binary. Which bit changes at every step, and which
+      only once?
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{3}}
+    Boolean algebra: an algebra with only the values 0 and 1, and its laws and
+    theorems.
+  \end{block}
+\end{frame}
+
+\end{document}

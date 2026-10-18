@@ -23,6 +23,7 @@ npm run dev        # http://localhost:4321
 | `npm run linkcheck` | Check internal links and anchors in `dist/` (run after `build`) |
 | `npm run brand` | Regenerate favicon, touch icon, OG image and logo SVGs |
 | `npm run pdfs` | Compile the module descriptions (.tex) to the PDFs offered on course pages (needs `pdflatex`) |
+| `npm run materials` | Compile the course materials in `materials/` (lecture slides, exercise sheets) to PDFs (needs `pdflatex`) |
 
 ## Editing content
 

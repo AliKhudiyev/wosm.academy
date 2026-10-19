@@ -5,7 +5,11 @@
 %
 %  Build the slides and the print handout:  npm run materials -- lecture-03
 % =============================================================
-\documentclass{wosm-slides}
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
 \usepackage{cs102-lectures}
 
 \title[Lecture 03 \textperiodcentered\ Boolean Algebra]{Boolean Algebra}

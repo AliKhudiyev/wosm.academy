@@ -1,0 +1,443 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 08 -- Encoders and Decoders (Unit 8)
+%  Follows Sections 4.1.3 and 4.1.4 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-08
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/19]
+
+\title[Lecture 08 \textperiodcentered\ Encoders and Decoders]{Encoders and Decoders}
+\subtitle{Lecture 08: one-hot codes, encoders, priority encoders and decoders}
+
+% ---------- Helpers for this lecture --------------------------
+% Wider input spacing than the course default, so input labels fit.
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.36cm},
+  or gate/.append style={logic gate input sep=0.36cm}}}
+
+% A column of AND gates, each labelled with its inputs, one output each:
+% \andcolumn{<input labels>/<output label>, ...}
+\newcommand*\andcolumn[1]{%
+  \begin{tikzpicture}[gates]
+    \foreach \t/\o [count=\i from 0] in {#1} {
+      \node[and gate, inputs=nn] (g\i) at (0,-\i*0.8) {};
+      \draw[wire] (g\i.input 1) -- ++(-0.3,0);
+      \draw[wire] (g\i.input 2) -- ++(-0.3,0);
+      \node[left, font=\scriptsize] at ($(g\i.west)+(-0.3,0)$) {$\t$};
+      \draw[wire] (g\i.output) -- ++(0.35,0) node[right] {$\o$};
+    }
+  \end{tikzpicture}}
+
+% A block with a name, for block diagrams.
+\tikzset{block/.style={draw=wosm-text, line width=0.6pt, minimum width=1.3cm,
+  minimum height=1.5cm, font=\scriptsize, align=center}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{One-hot codes}
+
+\begin{frame}{One-hot encoding}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.4\textwidth}
+      \centering
+      \begin{tabular}{@{}rcc@{}}
+        \toprule
+        Decimal & Binary & One-hot \\
+        \midrule
+        0 & 00 & 0001 \\
+        1 & 01 & 0010 \\
+        2 & 10 & 0100 \\
+        3 & 11 & 1000 \\
+        \bottomrule
+      \end{tabular}
+    \column{0.56\textwidth}
+      \begin{definition}[One-hot code]
+        In an $n$-bit \emph{one-hot} code, exactly one bit is 1 (\enquote{hot}) and
+        the other $n - 1$ are 0. The number $k$ has its hot bit $k$ places from the
+        right, at index $k$.
+      \end{definition}
+  \end{columns}
+
+  \bigskip
+  \begin{example}[7 in a 10-bit one-hot code]
+    Bit 7, counting from bit 0 on the right, is the hot one: \texttt{0010000000}.
+  \end{example}
+\end{frame}
+
+\begin{frame}{Binary or one-hot?}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.47\textwidth}
+      \textbf{Binary}
+      \begin{itemize}
+        \item $n$ bits give $2^n$ values: compact.
+        \item To ask \enquote{is the value 5?}, you need a circuit that compares all
+          the bits.
+      \end{itemize}
+    \column{0.47\textwidth}
+      \textbf{One-hot}
+      \begin{itemize}
+        \item $n$ bits give only $n$ values: many more wires.
+        \item Each bit already answers \enquote{is the value $k$?}: just look at bit
+          $k$.
+      \end{itemize}
+  \end{columns}
+
+  \bigskip
+  Circuits often need both, so we need converters:
+  \begin{itemize}
+    \item an \alert{encoder} turns one-hot into binary;
+    \item a \alert{decoder} turns binary into one-hot.
+  \end{itemize}
+
+  \medskip
+  \wosmlabel{The DX8's stepper (Lecture 01) is one-hot: it turns on one of its
+  outputs $s_1, \dots, s_8$ at a time.}
+\end{frame}
+
+% =============================================================
+\section{Encoders}
+
+\begin{frame}{The 4-to-2 encoder}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.38\textwidth}
+      \centering
+      \begin{tabular}{@{}cccc|cc@{}}
+        $x_3$ & $x_2$ & $x_1$ & $x_0$ & $y_1$ & $y_0$ \\
+        \midrule
+        0 & 0 & 0 & 1 & 0 & 0 \\
+        0 & 0 & 1 & 0 & 0 & 1 \\
+        0 & 1 & 0 & 0 & 1 & 0 \\
+        1 & 0 & 0 & 0 & 1 & 1 \\
+      \end{tabular}
+    \column{0.58\textwidth}
+      \begin{definition}[Encoder]
+        A $2^N$-to-$N$ \emph{encoder} turns a $2^N$-bit one-hot input into the
+        $N$-bit binary number of its hot bit.
+      \end{definition}
+      \wosmlabel{The book calls it a 4x2 encoder.}
+  \end{columns}
+
+  \bigskip
+  Only four inputs are valid, so the table has four rows. Read off each output:
+  \begin{itemize}
+    \item $y_1$ is 1 for the values 2 and 3: \quad $y_1 = x_3 + x_2$;
+    \item $y_0$ is 1 for the values 1 and 3: \quad $y_0 = x_3 + x_1$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The circuit}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.46\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[or gate, inputs=nn] (o1) at (2.4,1.15) {};
+        \node[or gate, inputs=nn] (o0) at (2.4,-0.25) {};
+        \node (x3) at (0,1.6) {$x_3$};
+        \node (x2) at (0,0.95) {$x_2$};
+        \node (x1) at (0,0.3) {$x_1$};
+        \node (x0) at (0,-0.6) {$x_0$};
+        \draw[wire] (x3) -- (0.7,1.6) |- (o1.input 1);
+        \draw[wire] (0.7,1.6) |- (o0.input 1);
+        \fill[wosm-text] (0.7,1.6) circle (1.5pt);
+        \draw[wire] (x2) -- (1.2,0.95) |- (o1.input 2);
+        \draw[wire] (x1) -- (1.5,0.3) |- (o0.input 2);
+        \draw[wire] (x0) -- ++(0.5,0);
+        \draw[wire] (o1.output) -- ++(0.35,0) node[right] {$y_1$};
+        \draw[wire] (o0.output) -- ++(0.35,0) node[right] {$y_0$};
+      \end{tikzpicture}
+    \column{0.5\textwidth}
+      \begin{itemize}
+        \item Two OR gates. $x_0$ is not connected at all: when it is the hot bit,
+          the output is 00 anyway.
+        \item In general, output bit $j$ is the OR of the inputs whose index has a 1
+          in bit $j$.
+      \end{itemize}
+  \end{columns}
+
+  \bigskip
+  \begin{example}[The 8-to-3 encoder]
+    $y_2 = x_4 + x_5 + x_6 + x_7$, \quad $y_1 = x_2 + x_3 + x_6 + x_7$, \quad
+    $y_0 = x_1 + x_3 + x_5 + x_7$
+  \end{example}
+\end{frame}
+
+\begin{frame}{Two problems}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.3\textwidth}
+      \centering
+      \begin{tabular}{@{}c|c@{}}
+        input & $y_1 y_0$ \\
+        \midrule
+        0001 & 00 \\
+        \alert{0000} & \alert{00} \\
+        \alert{1001} & \alert{11} \\
+        \alert{0110} & \alert{11} \\
+      \end{tabular}
+    \column{0.66\textwidth}
+      \begin{enumerate}
+        \item \textbf{No hot bit.} Input 0000 gives 00, exactly like the valid input
+          0001. The output cannot tell us the input was not one-hot.
+        \item \textbf{Several hot bits.} Inputs such as 1001 or 0110 give 11, an
+          answer that appears nowhere in the truth table.
+      \end{enumerate}
+  \end{columns}
+
+  \bigskip
+  \begin{itemize}
+    \item The book's first fix adds a \alert{valid} output $v$: 1 exactly when the
+      input is one-hot,
+      \[ v = x_3x_2'x_1'x_0' + x_3'x_2x_1'x_0' + x_3'x_2'x_1x_0' + x_3'x_2'x_1'x_0 . \]
+    \item That flags bad inputs, but still gives no useful answer for them. The
+      priority encoder does.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Priority encoders}
+
+\begin{frame}{The priority encoder}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{tabular}{@{}cccc|ccc@{}}
+        $x_3$ & $x_2$ & $x_1$ & $x_0$ & $y_1$ & $y_0$ & $v$ \\
+        \midrule
+        1 & X & X & X & 1 & 1 & 1 \\
+        0 & 1 & X & X & 1 & 0 & 1 \\
+        0 & 0 & 1 & X & 0 & 1 & 1 \\
+        0 & 0 & 0 & 1 & 0 & 0 & 1 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+      \end{tabular}\par\smallskip
+      \wosmlabel{X: either value}
+    \column{0.54\textwidth}
+      \begin{definition}[Priority encoder]
+        A \emph{priority encoder} outputs the index of the \alert{highest} hot bit,
+        and ignores the bits below it. Its output $v$ is 1 when at least one bit is
+        hot.
+      \end{definition}
+  \end{columns}
+
+  \bigskip
+  Every input now has a meaningful output: 1001 gives 11 because $x_3$ wins, and
+  0110 gives 10 because $x_2$ wins.
+\end{frame}
+
+\begin{frame}{Its equations}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{kmap}{4}{4}{x_3x_2}{x_1x_0}{00,01,11,10}{00,01,11,10}
+        \kmaprow{0}{0,0,1,1}\kmaprow{1}{0,0,0,0}
+        \kmaprow{2}{1,1,1,1}\kmaprow{3}{1,1,1,1}
+        \kgroup{2}{0}{3}{3}
+        \kgroup[wosm-brick]{-1}{2}{0}{3}\kgroup[wosm-brick]{3}{2}{4}{3}
+      \end{kmap}\par\smallskip
+      \wosmlabel{Karnaugh map of $y_0$}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item $y_0$ is 1 when the highest hot bit is $x_3$ or $x_1$:
+          \textcolor{wosm-accent}{$x_3$} or \textcolor{wosm-brick}{$x_2'x_1$}.
+        \item $y_1$ is 1 when it is $x_3$ or $x_2$.
+      \end{itemize}
+      \[ y_1 = x_3 + x_2, \qquad y_0 = x_3 + x_2'x_1 \]
+      \[ v = x_3 + x_2 + x_1 + x_0 \]
+  \end{columns}
+
+  \medskip
+  \wosmlabel{The book's circuit computes $y_0 = x_3 + x_3'x_2'x_1$; it is the same
+  function, since $a + a'b = a + b$ (Lecture 03).}
+\end{frame}
+
+\begin{frame}{Where priority encoders are used}
+  \begin{itemize}
+    \item \textbf{Requests with priorities.} Several devices ask for attention at
+      once; the one with the highest priority is served first, and $v$ says whether
+      anyone is asking at all.
+    \item \textbf{Finding the first 1.} The index of the highest 1 in a word tells,
+      for example, how far a number must be shifted to put its leading 1 first.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    Logisim-evolution has a ready-made Priority Encoder in the Plexers library.
+    Build your own first, then compare.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Decoders}
+
+\begin{frame}{The 2-to-4 decoder}
+  \begin{definition}[Decoder]
+    An $N$-to-$2^N$ \emph{decoder} turns an $N$-bit binary number into the $2^N$-bit
+    one-hot code: the opposite of an encoder.
+  \end{definition}
+
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{tabular}{@{}cc|cccc@{}}
+        $x_1$ & $x_0$ & $y_3$ & $y_2$ & $y_1$ & $y_0$ \\
+        \midrule
+        0 & 0 & 0 & 0 & 0 & 1 \\
+        0 & 1 & 0 & 0 & 1 & 0 \\
+        1 & 0 & 0 & 1 & 0 & 0 \\
+        1 & 1 & 1 & 0 & 0 & 0 \\
+      \end{tabular}
+    \column{0.28\textwidth}
+      \centering
+      \andcolumn{x_1\,x_0/y_3, x_1\,x_0'/y_2, x_1'\,x_0/y_1, x_1'\,x_0'/y_0}
+    \column{0.3\textwidth}
+      Each output is 1 on one row only, so it is a single minterm, $y_i = m_i$:
+      \[ \begin{aligned} y_0 &= x_1'x_0' & y_1 &= x_1'x_0 \\
+                         y_2 &= x_1 x_0' & y_3 &= x_1 x_0 \end{aligned} \]
+  \end{columns}
+
+  \medskip
+  \wosmlabel{The book calls it a 2x4 decoder; its table names the inputs $x_1, x_2$.}
+\end{frame}
+
+\begin{frame}{Decoders and demultiplexers}
+  \begin{itemize}
+    \item A decoder with an \alert{enable} input $e$: \quad $y_i = e \cdot m_i$.
+      With $e = 0$ all outputs are 0.
+    \item That is exactly the 1-to-4 demultiplexer of Lecture 07, with the data
+      input called $e$.
+    \item Enables let small decoders build larger ones:
+  \end{itemize}
+
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[block] (lo) at (0,1.05) {2-to-4\\decoder};
+        \node[block] (hi) at (0,-1.05) {2-to-4\\decoder};
+        \foreach \b/\o/\e in {lo/0/x_2', hi/4/x_2} {
+          \foreach \k in {0,...,3} {
+            \pgfmathtruncatemacro\n{\o+\k}
+            \draw[wire] ($(\b.north east)+(0,-0.25-\k*0.33)$) -- ++(0.4,0)
+              node[right, font=\scriptsize] {$y_{\n}$};
+          }
+          \draw[wire] ($(\b.west)+(0,0.3)$) -- ++(-0.6,0)
+            node[left, font=\scriptsize] {$x_1$};
+          \draw[wire] ($(\b.west)+(0,-0.3)$) -- ++(-0.6,0)
+            node[left, font=\scriptsize] {$x_0$};
+          \draw[wire] (\b.south) -- ++(0,-0.2) node[below, font=\scriptsize,
+            inner sep=1pt] {$e = \e$};
+        }
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      A 3-to-8 decoder from two 2-to-4 decoders: both get $x_1 x_0$, and $x_2$ picks
+      which one is enabled.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{A decoder can compute any function}
+  A decoder's outputs are all the minterms. OR together the ones you need, and you
+  have the canonical sum of products (Lecture 04).
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.44\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[block, minimum height=2.6cm] (d) at (0,0) {3-to-8\\decoder};
+        \foreach \v/\y in {x/0.6, y/0, z/-0.6}
+          \draw[wire] ($(d.west)+(0,\y)$) -- ++(-0.45,0) node[left] {$\v$};
+        \foreach \k in {0,...,7}
+          \draw[wire] ($(d.north east)+(0,-0.2-\k*0.31)$) -- ++(0.25,0)
+            coordinate (y\k) node[right, font=\tiny] {$y_{\k}$};
+        \node[or gate, inputs=nnnn, logic gate input sep=0.22cm] (o) at (2.2,-0.6) {};
+        \foreach \k/\j in {3/1, 5/2, 6/3, 7/4}
+          \draw[wire] ($(y\k)+(0.3,0)$) -- ($(o.input \j)+(-0.3,0)$) -- (o.input \j);
+        \draw[wire] (o.output) -- ++(0.35,0) node[right] {$\mathit{maj}$};
+      \end{tikzpicture}
+    \column{0.52\textwidth}
+      \begin{itemize}
+        \item The majority function: $\sum m(3, 5, 6, 7)$, so
+          $\mathit{maj} = y_3 + y_5 + y_6 + y_7$.
+        \item The sum bit of a 3-bit addition, 1 when an odd number of inputs are 1:
+          $y_1 + y_2 + y_4 + y_7$ \unitref{16}.
+        \item One decoder can feed several ORs, one per function.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Decoders in a computer}
+  \begin{itemize}
+    \item \textbf{Choosing by address.} The DX8 has 8 registers with 3-bit
+      addresses. A 3-to-8 decoder turns the address into one enable signal per
+      register, so only the addressed register is written \unitref{19}.
+    \item \textbf{Memory.} The same idea selects one byte out of 256 with an 8-bit
+      address.
+    \item \textbf{Instructions.} Decoding an instruction's operation code tells the
+      computer which operation to perform \unitref{20}.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    An encoder undoes a decoder: decode a 2-bit number to one-hot, encode it again,
+    and you get the number back.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item Which inputs of an 8-to-3 encoder feed $y_1$?\par
+      \uncover<2->{\small $x_2, x_3, x_6, x_7$: the indices with a 1 in bit 1.}
+    \item A 4-to-2 priority encoder gets 0110. What are $y_1 y_0$ and $v$?\par
+      \uncover<3->{\small The highest hot bit is $x_2$: $y_1 y_0 = 10$, $v = 1$.}
+    \item Write output $y_5$ of a 3-to-8 decoder with inputs $x_2 x_1 x_0$.\par
+      \uncover<4->{\small $y_5 = x_2 x_1' x_0$: the minterm of 101.}
+    \item How many AND gates does a 4-to-16 decoder need, and with how many
+      inputs?\par
+      \uncover<5->{\small Sixteen, one per output, each with four inputs.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item A one-hot code has exactly one bit set; bit $k$ means the value $k$.
+    \item A $2^N$-to-$N$ encoder turns one-hot into binary: output bit $j$ is the OR
+      of the inputs whose index has a 1 in bit $j$.
+    \item A plain encoder is wrong for inputs that are not one-hot. A priority
+      encoder reports the highest hot bit, with $v$ saying whether any bit is hot.
+    \item An $N$-to-$2^N$ decoder turns binary into one-hot: each output is a
+      minterm. With an enable input it is a demultiplexer.
+    \item A decoder and an OR gate compute any function.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Sections~4.1.3 and 4.1.4 of the book.
+    \item In Logisim-evolution, build the 4-to-2 priority encoder and the 2-to-4
+      decoder from gates, and test both on every input.
+    \item Build a 3-to-8 decoder from two 2-to-4 decoders, and use it with an OR
+      gate to compute the majority function.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{9}}
+    Timing of combinational circuits: propagation and contamination delays, and
+    glitches.
+  \end{block}
+\end{frame}
+
+\end{document}

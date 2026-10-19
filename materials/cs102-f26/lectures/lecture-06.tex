@@ -5,7 +5,11 @@
 %
 %  Build the slides and the print handout:  npm run materials -- lecture-06
 % =============================================================
-\documentclass{wosm-slides}
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
 \usepackage{cs102-lectures}[2026/10/19]
 
 \title[Lecture 06 \textperiodcentered\ Logic Gates]{Logic Gates}

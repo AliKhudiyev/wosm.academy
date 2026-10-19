@@ -1,0 +1,406 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 09 -- Timing of Combinational Circuits (Unit 9)
+%  Follows Section 4.2 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-09
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/19]
+
+\title[Lecture 09 \textperiodcentered\ Timing]{Timing}
+\subtitle{Lecture 09: propagation delay, contamination delay and glitches}
+
+% ---------- Helpers for this lecture --------------------------
+% Wider input spacing than the course default, so input labels fit.
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.36cm},
+  or gate/.append style={logic gate input sep=0.36cm}}}
+
+% Timing diagrams, 1 ns per unit, from t = -1 to t = 7.
+% \wave{<row>}{<label>}{<level in each ns, from t = -1 to 6>}
+\newcommand*\wave[3]{%
+  \pgfmathsetmacro\wy{-#1*0.52}
+  \node[left, font=\scriptsize] at (-1.1,\wy+0.14) {#2};
+  \foreach \v [count=\i from -1, remember=\v as \pv (initially X)] in {#3} {
+    \draw[wosm-text, line width=0.9pt] (\i,\wy+\v*0.28) -- (\i+1,\wy+\v*0.28);
+    \if\pv X\else
+      \draw[wosm-text, line width=0.9pt] (\i,\wy+\pv*0.28) -- (\i,\wy+\v*0.28);
+    \fi
+  }}
+% \timeaxis{<rows>}: tick marks under the last row.
+\newcommand*\timeaxis[1]{%
+  \pgfmathsetmacro\wy{-#1*0.52+0.22}
+  \draw[wosm-muted, line width=0.4pt] (-1,\wy) -- (7,\wy);
+  \foreach \t in {0,...,6}
+    \draw[wosm-muted, line width=0.4pt] (\t,\wy) -- ++(0,-0.08)
+      node[below, font=\tiny] {\t};
+  \node[right, font=\tiny, text=wosm-muted] at (7,\wy) {ns};}
+% \tmark{<time>}{<rows>}{<label>}: a dashed line across all rows.
+\newcommand*\tmark[3]{%
+  \draw[wosm-brick, dashed, line width=0.5pt] (#1,0.45) -- (#1,{-#2*0.52+0.22});
+  \node[above, font=\scriptsize, text=wosm-brick] at (#1,0.4) {#3};}
+
+% The example circuit f = xy' + x'yz + z' (book, Figure 4.5).
+% \bookcircuit{<style of the longest path>}{<style of the shortest path>}
+\newcommand*\bookcircuit[2]{%
+  \begin{tikzpicture}[gates, scale=0.88, every node/.append style={transform shape}]
+    \coordinate (left) at (0,0);
+    \node[and gate, inputs=nn] (a1) at (3.6,2.55) {};
+    \node[and gate, inputs=nn] (a2) at (3.6,0.95) {};
+    \node[and gate, inputs=nn] (a3) at (5.3,0.45) {};
+    \node[or gate, inputs=nn] (o1) at (7.0,1.6) {};
+    \node[or gate, inputs=nn] (o2) at (8.7,0.95) {};
+    \node[not gate] (ny) at ($(a1.input 2)+(-1.9,0)$) {};
+    \node[not gate] (nx) at ($(a2.input 1)+(-1.9,0)$) {};
+    \node[not gate] (nz) at (6.9,-0.7) {};
+    \node (x) at (a1.input 1 -| left) {$x$};
+    \node (y) at (a2.input 2 -| left) {$y$};
+    \node (z) at (0,-0.7) {$z$};
+    % x: straight to the first AND, and through a NOT to the second
+    \draw[wire, #1] (x) -- (x -| 0.9,0);
+    \draw[wire] (x -| 0.9,0) -- (a1.input 1);
+    \draw[wire, #1] (x -| 0.9,0) |- (nx.input);
+    \fill[wosm-text] (x -| 0.9,0) circle (1.5pt);
+    \draw[wire, #1] (nx.output) -- (a2.input 1);
+    % y: straight to the second AND, and through a NOT to the first
+    \draw[wire] (y) -- (a2.input 2);
+    \draw[wire] (y -| 0.5,0) |- (ny.input);
+    \fill[wosm-text] (y -| 0.5,0) circle (1.5pt);
+    \draw[wire] (ny.output) -- (a1.input 2);
+    % z: to the third AND, and through a NOT to the last OR
+    \draw[wire, #2] (z) -- (nz.input);
+    \draw[wire] (4.6,-0.7) |- (a3.input 2);
+    \fill[wosm-text] (4.6,-0.7) circle (1.5pt);
+    \draw[wire, #1] (a2.output) -- ++(0.25,0) |- (a3.input 1);
+    \draw[wire] (a1.output) -- ++(0.4,0) |- (o1.input 1);
+    \draw[wire, #1] (a3.output) -- ++(0.25,0) |- (o1.input 2);
+    \draw[wire, #1] (o1.output) -- ++(0.25,0) |- (o2.input 1);
+    \draw[wire, #2] (nz.output) -- ++(0.4,0) |- (o2.input 2);
+    \draw[wire] (o2.output) -- ++(0.35,0) node[right] {$f$};
+    \node[edgelabel, above] at (a1.north) {$xy'$};
+    \node[edgelabel, below=1pt] at (a2.south) {$x'y$};
+    \node[edgelabel, below=1pt] at (a3.south) {$x'yz$};
+  \end{tikzpicture}}
+\tikzset{longest/.style={draw=wosm-brick, line width=1.4pt},
+  shortest/.style={draw=wosm-accent, line width=1.4pt}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Time in circuits}
+
+\begin{frame}{On paper, there is no time}
+  Take $f(x, y, z) = xy' + x'yz + z'$.
+
+  \begin{itemize}
+    \item Computing $f(1, 1, 0)$ by hand might take you 5 seconds. But you only give
+      the answer when you are done, so whoever hears it knows it is right.
+    \item A circuit cannot keep quiet until it is done. Its output wire always
+      carries \emph{some} value, 0 or 1, even while its gates are still working.
+  \end{itemize}
+
+  \bigskip
+  \begin{block}{The question for today}
+    After the inputs change, how long until the output can be trusted? And what does
+    it do in the meantime?
+  \end{block}
+\end{frame}
+
+\begin{frame}{The example circuit}
+  \begin{center}
+    \bookcircuit{}{}
+  \end{center}
+
+  \begin{itemize}
+    \item 0 and 1 are voltages, for example 0\,V and 5\,V. Keep the inputs at
+      $x, y, z = 1, 1, 0$ and the output settles at $f = 1$.
+    \item Then change the inputs to $0, 1, 1$. Here too $f(0, 1, 1) = 1$, so we expect
+      the output to stay at 1. Does it?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Delays}
+  \begin{itemize}
+    \item A signal needs time to travel through wires and through the transistors
+      inside each gate: a \alert{delay}. The longer the wire, the longer the delay.
+    \item To keep things simple, as the book does: \alert{every gate takes exactly
+      1\,ns}, and wires take no time.
+    \item So a gate's output at time $t$ is what its inputs were at time
+      $t - 1\,\mathrm{ns}$.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    Real gates switch in far less than a nanosecond, and different gates have
+    different delays. The method is the same: only the numbers change.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Propagation and contamination delay}
+
+\begin{frame}{Two delays}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \begin{definition}[Propagation delay $t_{pd}$]
+        The \emph{longest} time from a change at the inputs until the outputs have
+        reached their final values.
+      \end{definition}
+      \begin{definition}[Contamination delay $t_{cd}$]
+        The \emph{shortest} time from a change at the inputs until an output starts
+        to change.
+      \end{definition}
+    \column{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}[x=0.55cm]
+        \draw[wosm-text, line width=0.9pt] (-1,0.32) -- (0,0.32) -- (0,0) -- (7,0);
+        \node[left, font=\scriptsize] at (-1.1,0.15) {input};
+        \draw[wosm-text, line width=0.9pt] (-1,-0.6) -- (2,-0.6);
+        \draw[wosm-text, line width=0.9pt] (5,-0.6) -- (7,-0.6);
+        \fill[wosm-rule] (2,-0.62) rectangle (5,-0.26);
+        \draw[wosm-text, line width=0.9pt] (2,-0.6) -- (2,-0.28) -- (5,-0.28);
+        \node[font=\tiny, text=wosm-muted] at (3.5,-0.44) {may change};
+        \node[left, font=\scriptsize] at (-1.1,-0.45) {output};
+        \draw[wosm-brick, dashed, line width=0.5pt] (0,0.6) -- (0,-0.9);
+        \draw[wosm-accent, line width=0.5pt, {Stealth[length=3pt]}-{Stealth[length=3pt]}]
+          (0,-1.0) -- node[below, font=\scriptsize] {$t_{cd}$} (2,-1.0);
+        \draw[wosm-brick, line width=0.5pt, {Stealth[length=3pt]}-{Stealth[length=3pt]}]
+          (0,-1.55) -- node[below, font=\scriptsize] {$t_{pd}$} (5,-1.55);
+      \end{tikzpicture}
+  \end{columns}
+
+  \medskip
+  Before $t_{cd}$ the output still shows the old answer; after $t_{pd}$ it shows the
+  new one. In between, it may do anything.
+\end{frame}
+
+\begin{frame}{Finding the delays: paths}
+  \begin{center}
+    \bookcircuit{longest}{shortest}
+  \end{center}
+
+  \begin{itemize}
+    \item \textcolor{wosm-brick}{Longest path}, the \alert{critical path}:
+      $x \to$ NOT $\to$ AND $\to$ AND $\to$ OR $\to$ OR, 5 gates, so
+      $t_{pd} = 5$\,ns.
+    \item \textcolor{wosm-accent}{Shortest path}: $z \to$ NOT $\to$ OR, 2 gates, so
+      $t_{cd} = 2$\,ns.
+    \item The other four paths from an input to $f$ have 3 or 4 gates.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Gates with different delays}
+  \begin{itemize}
+    \item Each gate has its own $t_{pd}$ and $t_{cd}$, with $t_{cd} \le t_{pd}$.
+    \item The circuit's $t_{pd}$ is the largest sum of gate $t_{pd}$'s along any path
+      from an input to an output.
+    \item Its $t_{cd}$ is the smallest sum of gate $t_{cd}$'s along any path.
+  \end{itemize}
+
+  \bigskip
+  \begin{warning}
+    With different gate delays, the critical path is not always the path with the
+    most gates. Add up the delays of every path, or at least of every path that could
+    be the longest.
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{Glitches}
+
+\begin{frame}{Watching the change, nanosecond by nanosecond}
+  The inputs change from $x, y, z = 1, 1, 0$ to $0, 1, 1$ at $t = 0$.
+
+  \medskip
+  \begin{center}
+    \begin{tabular}{@{}l|c|ccccccc@{}}
+      $t$ (ns) & before & 0 & 1 & 2 & 3 & 4 & 5 & 6 \\
+      \midrule
+      $x'$ & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 \\
+      $z'$ & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+      $x'y$ & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 \\
+      $x'yz$ & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 \\
+      $xy' + x'yz$ & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 \\
+      $f$ & 1 & 1 & 1 & \alert{0} & \alert{0} & \alert{0} & 1 & 1 \\
+    \end{tabular}
+  \end{center}
+
+  \medskip
+  \begin{itemize}
+    \item $z'$ falls after 1\,ns, so $f$ falls after 2\,ns: nothing else is 1 yet.
+    \item The term $x'yz$ needs 4\,ns to rise, so $f$ is back at 1 only after 5\,ns.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The timing diagram}
+  \begin{center}
+    \begin{tikzpicture}[x=0.95cm]
+      \wave{0}{$x$}{1,0,0,0,0,0,0,0}
+      \wave{1}{$z$}{0,1,1,1,1,1,1,1}
+      \wave{2}{$x'$}{0,0,1,1,1,1,1,1}
+      \wave{3}{$z'$}{1,1,0,0,0,0,0,0}
+      \wave{4}{$x'y$}{0,0,0,1,1,1,1,1}
+      \wave{5}{$x'yz$}{0,0,0,0,1,1,1,1}
+      \wave{6}{$xy' + x'yz$}{0,0,0,0,0,1,1,1}
+      \wave{7}{$f$}{1,1,1,0,0,0,1,1}
+      \timeaxis{8}
+      \tmark{2}{8}{$t_{cd}$}
+      \tmark{5}{8}{$t_{pd}$}
+    \end{tikzpicture}
+  \end{center}
+  \wosmlabel{$y$ stays 1 throughout. Time 0 is when $x$ and $z$ change.}
+\end{frame}
+
+\begin{frame}{Glitches}
+  \begin{definition}[Glitch]
+    A \emph{glitch} is a short wrong value at an output while the circuit settles
+    after its inputs change.
+  \end{definition}
+
+  \begin{itemize}
+    \item Here $f$ should stay at 1, but it is 0 from 2\,ns to 5\,ns.
+    \item Anyone who reads $f$ in that window gets the wrong answer.
+    \item After $t_{pd}$ the output is always right. So the simplest rule is: wait at
+      least $t_{pd}$ after the inputs change, then read the output.
+  \end{itemize}
+
+  \bigskip
+  \wosmlabel{This needs $t_{pd}$ to be known, which is why we compute it.}
+\end{frame}
+
+\begin{frame}{A glitch from a single input}
+  The multiplexer of Lecture 07, $y = x_1 s' + x_2 s$, with $x_1 = x_2 = 1$. Then
+  $y = 1$ whatever $s$ is. Now switch $s$ from 1 to 0:
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.56\textwidth}
+      \centering
+      \begin{tikzpicture}[x=0.75cm]
+        \wave{0}{$s$}{1,0,0,0,0,0,0,0}
+        \wave{1}{$s'$}{0,0,1,1,1,1,1,1}
+        \wave{2}{$x_2 s$}{1,1,0,0,0,0,0,0}
+        \wave{3}{$x_1 s'$}{0,0,0,1,1,1,1,1}
+        \wave{4}{$y$}{1,1,1,0,1,1,1,1}
+        \timeaxis{5}
+      \end{tikzpicture}
+    \column{0.4\textwidth}
+      \begin{itemize}
+        \item $x_2 s$ turns off after 1\,ns.
+        \item $x_1 s'$ waits for the NOT gate, and turns on only after 2\,ns.
+        \item For 1\,ns neither door is open: $y$ glitches to 0.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Removing the glitch}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmap}{4}{2}{x_1x_2}{s}{00,01,11,10}{0,1}
+        \kmaprow{0}{0,0}\kmaprow{1}{0,1}\kmaprow{2}{1,1}\kmaprow{3}{1,0}
+        \kgroup{2}{0}{3}{0}
+        \kgroup[wosm-brick]{1}{1}{2}{1}
+        \kgroup[wosm-text]{2}{0}{2}{1}
+      \end{kmap}
+    \column{0.6\textwidth}
+      \begin{itemize}
+        \item The change goes from cell 111 to cell 110: two 1-cells next to each other
+          but in \alert{different groups}.
+        \item Add the group that covers both, $x_1 x_2$: the consensus term we left
+          out in Lecture 07.
+        \item $y = x_1 s' + x_2 s + x_1 x_2$ is the same function, and $x_1 x_2$ stays
+          1 while $s$ changes: no glitch.
+      \end{itemize}
+  \end{columns}
+
+  \bigskip
+  \begin{remark}
+    The price is one more gate. Usually we do not pay it: we wait for $t_{pd}$ instead,
+    and a clock tells every part of the computer when to read \unitref{11--14}.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Why timing matters}
+
+\begin{frame}{The speed limit}
+  \begin{itemize}
+    \item A result can only be used $t_{pd}$ after the inputs change. With
+      $t_{pd} = 5$\,ns, that is at most one result every 5\,ns:
+      \[ \frac{1}{5\,\mathrm{ns}} = 200 \text{ million results per second.} \]
+    \item To make a circuit faster, shorten its critical path.
+    \item In sequential circuits both delays matter: $t_{pd}$ sets how fast the clock
+      can tick, and $t_{cd}$ how soon a stored value may be disturbed. These are the
+      setup and hold time constraints \unitref{14}.
+  \end{itemize}
+
+  \bigskip
+  \wosmlabel{The book: delays become more and more important as we build a real
+  computer.}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item In the example circuit, let NOT take 1\,ns, and AND and OR 2\,ns each.
+      What are $t_{pd}$ and $t_{cd}$?\par
+      \uncover<2->{\small $t_{pd} = 1 + 2 + 2 + 2 + 2 = 9$\,ns, still along
+      $x \to$ NOT $\to$ AND $\to$ AND $\to$ OR $\to$ OR.
+      $t_{cd} = 1 + 2 = 3$\,ns, along $z \to$ NOT $\to$ OR.}
+    \item With 1\,ns gates, does the multiplexer glitch when $s$ goes from 0 to
+      1?\par
+      \uncover<3->{\small No. $x_2 s$ turns on after 1\,ns, and $x_1 s'$ turns off only
+      after 2\,ns: for 1\,ns both are 1, so $y$ stays 1.}
+    \item Why does a longer wire have a longer delay?\par
+      \uncover<4->{\small The signal takes time to travel, and a longer wire takes
+      longer to change its voltage.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Real circuits take time: every gate and wire adds a delay, and the output
+      always shows some value, right or not.
+    \item Propagation delay $t_{pd}$: the longest path, the time until the output is
+      final. Contamination delay $t_{cd}$: the shortest path, the time until it can
+      first change.
+    \item A glitch is a short wrong output while the circuit settles. Reading after
+      $t_{pd}$ is always safe.
+    \item A glitch from one input can be removed with the consensus term, at the cost
+      of a gate.
+    \item $t_{pd}$ limits how fast a circuit can be used.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~4.2 of the book, \emph{Timing}.
+    \item For $g = xy + x'z$, list every path, and find $t_{pd}$ and $t_{cd}$ with 1\,ns
+      gates. Which single input change can make $g$ glitch, and how do you remove it?
+    \item In Logisim-evolution, build the example circuit as in the book: one input
+      $\mathit{ctrl}$ drives $x$ directly and $z$ through a NOT gate, so both change
+      together. Switch $\mathit{ctrl}$ from 1 to 0 and find the glitch in the timing
+      diagram.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{10}}
+    Sequential logic: finite state machines, Moore and Mealy machines.
+  \end{block}
+\end{frame}
+
+\end{document}

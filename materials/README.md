@@ -34,8 +34,22 @@ committed. Files whose name starts with `_` are skipped.
 | CS102-F26 | `lecture-05.tex` — Karnaugh Maps | 5 | Section 2.3.2 |
 | CS102-F26 | `lecture-06.tex` — Logic Gates | 6 | Chapter 3 |
 | CS102-F26 | `lecture-07.tex` — Multiplexers and Demultiplexers | 7 | Chapter 4 intro, Sections 4.1.1, 4.1.2 |
+| CS102-F26 | `lecture-08.tex` — Encoders and Decoders | 8 | Sections 4.1.3, 4.1.4 |
+| CS102-F26 | `lecture-09.tex` — Timing | 9 | Section 4.2 |
 
-CS102-F26 lectures start with `\usepackage{cs102-lectures}` (`cs102-f26/lectures/cs102-lectures.sty`), which also
+CS102-F26 lectures start like this (the `\input@path` lets the files also compile with the classes in
+`templates/latex/` or one folder up):
+
+```latex
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/19]
+```
+
+`cs102-lectures.sty` (in `cs102-f26/lectures/`) sets the course, author and semester, and also
 has helpers for logic gates (`gates` TikZ style), multiplexers (`mux`, `mux4` and `demux` pics) and Karnaugh maps
 (`kmap` environment).
 

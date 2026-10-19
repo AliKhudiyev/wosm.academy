@@ -5,7 +5,11 @@
 %
 %  Build the slides and the print handout:  npm run materials -- lecture-01
 % =============================================================
-\documentclass{wosm-slides}
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
 \usepackage{cs102-lectures}
 
 \title[Lecture 01 \textperiodcentered\ The Essence of Computing]{The Essence of Computing}

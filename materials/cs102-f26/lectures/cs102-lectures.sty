@@ -37,6 +37,48 @@
   wire/.style={draw=wosm-text, line width=0.6pt},
 }
 
+% ---------- Multiplexers and demultiplexers -------------------
+% \pic (m) at (<x>,<y>) {mux};    2-to-1: (m-in0), (m-in1), (m-sel), (m-out)
+% \pic (m) at (<x>,<y>) {mux4};   4-to-1: (m-in0) ... (m-in3), (m-sel), (m-out)
+% \pic (d) at (<x>,<y>) {demux};  1-to-2: (d-in), (d-sel), (d-out0), (d-out1)
+% Input (or output) 0 is at the top; the small numbers inside are the select
+% values that pick it.
+\tikzset{
+  mux/.pic={
+    \draw[wosm-text, line width=0.6pt]
+      (-0.35,0.6) -- (0.35,0.35) -- (0.35,-0.35) -- (-0.35,-0.6) -- cycle;
+    \node[font=\tiny, text=wosm-muted] at (-0.23,0.3) {0};
+    \node[font=\tiny, text=wosm-muted] at (-0.23,-0.3) {1};
+    \node[font=\tiny] at (0.04,0) {MUX};
+    \coordinate (-in0) at (-0.35,0.3);
+    \coordinate (-in1) at (-0.35,-0.3);
+    \coordinate (-sel) at (0,-0.475);
+    \coordinate (-out) at (0.35,0);
+  },
+  mux4/.pic={
+    \draw[wosm-text, line width=0.6pt]
+      (-0.4,1.1) -- (0.4,0.8) -- (0.4,-0.8) -- (-0.4,-1.1) -- cycle;
+    \foreach \i/\y in {0/0.75, 1/0.25, 2/-0.25, 3/-0.75} {
+      \node[font=\tiny, text=wosm-muted] at (-0.28,\y) {\i};
+      \coordinate (-in\i) at (-0.4,\y);
+    }
+    \node[font=\tiny] at (0.05,0) {MUX};
+    \coordinate (-sel) at (0,-0.95);
+    \coordinate (-out) at (0.4,0);
+  },
+  demux/.pic={
+    \draw[wosm-text, line width=0.6pt]
+      (-0.35,0.35) -- (0.35,0.6) -- (0.35,-0.6) -- (-0.35,-0.35) -- cycle;
+    \node[font=\tiny, text=wosm-muted] at (0.23,0.3) {0};
+    \node[font=\tiny, text=wosm-muted] at (0.23,-0.3) {1};
+    \node[font=\tiny] at (-0.04,0) {DMX};
+    \coordinate (-in) at (-0.35,0);
+    \coordinate (-sel) at (0,-0.475);
+    \coordinate (-out0) at (0.35,0.3);
+    \coordinate (-out1) at (0.35,-0.3);
+  },
+}
+
 % ---------- Karnaugh maps -------------------------------------
 % \begin{kmap}{<rows>}{<columns>}{<row variables>}{<column variables>}
 %             {<row labels>}{<column labels>}

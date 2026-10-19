@@ -32,6 +32,9 @@ committed. Files whose name starts with `_` are skipped.
 | CS102-F26 | `lecture-03.tex` — Boolean Algebra | 3 | Section 2.2 |
 | CS102-F26 | `lecture-04.tex` — Boolean Functions | 4 | Sections 2.3, 2.3.1 |
 | CS102-F26 | `lecture-05.tex` — Karnaugh Maps | 5 | Section 2.3.2 |
+| CS102-F26 | `lecture-06.tex` — Logic Gates | 6 | Chapter 3 |
+| CS102-F26 | `lecture-07.tex` — Multiplexers and Demultiplexers | 7 | Chapter 4 intro, Sections 4.1.1, 4.1.2 |
 
 CS102-F26 lectures start with `\usepackage{cs102-lectures}` (`cs102-f26/lectures/cs102-lectures.sty`), which also
-has helpers for logic gates (`gates` TikZ style) and Karnaugh maps (`kmap` environment).
+has helpers for logic gates (`gates` TikZ style), multiplexers (`mux`, `mux4` and `demux` pics) and Karnaugh maps
+(`kmap` environment).

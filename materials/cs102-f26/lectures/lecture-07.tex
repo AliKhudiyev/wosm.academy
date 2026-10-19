@@ -1,0 +1,536 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 07 -- Multiplexers and Demultiplexers (Unit 7)
+%  Follows Sections 4, 4.1.1 and 4.1.2 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-07
+% =============================================================
+\documentclass{wosm-slides}
+\usepackage{cs102-lectures}
+
+\title[Lecture 07 \textperiodcentered\ Multiplexers]{Multiplexers and Demultiplexers}
+\subtitle{Lecture 07: combinational circuits that choose and route}
+
+% ---------- Helpers for this lecture --------------------------
+% Wider input spacing than the course default, so input labels fit.
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.36cm},
+  or gate/.append style={logic gate input sep=0.36cm}}}
+
+% A bus of several wires: a short slash with the number of wires.
+% \buswidth[<label position, default above>]{<point>}{<width>}
+\newcommand*\buswidth[3][above]{%
+  \draw[wire] ($(#2)+(-0.08,-0.12)$) -- ($(#2)+(0.08,0.12)$);
+  \node[edgelabel, #1=2pt] at (#2) {#3};}
+
+% Proof steps: an equation and the law that justifies it.
+\newenvironment{derivation}
+  {\begin{tabular}{@{}r@{\;}l@{\qquad}l@{}}}
+  {\end{tabular}}
+\newcommand*\by[1]{\wosmlabel{#1}}
+
+% Empty Karnaugh map, rows x1 x2, column s.
+\newenvironment{kmapmux}
+  {\begin{kmap}{4}{2}{x_1x_2}{s}{00,01,11,10}{0,1}}
+  {\end{kmap}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Combinational circuits}
+
+\begin{frame}{Combinational circuits}
+  \begin{definition}[Combinational circuit]
+    A circuit whose outputs depend \emph{only} on its present inputs. Give it the
+    same inputs, and it always gives the same outputs: it has no memory of the past.
+  \end{definition}
+
+  \begin{itemize}
+    \item On paper, $f(x, y, z) = xy' + x'z$ has no notion of time.
+    \item A real circuit works in time: at step $t$ it sees inputs $x_t, y_t, z_t$.
+      It is combinational when
+      \[ f(x_t, y_t, z_t) = x_t y'_t + x'_t z_t , \]
+      that is, the output at step $t$ depends only on the inputs at step $t$.
+    \item Circuits with memory, whose outputs also depend on earlier inputs, are
+      \emph{sequential} \unitref{10--14}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Building blocks}
+  A general-purpose computer can be programmed to compute any computable function.
+  Building one takes a few combinational circuits, over and over:
+
+  \medskip
+  \begin{itemize}
+    \item \textbf{multiplexers} and \textbf{demultiplexers}: today;
+    \item encoders and decoders \unitref{8};
+    \item adders, comparators and the arithmetic logic unit \unitref{16--18}.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    Look again at the DX8 diagram in Lecture 01: the trapezoids labelled MUX choose
+    which value goes into the RAM, the register file and the instruction pointer.
+    By the end of today you can build each of them.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{The multiplexer}
+
+\begin{frame}{Choosing between two results}
+  We have one circuit that computes $x_1 x_2$ and one that computes $x_1 + x_2$, and
+  a bit $\mathit{computeOR}$ that says which result we want:
+  \[
+    f(x_1, x_2, \mathit{computeOR}) =
+      \begin{cases}
+        x_1 x_2 & \text{if } \mathit{computeOR} = 0, \\
+        x_1 + x_2 & \text{if } \mathit{computeOR} = 1.
+      \end{cases}
+  \]
+
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node (a) at (0,0.25) {$x_1$};
+        \node (b) at (0,-0.25) {$x_2$};
+        \node[and gate, inputs=nn] (g1) at (1.6,0.7) {};
+        \node[or gate, inputs=nn] (g2) at (1.6,-0.7) {};
+        \draw[wire] (a) -- (0.6,0.25) |- (g1.input 1);
+        \draw[wire] (0.6,0.25) |- (g2.input 1);
+        \fill[wosm-text] (0.6,0.25) circle (1.5pt);
+        \draw[wire] (b) -- (0.9,-0.25) |- (g1.input 2);
+        \draw[wire] (0.9,-0.25) |- (g2.input 2);
+        \fill[wosm-text] (0.9,-0.25) circle (1.5pt);
+        \node[box, minimum width=0.7cm, minimum height=1.6cm] (q) at (3.2,0) {?};
+        \draw[wire] (g1.output) -- (g1.output -| q.west);
+        \draw[wire] (g2.output) -- (g2.output -| q.west);
+        \draw[wire] (q.east) -- ++(0.4,0) node[right] {$y$};
+        \draw[wire] (q.south) -- ++(0,-0.35) node[below, font=\scriptsize]
+          {$\mathit{computeOR}$};
+      \end{tikzpicture}
+    \column{0.44\textwidth}
+      We need a part that passes on one of two inputs, chosen by a bit: like a
+      railway switch, which decides which track a train continues on.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The 2-to-1 multiplexer}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.56\textwidth}
+      \begin{definition}[Multiplexer]
+        A 2-to-1 \emph{multiplexer} (MUX) has two data inputs and one
+        \emph{select} input $s$:
+        \[
+          \mathrm{MUX}(x_1, x_2, s) =
+            \begin{cases}
+              x_1 & \text{if } s = 0, \\
+              x_2 & \text{if } s = 1.
+            \end{cases}
+        \]
+      \end{definition}
+      \wosmlabel{The book calls it a 2x1 MUX: 2 inputs, 1 output.}
+    \column{0.4\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=1.3]
+        \pic (m) at (0,0) {mux};
+        \draw[wire] (m-in0) -- ++(-0.4,0) node[left] {$x_1$};
+        \draw[wire] (m-in1) -- ++(-0.4,0) node[left] {$x_2$};
+        \draw[wire] (m-sel) -- ++(0,-0.35) node[below] {$s$};
+        \draw[wire] (m-out) -- ++(0.4,0) node[right] {$y$};
+      \end{tikzpicture}
+  \end{columns}
+
+  \bigskip
+  Our function is now one MUX: \quad
+  $f(x_1, x_2, \mathit{computeOR}) = \mathrm{MUX}(x_1 x_2,\; x_1 + x_2,\;
+  \mathit{computeOR})$.
+\end{frame}
+
+\begin{frame}{The truth table}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}ccc|c@{}}
+        $x_1$ & $x_2$ & $s$ & $\mathrm{MUX}$ \\
+        \midrule
+        0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 0 \\
+        0 & 1 & 0 & 0 \\
+        0 & 1 & 1 & 1 \\
+        1 & 0 & 0 & 1 \\
+        1 & 0 & 1 & 0 \\
+        1 & 1 & 0 & 1 \\
+        1 & 1 & 1 & 1 \\
+      \end{tabular}
+    \column{0.6\textwidth}
+      \begin{itemize}
+        \item Where $s = 0$ the output copies $x_1$; where $s = 1$ it copies $x_2$.
+        \item The 1s are on rows 3, 4, 6 and 7. The canonical sum of products
+          (Lecture 04) is
+          \[ x_1'x_2s + x_1x_2's' + x_1x_2s' + x_1x_2s . \]
+        \item Four products of three literals. Can it be shorter?
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Simplifying with a Karnaugh map}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{kmapmux}
+        \kindices{0}{0,1}\kindices{1}{2,3}\kindices{2}{6,7}\kindices{3}{4,5}
+        \kmaprow{0}{0,0}\kmaprow{1}{0,1}\kmaprow{2}{1,1}\kmaprow{3}{1,0}
+        \kgroup{2}{0}{3}{0}
+        \kgroup[wosm-brick]{1}{1}{2}{1}
+        \kgroup[wosm-muted, dashed]{2}{0}{2}{1}
+      \end{kmapmux}
+    \column{0.6\textwidth}
+      \begin{itemize}
+        \item \textcolor{wosm-accent}{Teal}: $x_1 = 1$, $s = 0$. Product: $x_1 s'$.
+        \item \textcolor{wosm-brick}{Brick}: $x_2 = 1$, $s = 1$. Product: $x_2 s$.
+        \item Dashed: $x_1 x_2$ is prime but not essential. It is the consensus term
+          (Lecture 03).
+      \end{itemize}
+      \medskip
+      \[ \mathrm{MUX}(x_1, x_2, s) = x_1 s' + x_2 s \]
+  \end{columns}
+
+  \medskip
+  \wosmlabel{The book reaches the same result with the laws, ending with a case
+  analysis on $x_1 x_2$.}
+\end{frame}
+
+\begin{frame}{Inside the multiplexer}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \coordinate (left) at (0,0);
+        \node[and gate, inputs=nn] (a1) at (2.4,0.85) {};
+        \node[and gate, inputs=nn] (a2) at (2.4,-0.75) {};
+        \node[or gate, inputs=nn] (o) at (3.9,0.05) {};
+        \node[not gate] (n) at ($(a1.input 2)+(-0.9,0)$) {};
+        \node (x1) at (a1.input 1 -| left) {$x_1$};
+        \node (s) at (0,0.05) {$s$};
+        \node (x2) at (a2.input 2 -| left) {$x_2$};
+        \draw[wire] (x1) -- (a1.input 1);
+        \draw[wire] (x2) -- (a2.input 2);
+        \draw[wire] (s) -- (0.7,0.05) coordinate (j);
+        \draw[wire] (j) |- (n.input);
+        \draw[wire] (n.output) -- (a1.input 2);
+        \draw[wire] (j) |- (a2.input 1);
+        \fill[wosm-text] (j) circle (1.5pt);
+        \draw[wire] (a1.output) -- ++(0.2,0) |- (o.input 1);
+        \draw[wire] (a2.output) -- ++(0.2,0) |- (o.input 2);
+        \draw[wire] (o.output) -- ++(0.35,0) node[right] {$y$};
+        \node[edgelabel, above] at (a1.north) {$x_1 s'$};
+        \node[edgelabel, below] at (a2.south) {$x_2 s$};
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      \begin{itemize}
+        \item Each AND gate is a door: $x \cdot 1 = x$ (identity) lets $x$ through,
+          $x \cdot 0 = 0$ (domination) shuts it.
+        \item $s = 0$ opens the top door, so $y = x_1$; $s = 1$ opens the bottom
+          one, so $y = x_2$.
+        \item The OR passes on whichever door is open.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Larger multiplexers}
+
+\begin{frame}{The 4-to-1 multiplexer}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.3\textwidth}
+      \centering
+      \begin{tabular}{@{}cc|c@{}}
+        $s_1$ & $s_2$ & $y$ \\
+        \midrule
+        0 & 0 & $x_1$ \\
+        0 & 1 & $x_2$ \\
+        1 & 0 & $x_3$ \\
+        1 & 1 & $x_4$ \\
+      \end{tabular}
+    \column{0.3\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \pic (m) at (0,0) {mux4};
+        \foreach \i/\x in {0/x_1, 1/x_2, 2/x_3, 3/x_4}
+          \draw[wire] (m-in\i) -- ++(-0.4,0) node[left] {$\x$};
+        \draw[wire] (m-sel) -- ++(0,-0.35) node[below] {$s_1 s_2$};
+        \buswidth[right]{0,-1.15}{2}
+        \draw[wire] (m-out) -- ++(0.4,0) node[right] {$y$};
+      \end{tikzpicture}
+    \column{0.34\textwidth}
+      \begin{itemize}
+        \item Four data inputs need two select bits.
+        \item The select bits, read as a binary number, say which input passes.
+      \end{itemize}
+  \end{columns}
+
+  \medskip
+  As a sum of products, each input is ANDed with the minterm of its select value:
+  \[ y = s_1's_2'\,x_1 + s_1's_2\,x_2 + s_1s_2'\,x_3 + s_1s_2\,x_4 . \]
+\end{frame}
+
+\begin{frame}{Building it from 2-to-1 multiplexers}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \pic (a) at (0,0.95) {mux};
+        \pic (b) at (0,-0.95) {mux};
+        \pic (c) at (1.6,0) {mux};
+        \draw[wire] (a-in0) -- ++(-0.4,0) node[left] {$x_1$};
+        \draw[wire] (a-in1) -- ++(-0.4,0) node[left] {$x_2$};
+        \draw[wire] (b-in0) -- ++(-0.4,0) node[left] {$x_3$};
+        \draw[wire] (b-in1) -- ++(-0.4,0) node[left] {$x_4$};
+        \draw[wire] (a-out) -- ++(0.3,0) |- (c-in0);
+        \draw[wire] (b-out) -- ++(0.3,0) |- (c-in1);
+        \draw[wire] (c-out) -- ++(0.4,0) node[right] {$y$};
+        \draw[wire] (a-sel) -- ++(0,-0.2) node[below, inner sep=1pt] {$s_2$};
+        \draw[wire] (b-sel) -- ++(0,-0.3) node[below] {$s_2$};
+        \draw[wire] (c-sel) -- ++(0,-1.25) node[below] {$s_1$};
+      \end{tikzpicture}
+    \column{0.48\textwidth}
+      \begin{itemize}
+        \item The first column picks within each pair, using $s_2$: $x_1$ or $x_2$,
+          and $x_3$ or $x_4$.
+        \item The second picks between the pairs, using $s_1$.
+        \item Check $s_1 s_2 = 01$: the first column passes $x_2$ and $x_4$; then
+          $s_1 = 0$ picks $x_2$, as in the table.
+      \end{itemize}
+  \end{columns}
+
+  \medskip
+  \wosmlabel{Both $s_2$ labels are the same wire. The lower select bit goes to the
+  first column, the higher one to the last.}
+\end{frame}
+
+\begin{frame}{Any number of inputs}
+  \begin{itemize}
+    \item A $2^n$-to-1 multiplexer needs $n$ select bits.
+    \item As a tree of 2-to-1 multiplexers it has $n$ columns and
+      $2^{n-1} + \dots + 2 + 1 = 2^n - 1$ of them.
+  \end{itemize}
+
+  \begin{center}
+    \begin{tabular}{@{}lccc@{}}
+      \toprule
+      Inputs & 2 & 4 & 8 \\
+      Select bits & 1 & 2 & 3 \\
+      2-to-1 multiplexers & 1 & 3 & 7 \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{remark}
+    For a number of inputs that is not a power of two, round up: a 3-to-1
+    multiplexer still needs 2 select bits, and one select value is left unused.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Choosing between whole numbers}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.44\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=1.3]
+        \pic (m) at (0,0) {mux};
+        \draw[wire, line width=1.2pt] (m-in0) -- ++(-0.7,0) node[left] {$A$};
+        \draw[wire, line width=1.2pt] (m-in1) -- ++(-0.7,0) node[left] {$B$};
+        \draw[wire, line width=1.2pt] (m-out) -- ++(0.7,0) node[right] {$Y$};
+        \buswidth{-0.65,0.3}{8}
+        \buswidth{-0.65,-0.3}{8}
+        \buswidth{0.7,0}{8}
+        \draw[wire] (m-sel) -- ++(0,-0.35) node[below] {$s$};
+      \end{tikzpicture}
+    \column{0.52\textwidth}
+      \begin{itemize}
+        \item To choose between two 8-bit numbers $A$ and $B$, use eight 2-to-1
+          multiplexers, one per bit, all sharing the same $s$.
+        \item A thick line with a slash and a number is a \alert{bus}: that many
+          wires side by side.
+        \item This is how the DX8 chooses which value goes into a register or into
+          memory.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{A multiplexer can compute any function}
+  \begin{itemize}
+    \item Put the inputs of a function on the select lines, and its truth table on
+      the data inputs. An 8-to-1 multiplexer with data
+      $0, 0, 0, 1, 0, 1, 1, 1$ computes the majority function of Lecture 04.
+    \item Or split on one variable (Shannon's expansion):
+      \[ f(x, y, z) = x' f(0, y, z) + x f(1, y, z)
+                    = \mathrm{MUX}(f(0, y, z),\, f(1, y, z),\, x). \]
+    \item For the majority function, $f(0, y, z) = yz$ and $f(1, y, z) = y + z$:
+      \[ \mathit{maj}(x, y, z) = \mathrm{MUX}(yz,\; y + z,\; x). \]
+  \end{itemize}
+
+  \medskip
+  \wosmlabel{FPGAs, chips whose logic can be reconfigured after they are made, build
+  it from small lookup tables that work this way.}
+\end{frame}
+
+% =============================================================
+\section{The demultiplexer}
+
+\begin{frame}{The 1-to-2 demultiplexer}
+  The opposite job: one input $x$, routed to \emph{one of} two outputs. The other
+  output is 0.
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.28\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}cc|cc@{}}
+        $x$ & $s$ & $y_1$ & $y_2$ \\
+        \midrule
+        0 & 0 & 0 & 0 \\
+        0 & 1 & 0 & 0 \\
+        1 & 0 & 1 & 0 \\
+        1 & 1 & 0 & 1 \\
+      \end{tabular}\par\medskip
+      \begin{tabular}{@{}c|cc@{}}
+        $s$ & $y_1$ & $y_2$ \\
+        \midrule
+        0 & $x$ & 0 \\
+        1 & 0 & $x$ \\
+      \end{tabular}
+    \column{0.3\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=1.3]
+        \pic (d) at (0,0) {demux};
+        \draw[wire] (d-in) -- ++(-0.4,0) node[left] {$x$};
+        \draw[wire] (d-out0) -- ++(0.4,0) node[right] {$y_1$};
+        \draw[wire] (d-out1) -- ++(0.4,0) node[right] {$y_2$};
+        \draw[wire] (d-sel) -- ++(0,-0.35) node[below] {$s$};
+      \end{tikzpicture}
+    \column{0.36\textwidth}
+      From the table:
+      \[ y_1 = x s', \qquad y_2 = x s . \]
+      Two AND gates and one NOT: the same doors as in the multiplexer, without the
+      OR.
+  \end{columns}
+
+  \medskip
+  \wosmlabel{The book calls it a 1x2 DEMUX.}
+\end{frame}
+
+\begin{frame}{Larger demultiplexers}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.44\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \pic (a) at (0,0) {demux};
+        \pic (b) at (1.6,0.95) {demux};
+        \pic (c) at (1.6,-0.95) {demux};
+        \draw[wire] (a-in) -- ++(-0.4,0) node[left] {$x$};
+        \draw[wire] (a-out0) -- ++(0.3,0) |- (b-in);
+        \draw[wire] (a-out1) -- ++(0.3,0) |- (c-in);
+        \draw[wire] (b-out0) -- ++(0.35,0) node[right] {$y_1$};
+        \draw[wire] (b-out1) -- ++(0.35,0) node[right] {$y_2$};
+        \draw[wire] (c-out0) -- ++(0.35,0) node[right] {$y_3$};
+        \draw[wire] (c-out1) -- ++(0.35,0) node[right] {$y_4$};
+        \draw[wire] (a-sel) -- ++(0,-1.25) node[below] {$s_1$};
+        \draw[wire] (b-sel) -- ++(0,-0.2) node[below, inner sep=1pt] {$s_2$};
+        \draw[wire] (c-sel) -- ++(0,-0.3) node[below] {$s_2$};
+      \end{tikzpicture}
+    \column{0.52\textwidth}
+      \begin{itemize}
+        \item A 1-to-4 demultiplexer: $s_1$ picks a half, then $s_2$ picks within
+          it.
+        \item $y_k$ is $x$ ANDed with the minterm of its select value:
+          $y_1 = x s_1's_2'$, \dots, $y_4 = x s_1 s_2$.
+        \item A 1-to-$N$ demultiplexer needs $\lceil \log_2 N \rceil$ select bits.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{One wire, many users}
+  \begin{center}
+    \begin{tikzpicture}
+      \pic (m) at (0,0) {mux};
+      \pic (d) at (4,0) {demux};
+      \draw[wire] (m-in0) -- ++(-0.4,0) node[left] {$a$};
+      \draw[wire] (m-in1) -- ++(-0.4,0) node[left] {$b$};
+      \draw[wire] (m-out) -- (d-in) node[midway, above, edgelabel] {one shared wire};
+      \draw[wire] (d-out0) -- ++(0.4,0) node[right] {$a$};
+      \draw[wire] (d-out1) -- ++(0.4,0) node[right] {$b$};
+      \draw[wire] (m-sel) -- ++(0,-0.4) -| (d-sel);
+      \draw[wire] (2,-0.875) -- ++(0,-0.3) node[below] {$s$};
+      \fill[wosm-text] (2,-0.875) circle (1.5pt);
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item With the same $s$ on both ends, $a$ and $b$ take turns on one wire. This
+      is where the names come from: \emph{multiplexing} is sending several signals
+      over one line.
+    \item Inside a computer, the same idea lets many parts share one bus.
+  \end{itemize}
+
+  \medskip
+  \wosmlabel{Coming back: a demultiplexer whose input is fixed at 1 sets exactly one
+  output to 1. That is a decoder (Unit 8).}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item Write the truth table of a 3-to-1 multiplexer.\par
+      \uncover<2->{\small Two select bits: $s_1 s_2 = 00, 01, 10$ give $x_1, x_2,
+      x_3$; the value 11 is unused (a don't-care).}
+    \item How many 2-to-1 multiplexers make an 8-to-1 multiplexer?\par
+      \uncover<3->{\small Seven, in three columns: $4 + 2 + 1$.}
+    \item Write $y_3$ of a 1-to-4 demultiplexer as an expression.\par
+      \uncover<4->{\small $y_3 = x s_1 s_2'$: select value 10.}
+    \item Build XOR from one 2-to-1 multiplexer and one NOT gate.\par
+      \uncover<5->{\small $x \oplus y = \mathrm{MUX}(y,\, y',\, x)$: if $x = 0$ pass
+      $y$, if $x = 1$ pass $y'$.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item A combinational circuit's outputs depend only on its present inputs.
+    \item A 2-to-1 multiplexer passes on $x_1$ or $x_2$, chosen by $s$:
+      $\mathrm{MUX}(x_1, x_2, s) = x_1 s' + x_2 s$.
+    \item A $2^n$-to-1 multiplexer has $n$ select bits; it can be built as a tree of
+      $2^n - 1$ 2-to-1 multiplexers. One per bit chooses between whole numbers.
+    \item A multiplexer can compute any function from its truth table.
+    \item A 1-to-2 demultiplexer routes $x$ to one of two outputs: $y_1 = x s'$,
+      $y_2 = x s$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read the beginning of Chapter~4 and Sections~4.1.1 and 4.1.2 of the book.
+    \item In Logisim-evolution, build a 2-to-1 multiplexer from gates, then a
+      4-to-1 multiplexer from three of yours. Test it on every select value.
+    \item Build a 1-to-4 demultiplexer, and compare it with the Demultiplexer in
+      the Plexers library.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{8}}
+    Encoders, priority encoders and decoders.
+  \end{block}
+\end{frame}
+
+\end{document}

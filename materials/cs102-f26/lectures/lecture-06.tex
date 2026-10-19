@@ -1,0 +1,472 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 06 -- Logic Gates (Unit 6)
+%  Follows Chapter 3 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-06
+% =============================================================
+\documentclass{wosm-slides}
+\usepackage{cs102-lectures}
+
+\title[Lecture 06 \textperiodcentered\ Logic Gates]{Logic Gates}
+\subtitle{Lecture 06: NOT, AND, OR, NAND, NOR, XOR, XNOR, and universal gate sets}
+
+% ---------- Helpers for this lecture --------------------------
+% Wider input spacing than the course default, so input labels fit.
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.36cm},
+  or gate/.append style={logic gate input sep=0.36cm},
+  nand gate/.append style={logic gate input sep=0.36cm},
+  nor gate/.append style={logic gate input sep=0.36cm},
+  xor gate/.append style={logic gate input sep=0.36cm},
+  xnor gate/.append style={logic gate input sep=0.36cm}}}
+
+% One gate with labelled inputs: \gate{<type>}{1 or 2}.
+\newcommand*\gate[2]{%
+  \begin{tikzpicture}[gates, baseline=(g.center)]
+    \ifnum#2=1
+      \node[#1 gate] (g) {};
+      \draw[wire] (g.input) -- ++(-0.35,0) node[left] {$x$};
+    \else
+      \node[#1 gate, inputs=nn] (g) {};
+      \draw[wire] (g.input 1) -- ++(-0.35,0) node[left] {$x$};
+      \draw[wire] (g.input 2) -- ++(-0.35,0) node[left] {$y$};
+    \fi
+    \draw[wire] (g.output) -- ++(0.35,0);
+  \end{tikzpicture}}
+
+% A gate with its name, expression and truth table, in one column:
+% \gatecard{<type>}{<NAME>}{<expression>}{<outputs for xy = 00,01,10,11>}
+\newcommand*\gatecard[4]{%
+  \centering
+  \gate{#1}{2}\par\smallskip
+  \textbf{#2}\par
+  {\small $#3$}\par\smallskip
+  \small
+  \begin{tabular}{@{}cc|c@{}}
+    $x$ & $y$ & \\
+    \midrule
+    \gatecardrows#4\relax
+  \end{tabular}}
+\def\gatecardrows#1,#2,#3,#4\relax{%
+  0 & 0 & #1 \\ 0 & 1 & #2 \\ 1 & 0 & #3 \\ 1 & 1 & #4 \\}
+
+% Proof steps: an equation and the law that justifies it.
+\newenvironment{derivation}
+  {\begin{tabular}{@{}r@{\;}l@{\qquad}l@{}}}
+  {\end{tabular}}
+\newcommand*\by[1]{\wosmlabel{#1}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Logic gates}
+
+\begin{frame}{What is a logic gate?}
+  \begin{definition}[Logic gate]
+    A \emph{logic gate} is a piece of hardware that computes one of the basic
+    Boolean functions: addition, multiplication, negation, or a simple combination
+    of these.
+  \end{definition}
+
+  \begin{itemize}
+    \item Gates are connected by wires into \alert{circuits}, which compute larger
+      functions.
+    \item In a real chip, 0 and 1 are a low and a high voltage, and each gate is a
+      handful of transistors: the switches of Lecture 01.
+    \item From now on we work one layer up: with gates, not with transistors.
+  \end{itemize}
+
+  \medskip
+  \wosmlabel{Every gate in this lecture is in the Gates library of
+  Logisim-evolution.}
+\end{frame}
+
+\begin{frame}{NOT, AND and OR}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.3\textwidth}
+      \centering
+      \gate{not}{1}\par\smallskip
+      \textbf{NOT}\par
+      {\small $x'$}\par\smallskip
+      \small
+      \begin{tabular}{@{}c|c@{}}
+        $x$ & \\
+        \midrule
+        0 & 1 \\
+        1 & 0 \\
+      \end{tabular}
+    \column{0.3\textwidth}
+      \gatecard{and}{AND}{x \cdot y}{0,0,0,1}
+    \column{0.3\textwidth}
+      \gatecard{or}{OR}{x + y}{0,1,1,1}
+  \end{columns}
+
+  \medskip
+  \begin{itemize}
+    \item The three operations of Boolean algebra (Lecture 03), now as hardware.
+    \item The small circle on the NOT gate, the \emph{bubble}, means
+      \alert{complement}. Without it, the triangle is a \emph{buffer}: its output
+      equals its input.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{NAND and NOR}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.3\textwidth}
+      \gatecard{nand}{NAND}{(xy)' = x' + y'}{1,1,1,0}
+    \column{0.3\textwidth}
+      \gatecard{nor}{NOR}{(x + y)' = x'y'}{1,0,0,0}
+    \column{0.34\textwidth}
+      \begin{itemize}
+        \item NAND is NOT-AND: an AND gate with a bubble on its output. NOR is
+          NOT-OR.
+        \item The second form of each expression is De Morgan's theorem
+          (Lecture 03).
+        \item Each one, on its own, can build every circuit: see the last section.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{XOR and XNOR}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.3\textwidth}
+      \gatecard{xor}{XOR}{x \oplus y = x'y + xy'}{0,1,1,0}
+    \column{0.3\textwidth}
+      \gatecard{xnor}{XNOR}{(x \oplus y)' = x'y' + xy}{1,0,0,1}
+    \column{0.34\textwidth}
+      \begin{itemize}
+        \item XOR, \emph{exclusive OR}: \enquote{either $x$ or $y$, but not both}.
+          It is 1 when the inputs \alert{differ}.
+        \item XNOR is NOT-XOR: 1 when the inputs are \alert{equal}.
+        \item With more inputs, XOR is 1 when an odd number of them are 1.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{All sixteen functions of two variables}
+  \footnotesize
+  \begin{center}
+    \begin{tabular}{@{}cccc|l@{\qquad}cccc|l@{}}
+      \multicolumn{4}{c|}{$xy = $ 00, 01, 10, 11} & &
+      \multicolumn{4}{c|}{$xy = $ 00, 01, 10, 11} & \\
+      \midrule
+      0 & 0 & 0 & 0 & $0$ & 1 & 0 & 0 & 0 & $(x + y)'$ \quad NOR \\
+      0 & 0 & 0 & 1 & $xy$ \quad AND & 1 & 0 & 0 & 1 & $x'y' + xy$ \quad XNOR \\
+      0 & 0 & 1 & 0 & $xy'$ & 1 & 0 & 1 & 0 & $y'$ \\
+      0 & 0 & 1 & 1 & $x$ & 1 & 0 & 1 & 1 & $x + y'$ \\
+      0 & 1 & 0 & 0 & $x'y$ & 1 & 1 & 0 & 0 & $x'$ \\
+      0 & 1 & 0 & 1 & $y$ & 1 & 1 & 0 & 1 & $x' + y$ \\
+      0 & 1 & 1 & 0 & $x'y + xy'$ \quad XOR & 1 & 1 & 1 & 0 & $(xy)'$ \quad NAND \\
+      0 & 1 & 1 & 1 & $x + y$ \quad OR & 1 & 1 & 1 & 1 & $1$ \\
+    \end{tabular}
+  \end{center}
+
+  \normalsize
+  \medskip
+  These are the $2^{2^2} = 16$ functions counted in Lecture 04. Six of them are the
+  two-input gates of this lecture, in complementary pairs: AND and NAND, OR and NOR,
+  XOR and XNOR.
+\end{frame}
+
+\begin{frame}{Gates with more inputs}
+  \begin{itemize}
+    \item An $n$-input AND is 1 when \emph{all} its inputs are 1; an $n$-input OR
+      when \emph{at least one} is.
+    \item Because AND and OR are associative, a 3-input AND is the same as two
+      2-input ANDs in a row: $xyz = (xy)z$.
+    \item A 3-input NAND is $(xyz)'$, a NAND with three inputs.
+  \end{itemize}
+
+  \begin{warning}[NAND and NOR are not associative]
+    Two 2-input NANDs in a row are not a 3-input NAND. With $x = y = 0$, $z = 1$:
+    $\mathrm{NAND}(\mathrm{NAND}(x, y), z) = \mathrm{NAND}(1, 1) = 0$, but
+    $(xyz)' = 1$.
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{From expressions to circuits}
+
+\begin{frame}{Drawing a circuit}
+  Build $f = xy' + x'z$, the result of Lecture 05.
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.55\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node (y) at (0,1.3) {$y$};
+        \node (x) at (0,0.1) {$x$};
+        \node (z) at (0,-1.4) {$z$};
+        \node[not gate] (ny) at (1.4,1.3) {};
+        \node[not gate] (nx) at (1.4,-0.6) {};
+        \node[and gate, inputs=nn] (a1) at (3.0,0.95) {};
+        \node[and gate, inputs=nn] (a2) at (3.0,-0.85) {};
+        \node[or gate, inputs=nn] (o) at (4.6,0.05) {};
+        \draw[wire] (y) -- (ny.input);
+        \draw[wire] (ny.output) -- ++(0.25,0) |- (a1.input 1);
+        \draw[wire] (x) -- (0.6,0.1) |- (a1.input 2);
+        \draw[wire] (0.6,0.1) |- (nx.input);
+        \fill[wosm-text] (0.6,0.1) circle (1.5pt);
+        \draw[wire] (nx.output) -- ++(0.25,0) |- (a2.input 1);
+        \draw[wire] (z) -- (2.35,-1.4) |- (a2.input 2);
+        \draw[wire] (a1.output) -- ++(0.25,0) |- (o.input 1);
+        \draw[wire] (a2.output) -- ++(0.25,0) |- (o.input 2);
+        \draw[wire] (o.output) -- ++(0.4,0) node[right] {$f$};
+        \node[edgelabel, above] at (a1.north) {$xy'$};
+        \node[edgelabel, below] at (a2.south) {$x'z$};
+      \end{tikzpicture}
+    \column{0.41\textwidth}
+      \begin{itemize}
+        \item One gate per operation: two NOTs, two ANDs, one OR.
+        \item A dot marks where one wire branches into two; crossing wires without a
+          dot are not connected.
+        \item A sum of products always gives this shape: NOTs, a column of ANDs,
+          and one OR.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Building and testing in Logisim-evolution}
+  \begin{enumerate}
+    \item Place an input pin for each variable and an output pin for the result.
+    \item Add the gates from the Gates library and connect them with wires.
+    \item With the poke tool, set the inputs to every combination and check the
+      output against the truth table.
+  \end{enumerate}
+
+  \bigskip
+  \begin{remark}
+    Testing every combination is proof by exhaustion again (Lecture 03). With 3
+    inputs it is 8 checks; for larger circuits, Logisim-evolution can list the truth
+    table for you (Project $\rightarrow$ Analyze Circuit).
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Universal gate sets}
+
+\begin{frame}{Universality}
+  \begin{definition}[Universal set of gates]
+    A set of gates is \emph{universal} if every Boolean function can be built from
+    its gates alone.
+  \end{definition}
+
+  \begin{theorem}
+    $\{\mathrm{NOT}, \mathrm{AND}, \mathrm{OR}\}$ is universal.
+  \end{theorem}
+
+  \emph{Proof.} Every Boolean function has a canonical sum of products (Lecture 04),
+  which uses only NOT, AND and OR.
+\end{frame}
+
+\begin{frame}{NOT and AND are enough}
+  \begin{theorem}
+    $\{\mathrm{NOT}, \mathrm{AND}\}$ is universal.
+  \end{theorem}
+
+  To show a set is universal, build the gates of a set already known to be
+  universal. Here only OR is missing:
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.52\textwidth}
+      \small
+      \begin{tabular}{@{}r@{\;}l@{}}
+        $x + y$ & $= ((x + y)')'$ \quad \by{involution} \\
+                & $= (x'y')'$ \quad \by{De Morgan} \\
+                & $= \mathrm{NOT}(\mathrm{AND}(\mathrm{NOT}\,x, \mathrm{NOT}\,y))$ \\
+      \end{tabular}
+    \column{0.44\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[not gate] (nx) at (0,0.4) {};
+        \node[not gate] (ny) at (0,-0.4) {};
+        \node[and gate, inputs=nn] (a) at (1.5,0) {};
+        \node[not gate] (n) at (2.9,0) {};
+        \draw[wire] (nx.input) -- ++(-0.3,0) node[left] {$x$};
+        \draw[wire] (ny.input) -- ++(-0.3,0) node[left] {$y$};
+        \draw[wire] (nx.output) -- ++(0.2,0) |- (a.input 1);
+        \draw[wire] (ny.output) -- ++(0.2,0) |- (a.input 2);
+        \draw[wire] (a.output) -- (n.input);
+        \draw[wire] (n.output) -- ++(0.35,0) node[right] {$x + y$};
+      \end{tikzpicture}
+  \end{columns}
+
+  \medskip
+  By duality, $\{\mathrm{NOT}, \mathrm{OR}\}$ is universal too: $xy = (x' + y')'$.
+\end{frame}
+
+\begin{frame}{NAND alone is enough}
+  \begin{theorem}
+    $\{\mathrm{NAND}\}$ is universal.
+  \end{theorem}
+
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.25\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[nand gate, inputs=nn] (g) at (0,0) {};
+        \draw[wire] (g.input 1) -- ++(-0.3,0) coordinate (j) -- (j |- g.input 2)
+          -- (g.input 2);
+        \draw[wire] (j |- g.center) -- ++(-0.35,0) node[left] {$x$};
+        \fill[wosm-text] (j |- g.center) circle (1.5pt);
+        \draw[wire] (g.output) -- ++(0.3,0) node[right] {$x'$};
+      \end{tikzpicture}\par\smallskip
+      \small NOT: $\mathrm{NAND}(x, x) = x'$
+    \column{0.36\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[nand gate, inputs=nn] (g1) at (0,0) {};
+        \node[nand gate, inputs=nn] (g2) at (1.6,0) {};
+        \draw[wire] (g1.input 1) -- ++(-0.3,0) node[left] {$x$};
+        \draw[wire] (g1.input 2) -- ++(-0.3,0) node[left] {$y$};
+        \draw[wire] (g1.output) -- ++(0.2,0) coordinate (j);
+        \draw[wire] (j) |- (g2.input 1) (j) |- (g2.input 2);
+        \fill[wosm-text] (j) circle (1.5pt);
+        \draw[wire] (g2.output) -- ++(0.3,0) node[right] {$xy$};
+      \end{tikzpicture}\par\smallskip
+      \small AND: a NAND, then a NAND as NOT
+    \column{0.37\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[nand gate, inputs=nn] (a) at (0,0.6) {};
+        \node[nand gate, inputs=nn] (b) at (0,-0.6) {};
+        \node[nand gate, inputs=nn] (g) at (1.35,0) {};
+        \foreach \n/\v in {a/x, b/y} {
+          \draw[wire] (\n.input 1) -- ++(-0.2,0) coordinate (j\n)
+            -- (j\n |- \n.input 2) -- (\n.input 2);
+          \draw[wire] (j\n |- \n.center) -- ++(-0.25,0) node[left] {$\v$};
+        }
+        \draw[wire] (a.output) -- ++(0.15,0) |- (g.input 1);
+        \draw[wire] (b.output) -- ++(0.15,0) |- (g.input 2);
+        \draw[wire] (g.output) -- ++(0.3,0) node[right] {$x + y$};
+      \end{tikzpicture}\par\smallskip
+      \small OR: $\mathrm{NAND}(x', y') = x + y$
+  \end{columns}
+
+  \bigskip
+  NOT and AND are enough (previous slide), so NAND is enough.
+\end{frame}
+
+\begin{frame}{NOR alone is enough}
+  \begin{theorem}
+    $\{\mathrm{NOR}\}$ is universal.
+  \end{theorem}
+
+  \begin{proof}
+    \small
+    The duals of the NAND constructions. NOT: $\mathrm{NOR}(x, x) = (x + x)' = x'$.\par
+    OR: $\mathrm{NOR}(\mathrm{NOR}(x, y), \mathrm{NOR}(x, y)) = ((x + y)')' = x + y$.\par
+    AND: $\mathrm{NOR}(x', y') = (x' + y')' = xy$.\par
+    NOT and OR are enough, so NOR is enough.
+  \end{proof}
+
+  \wosmlabel{The book builds a NAND from NOR gates instead: $xy = \mathrm{NOR}(x', y')$,
+  then complement.}
+\end{frame}
+
+\begin{frame}{A set that is not universal}
+  \begin{itemize}
+    \item $\{\mathrm{AND}, \mathrm{OR}\}$ is \emph{not} universal: it cannot build
+      NOT.
+    \item Why: in a circuit of ANDs and ORs, changing an input from 0 to 1 can never
+      change the output from 1 to 0. Each gate has this property, so the whole
+      circuit has it.
+    \item NOT does the opposite: as $x$ goes from 0 to 1, $x'$ goes from 1 to 0.
+  \end{itemize}
+
+  \bigskip
+  \begin{remark}
+    So the complement is what makes NAND and NOR special: each one combines an
+    AND or an OR with a NOT.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Why NAND and NOR matter}
+  \begin{itemize}
+    \item In CMOS, today's main chip technology, NOT takes 2 transistors, NAND and
+      NOR take 4, and AND and OR take 6: a NAND or a NOR followed by a NOT.
+    \item So NAND and NOR are the cheapest gates, and one gate type is enough for a
+      whole chip.
+  \end{itemize}
+
+  \medskip
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[nand gate, inputs=nn] (a) at (0,0.65) {};
+        \node[nand gate, inputs=nn] (b) at (0,-0.65) {};
+        \node[nand gate, inputs=nn] (g) at (1.7,0) {};
+        \draw[wire] (a.input 1) -- ++(-0.3,0) node[left] {$a$};
+        \draw[wire] (a.input 2) -- ++(-0.3,0) node[left] {$b$};
+        \draw[wire] (b.input 1) -- ++(-0.3,0) node[left] {$c$};
+        \draw[wire] (b.input 2) -- ++(-0.3,0) node[left] {$d$};
+        \draw[wire] (a.output) -- ++(0.2,0) |- (g.input 1);
+        \draw[wire] (b.output) -- ++(0.2,0) |- (g.input 2);
+        \draw[wire] (g.output) -- ++(0.3,0) node[right] {$ab + cd$};
+      \end{tikzpicture}
+    \column{0.48\textwidth}
+      A sum of products becomes NAND--NAND: replace every gate by a NAND.
+      \[ ((ab)' \cdot (cd)')' = ab + cd \]
+      \wosmlabel{De Morgan, then involution.}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item Build XOR from four NAND gates.\par
+      \uncover<2->{\small $n = \mathrm{NAND}(x, y)$, \quad
+      $x \oplus y = \mathrm{NAND}(\mathrm{NAND}(x, n), \mathrm{NAND}(y, n))$.
+      Check it on all four inputs.}
+    \item Build NOR from NAND gates only. How many do you need?\par
+      \uncover<3->{\small Four: OR takes three (two as NOTs, one NAND), then one
+      more as NOT.}
+    \item Is $\{\mathrm{XOR}\}$ universal?\par
+      \uncover<4->{\small No. A circuit of XORs only ever computes the XOR of some
+      of its inputs (or 0), and $xy$ is not of that form.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item A logic gate computes a basic Boolean function in hardware: NOT, AND, OR,
+      and the combinations NAND, NOR, XOR, XNOR.
+    \item A bubble means complement. XOR is 1 when its inputs differ; XNOR when they
+      are equal.
+    \item A circuit has one gate per operation; a sum of products gives NOTs, ANDs,
+      then an OR.
+    \item A set of gates is universal if it can build every Boolean function:
+      $\{\mathrm{NOT}, \mathrm{AND}, \mathrm{OR}\}$, $\{\mathrm{NOT}, \mathrm{AND}\}$,
+      $\{\mathrm{NAND}\}$ and $\{\mathrm{NOR}\}$ are; $\{\mathrm{AND}, \mathrm{OR}\}$
+      is not.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Chapter~3 of the book, \emph{Logic Gates \& Circuits}.
+    \item In Logisim-evolution, build NOT, AND and OR from NAND gates only, and test
+      each one on every input.
+    \item Build $f = xy' + x'z$ with NOT, AND and OR gates, and check it against its
+      truth table.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{7}}
+    Combinational circuits: multiplexers and demultiplexers.
+  \end{block}
+\end{frame}
+
+\end{document}

@@ -38,3 +38,8 @@ committed. Files whose name starts with `_` are skipped.
 CS102-F26 lectures start with `\usepackage{cs102-lectures}` (`cs102-f26/lectures/cs102-lectures.sty`), which also
 has helpers for logic gates (`gates` TikZ style), multiplexers (`mux`, `mux4` and `demux` pics) and Karnaugh maps
 (`kmap` environment).
+
+If a lecture stops compiling with errors such as `I do not know the key '/tikz/pics/mux'`, LaTeX has found an older
+copy of `cs102-lectures.sty`. Lectures ask for the version they need (`\usepackage{cs102-lectures}[2026/10/19]`), so
+the log then also says `You have requested ... version`. Replace the old copy, or delete it so the one next to the
+lectures is used.

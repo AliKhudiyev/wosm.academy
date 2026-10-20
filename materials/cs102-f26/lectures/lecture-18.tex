@@ -1,0 +1,320 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 18 -- The Arithmetic Logic Unit (Unit 18)
+%  Follows Section 6.4 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-18
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 18 \textperiodcentered\ The Arithmetic Logic Unit]{The Arithmetic
+  Logic Unit}
+\subtitle{Lecture 18: shifts and rotations, and selecting the operation}
+
+% ---------- Helpers for this lecture --------------------------
+\usetikzlibrary{decorations.pathreplacing}
+\tikzset{
+  unit/.style={draw=wosm-text, line width=0.6pt, fill=wosm-bg, align=center,
+    font=\scriptsize, minimum width=2.1cm, minimum height=0.7cm},
+}
+\newcommand*\junction[1]{\fill[wosm-text] #1 circle (1.5pt);}
+\newcommand*\byte[2]{\texttt{#1\,#2}}
+% A bit that moved or came in, in the shift and rotate table.
+\newcommand*\moved[1]{\textcolor{wosm-brick}{#1}}
+
+% Wiring of a 4-bit shift or rotation: \wiring{<title>}{<input of c3>/<c2>/<c1>/<c0>}
+% Each input is 3, 2, 1, 0 (a bit of a) or z (the constant 0).
+\newcommand*\wiring[5]{%
+  \begin{tikzpicture}
+    \node[font=\scriptsize] at (1.2,1.75) {#1};
+    \foreach \i/\y in {3/1.2, 2/0.4, 1/-0.4, 0/-1.2} {
+      \node[left, font=\scriptsize] at (0,\y) {$a_\i$};
+      \node[right, font=\scriptsize] at (2.4,\y) {$c_\i$};
+      \fill[wosm-text] (0,\y) circle (1.2pt);
+      \fill[wosm-text] (2.4,\y) circle (1.2pt);
+    }
+    \foreach \o/\y/\s in {3/1.2/#2, 2/0.4/#3, 1/-0.4/#4, 0/-1.2/#5} {
+      \if z\s
+        \node[font=\scriptsize] at (1.75,\y) {0};
+        \draw[wire] (1.9,\y) -- (2.4,\y);
+      \else
+        \pgfmathsetmacro\yin{1.2 - 0.8*(3-\s)}
+        \draw[wire] (0,\yin) -- (2.4,\y);
+      \fi
+    }
+  \end{tikzpicture}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Shifts and rotations}
+
+\begin{frame}{Moving bits}
+  \begin{center}
+    \begin{tabular}{@{}l*{8}{c}@{}}
+      \toprule
+      $a$ & $a_7$ & $a_6$ & $a_5$ & $a_4$ & $a_3$ & $a_2$ & $a_1$ & $a_0$ \\
+      \midrule
+      \texttt{rotl}   & $a_6$ & $a_5$ & $a_4$ & $a_3$ & $a_2$ & $a_1$ & $a_0$ & \moved{$a_7$} \\
+      \texttt{rotr}   & \moved{$a_0$} & $a_7$ & $a_6$ & $a_5$ & $a_4$ & $a_3$ & $a_2$ & $a_1$ \\
+      \texttt{shiftl} & $a_6$ & $a_5$ & $a_4$ & $a_3$ & $a_2$ & $a_1$ & $a_0$ & \moved{0} \\
+      \texttt{shiftr} & \moved{0} & $a_7$ & $a_6$ & $a_5$ & $a_4$ & $a_3$ & $a_2$ & $a_1$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item A \emph{rotation} moves every bit one place; the bit that falls off one end
+      comes back in at the other.
+    \item A \emph{shift} moves every bit one place too, but the bit that falls off is
+      lost, and a 0 comes in at the other end.
+    \item The DX8 has all four, on regA \unitref{15}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{No gates needed}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.26\textwidth}
+      \centering
+      \wiring{\texttt{rotl}, 4 bits}{2}{1}{0}{3}
+    \column{0.26\textwidth}
+      \centering
+      \wiring{\texttt{shiftl}, 4 bits}{2}{1}{0}{z}
+    \column{0.42\textwidth}
+      \begin{itemize}
+        \item Output bit $c_i$ is just input bit $a_{i-1}$: a shift or a rotation is
+          a pattern of wires, with no gates at all.
+        \item \texttt{shiftl} also needs a constant 0, and leaves $a_3$ unconnected.
+        \item In Logisim-evolution the book builds them with splitters, which
+          regroup the wires of a bus.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Shifts are arithmetic too}
+  \begin{itemize}
+    \item \texttt{shiftl} doubles an unsigned number, as long as the leftmost bit was
+      0: $\byte{0000}{0101} = 5$ becomes $\byte{0000}{1010} = 10$.
+    \item \texttt{shiftr} halves it, rounding down: $\byte{0000}{1101} = 13$ becomes
+      $\byte{0000}{0110} = 6$.
+    \item Twice \texttt{shiftl} multiplies by 4, three times by 8, and so on, just as
+      adding a 0 on the right multiplies a decimal number by 10.
+  \end{itemize}
+
+  \begin{warning}[Where it breaks]
+    \texttt{shiftl} loses the leftmost bit: $\byte{1000}{0001} = 129$ becomes
+    $\byte{0000}{0010} = 2$. And \texttt{shiftr} brings in a 0, so a negative two's
+    complement number turns positive: $\byte{1111}{1100} = -4$ becomes
+    $\byte{0111}{1110} = 126$, not $-2$.
+  \end{warning}
+\end{frame}
+
+% =============================================================
+\section{Putting the ALU together}
+
+\begin{frame}{The ALU from the outside}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[unit, minimum width=2cm, minimum height=2.2cm, font=\small] (alu) {ALU};
+        \draw[arrow] ($(alu.west)+(-1,0.55)$) node[left, font=\scriptsize] {$a$ (8)}
+          -- ($(alu.west)+(0,0.55)$);
+        \draw[arrow] ($(alu.west)+(-1,-0.55)$) node[left, font=\scriptsize] {$b$ (8)}
+          -- ($(alu.west)+(0,-0.55)$);
+        \draw[arrow] ($(alu.north)+(0,0.8)$) node[above, font=\scriptsize]
+          {opcode $b_{14:11}$ (4)} -- (alu.north);
+        \draw[arrow] (alu.east) -- ++(1,0) node[right, font=\scriptsize] {$c$ (8)};
+        \draw[arrow] (alu.south) -- ++(0,-0.8) node[below, font=\scriptsize]
+          {flags (4)};
+      \end{tikzpicture}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item Inputs: two bytes, $a$ (from regA) and $b$ (from regB), and the 4-bit
+          opcode of the instruction.
+        \item Outputs: a byte $c$ (to regOUT) and four flags (to regFLAG).
+        \item Inside: every unit of Lectures 16 and 17, the shifts and rotations of
+          today, and one multiplexer.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Selecting the operation}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.58\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \draw[wosm-text, line width=0.6pt, fill=wosm-bg]
+          (4.6,2.55) -- (5.4,2.15) -- (5.4,-2.15) -- (4.6,-2.55) -- cycle;
+        \node[font=\tiny, rotate=90] at (5.05,0) {16-to-1 MUX, 8 bits wide};
+        \foreach \t [count=\i from 0] in {\byte{0000}{0000}, $a + b$,
+            $\mathrm{NOT}\,a + 1$, $a$ AND $b$, $a$ OR $b$, $a$ XOR $b$,
+            NOT $a$, \texttt{rotl} $a$, \texttt{rotr} $a$, \texttt{shiftl} $a$,
+            \texttt{shiftr} $a$} {
+          \pgfmathsetmacro\y{2.25 - 0.3*\i}
+          \draw[wire] (4.0,\y) -- (4.6,\y);
+          \node[left, font=\scriptsize] at (4.0,\y) {\t};
+          \node[font=\tiny, text=wosm-muted] at (4.75,\y) {\i};
+        }
+        \foreach \i in {11,...,15} {
+          \pgfmathsetmacro\y{2.25 - 0.3*\i}
+          \draw[wire] (4.3,\y) -- (4.6,\y);
+          \node[font=\tiny, text=wosm-muted] at (4.75,\y) {\i};
+        }
+        \draw[decorate, decoration={brace, amplitude=3pt, mirror}, wosm-muted]
+          (4.2,-1.05) -- (4.2,-2.25) node[midway, left=3pt, font=\scriptsize,
+          text=wosm-muted] {not used};
+        \draw[arrow] (5.0,3.0) node[above, font=\scriptsize] {opcode $b_{14:11}$}
+          -- (5.0,2.35);
+        \draw[arrow] (5.4,0) -- (6.1,0) node[right, font=\scriptsize] {$c$};
+      \end{tikzpicture}
+    \column{0.38\textwidth}
+      \begin{itemize}
+        \item Every unit computes its result at the same time; the multiplexer
+          \unitref{7} passes on the one the opcode selects.
+        \item The inputs are in opcode order: input 1 is \texttt{add} (1\,0001),
+          input 10 is \texttt{shiftr} (1\,1010). So the opcode is the select, with
+          no decoding.
+        \item \texttt{cmp} selects the constant 0: its answer is in the flags.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The flags}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[unit] (add) at (0,0.7) {8-bit adder};
+        \node[unit, minimum height=1cm] (cmp) at (0,-0.85) {8-bit comparator};
+        \draw[arrow] (-2,0.85) node[left, font=\scriptsize] {$a$} -- (add.west |- 0,0.85);
+        \draw[arrow] (-2,0.55) node[left, font=\scriptsize] {$b$} -- (add.west |- 0,0.55);
+        \draw[arrow] (-2,-0.7) node[left, font=\scriptsize] {$a$} -- (cmp.west |- 0,-0.7);
+        \draw[arrow] (-2,-1.0) node[left, font=\scriptsize] {$b$} -- (cmp.west |- 0,-1.0);
+        \draw[arrow] (add.east) -- ++(1.2,0) node[right, font=\scriptsize] {overflow};
+        \draw[arrow] ($(cmp.east)+(0,0.3)$) -- ++(1.2,0) node[right, font=\scriptsize] {gt};
+        \draw[arrow] (cmp.east) -- ++(1.2,0) node[right, font=\scriptsize] {lt};
+        \draw[arrow] ($(cmp.east)+(0,-0.3)$) -- ++(1.2,0) node[right, font=\scriptsize] {eq};
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      \begin{itemize}
+        \item Four flags, whatever the opcode: the adder's overflow
+          \unitref{16} and the comparator's gt, lt and eq \unitref{17}.
+        \item They go to regFLAG. After a \texttt{cmp}, the jumps \texttt{jmpgt},
+          \texttt{jmplt} and \texttt{jmpeq} test them.
+        \item Remember: the comparator reads $a$ and $b$ as unsigned numbers.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{One input, every answer}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.46\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}lll@{}}
+        \toprule
+        Opcode & Instr. & $c$ \\
+        \midrule
+        0000 & \texttt{cmp}    & \byte{0000}{0000} \\
+        0001 & \texttt{add}    & \byte{1110}{1001} \\
+        0010 & \texttt{neg}    & \byte{0110}{1010} \\
+        0011 & \texttt{and}    & \byte{0001}{0010} \\
+        0100 & \texttt{or}     & \byte{1101}{0111} \\
+        0101 & \texttt{xor}    & \byte{1100}{0101} \\
+        0110 & \texttt{not}    & \byte{0110}{1001} \\
+        0111 & \texttt{rotl}   & \byte{0010}{1101} \\
+        1000 & \texttt{rotr}   & \byte{0100}{1011} \\
+        1001 & \texttt{shiftl} & \byte{0010}{1100} \\
+        1010 & \texttt{shiftr} & \byte{0100}{1011} \\
+        \bottomrule
+      \end{tabular}
+    \column{0.5\textwidth}
+      \begin{itemize}
+        \item $a = \byte{1001}{0110}$, $b = \byte{0101}{0011}$. All eleven results
+          exist inside the ALU at once; the opcode picks one.
+        \item Flags: gt $= 1$, since $150 > 83$ unsigned (although $a$ is $-106$ in
+          two's complement). Overflow $= 0$: $-106 + 83 = -23$ fits.
+        \item Check a few rows by hand.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Why compute everything?}
+  \begin{itemize}
+    \item The ALU does not wait for the opcode: all units work in parallel, and the
+      multiplexer chooses. Simple to design, and the result is ready after the
+      slowest unit plus the multiplexer.
+    \item The price: gates that work for nothing most of the time.
+    \item In a clocked design, the ALU sits between registers (regA and regB before,
+      regOUT and regFLAG after): its longest path, through the adder, is part of the
+      setup constraint \unitref{14}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item $a = \byte{1100}{0011}$. What do \texttt{rotl}, \texttt{rotr},
+      \texttt{shiftl} and \texttt{shiftr} give?\par
+      \uncover<2->{\small \byte{1000}{0111}, \byte{1110}{0001}, \byte{1000}{0110},
+        \byte{0110}{0001}.}
+    \item Which ALU operation, used twice, multiplies an unsigned byte by 4? When does
+      it fail?\par
+      \uncover<3->{\small \texttt{shiftl}. It fails if one of the two leftmost bits is
+        1.}
+    \item Opcode 0101, $a = \byte{1111}{0000}$, $b = \byte{1010}{1010}$. What is
+      $c$?\par
+      \uncover<4->{\small \texttt{xor}: \byte{0101}{1010}.}
+    \item How many select bits does the multiplexer have, and how many of its inputs
+      are not used?\par
+      \uncover<5->{\small 4 select bits; inputs 11 to 15, so 5 are not used.}
+    \item Opcode 0001, $a = \byte{0111}{1111}$, $b = \byte{0000}{0001}$. What are $c$
+      and the flags?\par
+      \uncover<6->{\small $c = \byte{1000}{0000}$; overflow $= 1$ ($127 + 1$ does
+        not fit), gt $= 1$, lt $=$ eq $= 0$.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Rotations move every bit one place and wrap the end bit around; shifts lose
+      it and bring in a 0. Both are only wires.
+    \item \texttt{shiftl} doubles an unsigned number and \texttt{shiftr} halves it,
+      while no 1 falls off.
+    \item The ALU computes every operation at once; a 16-to-1 multiplexer, selected by
+      the opcode $b_{14:11}$, picks the result $c$.
+    \item Four flags come out whatever the opcode: overflow, gt, lt and eq.
+    \item \texttt{cmp} gives $c = 0$; its answer is in the flags.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~6.4 of the book.
+    \item In Logisim-evolution, build the 8-bit ALU from your adder, comparator and
+      logic units, with splitters for the shifts and rotations and a 16-to-1
+      multiplexer. Check the table of this lecture.
+    \item Read Section~6.5 of the book.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{19}}
+    Memory: registers, addressing, byte-addressable RAM and the register file.
+  \end{block}
+\end{frame}
+
+\end{document}

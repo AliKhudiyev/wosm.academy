@@ -42,6 +42,9 @@ committed. Files whose name starts with `_` are skipped.
 | CS102-F26 | `lecture-13.tex` — Counters | 13 | Section 5.4 |
 | CS102-F26 | `lecture-14.tex` — Timing of Sequential Circuits | 14 | Section 5.5 |
 | CS102-F26 | `lecture-15.tex` — Instruction Set Architecture | 15 | Chapter 6 intro, Section 6.1 |
+| CS102-F26 | `lecture-16.tex` — Arithmetic | 16 | Section 6.2 |
+| CS102-F26 | `lecture-17.tex` — Logic and Comparison | 17 | Section 6.3 |
+| CS102-F26 | `lecture-18.tex` — The Arithmetic Logic Unit | 18 | Section 6.4 |
 
 CS102-F26 lectures start like this (the `\input@path` lets the files also compile with the classes in
 `templates/latex/` or one folder up):

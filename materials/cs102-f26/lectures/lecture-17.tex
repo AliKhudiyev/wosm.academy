@@ -1,0 +1,283 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 17 -- Logic and Comparison (Unit 17)
+%  Follows Section 6.3 of A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-17
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 17 \textperiodcentered\ Logic and Comparison]{Logic and Comparison}
+\subtitle{Lecture 17: bitwise operations and comparators}
+
+% ---------- Helpers for this lecture --------------------------
+% Wider input spacing than the course default, so input labels fit.
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.36cm},
+  xnor gate/.append style={logic gate input sep=0.36cm}}}
+\newcommand*\junction[1]{\fill[wosm-text] #1 circle (1.5pt);}
+% A byte in a table, as two groups of four bits.
+\newcommand*\byte[2]{\texttt{#1\,#2}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Bitwise logic}
+
+\begin{frame}{One gate per bit}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.36\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \foreach \i/\y in {3/1.95, 2/0.65, 1/-0.65, 0/-1.95} {
+          \node[and gate, inputs=nn] (g\i) at (0,\y) {};
+          \draw[wire] (g\i.input 1) -- ++(-0.4,0) node[left] {$x_\i$};
+          \draw[wire] (g\i.input 2) -- ++(-0.4,0) node[left] {$y_\i$};
+          \draw[wire] (g\i.output) -- ++(0.4,0) node[right] {$z_\i$};
+        }
+      \end{tikzpicture}\par\smallskip
+      \wosmlabel{4-bit AND: $z_i = x_i\, y_i$}
+    \column{0.6\textwidth}
+      \begin{itemize}
+        \item Logic gates already do logic, one bit at a time \unitref{6}. To AND two
+          8-bit numbers $x_{7:0}$ and $y_{7:0}$, give each pair of bits its own gate.
+        \item The output is the 8 gate outputs side by side: $z_7 \ldots z_0$.
+        \item The same for OR and XOR; NOT needs only one number.
+        \item No bit affects any other: these are \emph{bitwise} operations.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Bitwise operations at work}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.44\textwidth}
+      \centering
+      \begin{tabular}{@{}lc@{}}
+        $x$ & \byte{1100}{1010} \\
+        $y$ & \byte{1010}{0110} \\
+        \midrule
+        $x$ AND $y$ & \byte{1000}{0010} \\
+        $x$ OR $y$  & \byte{1110}{1110} \\
+        $x$ XOR $y$ & \byte{0110}{1100} \\
+        NOT $x$     & \byte{0011}{0101} \\
+      \end{tabular}
+    \column{0.52\textwidth}
+      \begin{itemize}
+        \item Work column by column: every column is a one-bit truth table.
+        \item In the DX8: \texttt{and}, \texttt{or}, \texttt{xor} work on regA and
+          regB, \texttt{not} on regA alone; the result goes to regOUT
+          \unitref{15}.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{What they are good for: masks}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \begin{itemize}
+        \item A \emph{mask} is a number chosen to act on some bits and leave the
+          others alone.
+        \item AND with a mask \alert{clears} the bits where the mask is 0.
+        \item OR with a mask \alert{sets} the bits where the mask is 1.
+        \item XOR with a mask \alert{flips} the bits where the mask is 1.
+      \end{itemize}
+    \column{0.48\textwidth}
+      \centering
+      \begin{tabular}{@{}lc@{}}
+        $x$ & \byte{1011}{0110} \\
+        \midrule
+        AND \byte{0000}{1111} & \byte{0000}{0110} \\
+        OR \phantom{N}\byte{0000}{1001} & \byte{1011}{1111} \\
+        XOR \byte{0000}{0001} & \byte{1011}{0111} \\
+        XOR \byte{1111}{1111} & \byte{0100}{1001} \\
+      \end{tabular}\par\medskip
+      \wosmlabel{XOR with all ones is NOT}
+  \end{columns}
+
+  \begin{remark}
+    To test one bit, AND with a mask that has only that bit set: the result is 0
+    exactly when the bit is 0. And $x$ XOR $x = 0$ for every $x$.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Comparing bits}
+
+\begin{frame}{Comparing two bits}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{tabular}{@{}cc|ccc@{}}
+        $a$ & $b$ & gt & lt & eq \\
+        \midrule
+        0 & 0 & 0 & 0 & 1 \\
+        0 & 1 & 0 & 1 & 0 \\
+        1 & 0 & 1 & 0 & 0 \\
+        1 & 1 & 0 & 0 & 1 \\
+      \end{tabular}\par\smallskip
+      \wosmlabel{1-bit comparator (Table 6.5)}\par\medskip
+      gt $= a\, b'$, \quad lt $= a'\, b$, \quad eq $= (a \oplus b)'$
+    \column{0.54\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[and gate, inputs={ni}] (gt) at (2.2,1.35) {};
+        \node[and gate, inputs={in}] (lt) at (2.2,0) {};
+        \node[xnor gate, inputs=nn] (eq) at (2.2,-1.35) {};
+        \draw[wire] (0.3,2.05) node[above] {$a$} -- (0.3,-1.2 |- eq.input 1);
+        \draw[wire] (0.8,2.05) node[above] {$b$} -- (0.8,-1.2 |- eq.input 2);
+        \foreach \g in {gt, lt, eq} {
+          \draw[wire] (0.3,0 |- \g.input 1) -- (\g.input 1);
+          \draw[wire] (0.8,0 |- \g.input 2) -- (\g.input 2);
+          \draw[wire] (\g.output) -- ++(0.4,0) node[right] {\g};
+        }
+        \foreach \g in {gt, lt} {
+          \junction{(0.3,0 |- \g.input 1)}
+          \junction{(0.8,0 |- \g.input 2)}
+        }
+      \end{tikzpicture}\par\smallskip
+      \wosmlabel{A bubble on an input inverts it}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Comparing 4-bit numbers}
+  \begin{itemize}
+    \item Compare as you would by hand: from the left. The first position where the
+      numbers differ decides; if there is none, they are equal.
+    \item One 1-bit comparator per position gives $\mathrm{gt}_i$, $\mathrm{lt}_i$,
+      $\mathrm{eq}_i$. Then:
+  \end{itemize}
+  \begin{align*}
+    \mathrm{eq} &= \mathrm{eq}_3\, \mathrm{eq}_2\, \mathrm{eq}_1\, \mathrm{eq}_0 \\
+    \mathrm{gt} &= \mathrm{gt}_3 + \mathrm{eq}_3\, \mathrm{gt}_2
+      + \mathrm{eq}_3\, \mathrm{eq}_2\, \mathrm{gt}_1
+      + \mathrm{eq}_3\, \mathrm{eq}_2\, \mathrm{eq}_1\, \mathrm{gt}_0 \\
+    \mathrm{lt} &= \mathrm{lt}_3 + \mathrm{eq}_3\, \mathrm{lt}_2
+      + \mathrm{eq}_3\, \mathrm{eq}_2\, \mathrm{lt}_1
+      + \mathrm{eq}_3\, \mathrm{eq}_2\, \mathrm{eq}_1\, \mathrm{lt}_0
+  \end{align*}
+  \begin{itemize}
+    \item Each term reads: ``equal in every position to the left, and greater (or
+      less) here''. This is the extra logic of the book's 4-bit comparator: seven AND
+      gates and two OR gates.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The comparator at work}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.44\textwidth}
+      \centering
+      \begin{tabular}{@{}lcccc@{}}
+        position & 3 & 2 & 1 & 0 \\
+        \midrule
+        $a = 1011$ & 1 & 0 & 1 & 1 \\
+        $b = 1001$ & 1 & 0 & 0 & 1 \\
+        \midrule
+        $\mathrm{eq}_i$ & 1 & 1 & 0 & 1 \\
+        $\mathrm{gt}_i$ & 0 & 0 & 1 & 0 \\
+      \end{tabular}
+    \column{0.52\textwidth}
+      \begin{itemize}
+        \item Positions 3 and 2 are equal; position 1 has $a_1 = 1 > b_1 = 0$.
+        \item So the term $\mathrm{eq}_3\, \mathrm{eq}_2\, \mathrm{gt}_1$ is 1, and
+          gt $= 1$. Both lt and eq are 0.
+        \item Position 0 does not matter any more.
+      \end{itemize}
+  \end{columns}
+
+  \begin{block}{8 bits}
+    The same pattern with 8 positions: eq is the AND of 8 $\mathrm{eq}_i$, and gt and
+    lt have 8 terms each. The DX8 has an 8-bit comparator.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Signed numbers need care}
+  \begin{itemize}
+    \item The comparator reads its inputs as \alert{unsigned} numbers.
+    \item In two's complement \unitref{16}, $1111\,1111$ is $-1$ and $0000\,0001$ is
+      1, but the comparator finds $1111\,1111$ greater.
+    \item Likewise $1000\,0000$ ($-128$) comes out greater than $0111\,1111$ (127).
+  \end{itemize}
+
+  \begin{remark}[One fix]
+    Invert the leftmost bit of both numbers, then compare as unsigned:
+    $0000\,0000 < 1111\,1111$, so $-128 < 127$ as it should be. Inverting that bit
+    adds 128 to every value, which keeps their order.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Comparison in the DX8}
+  \begin{itemize}
+    \item \texttt{cmp} compares regA with regB \unitref{15}.
+    \item The comparator's three outputs are the \emph{flags} gt, lt and eq; the DX8
+      keeps them in regFLAG.
+    \item \texttt{jmpgt}, \texttt{jmplt} and \texttt{jmpeq} jump only if their flag
+      is set: this is how a DX8 program decides what to do next.
+  \end{itemize}
+
+  \begin{remark}
+    Exactly one of gt, lt and eq is 1 for any two inputs. Check it in the truth table
+    of the 1-bit comparator, then in the equations of the 4-bit one.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item $x = 0101\,1100$, $y = 0011\,1010$. Find $x$ AND $y$, $x$ OR $y$ and
+      $x$ XOR $y$.\par
+      \uncover<2->{\small $0001\,1000$, $0111\,1110$ and $0110\,0110$.}
+    \item Which mask and which operation clear the left 4 bits of $x$ and keep the
+      right 4?\par
+      \uncover<3->{\small AND with $0000\,1111$.}
+    \item How do you flip only bit 0 of $x$?\par
+      \uncover<4->{\small XOR with $0000\,0001$.}
+    \item $a = 0110$, $b = 0101$. Which output of the comparator is 1, and which
+      position decides?\par
+      \uncover<5->{\small gt, decided at position 1 ($a_1 = 1$, $b_1 = 0$).}
+    \item How many terms does gt have in an 8-bit comparator, and how many
+      $\mathrm{eq}_i$ are in its longest term?\par
+      \uncover<6->{\small 8 terms; the longest has 7: $\mathrm{eq}_7 \cdots
+        \mathrm{eq}_1\, \mathrm{gt}_0$.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Bitwise AND, OR, XOR and NOT use one gate per bit; no bit affects another.
+    \item Masks: AND clears bits, OR sets them, XOR flips them.
+    \item A 1-bit comparator: gt $= a b'$, lt $= a' b$, eq $= (a \oplus b)'$.
+    \item An $n$-bit comparator: the leftmost position where the numbers differ
+      decides. eq is the AND of all $\mathrm{eq}_i$.
+    \item The comparator treats numbers as unsigned. Its outputs are the DX8's flags
+      for the conditional jumps.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~6.3 of the book.
+    \item In Logisim-evolution, build the 1-bit comparator and the 4-bit comparator,
+      and test it on the pairs of this lecture. Then extend it to 8 bits.
+    \item Build 8-bit AND, OR, XOR and NOT units.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{18}}
+    The arithmetic logic unit: shifts and rotations, and selecting the operation.
+  \end{block}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,403 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 16 -- Arithmetic (Unit 16)
+%  Follows Section 6.2 of A Student's Computer Architecture Book I,
+%  with two's complement (the DX8's neg, Section 6.4) and the overflow
+%  output of the book's 4-bit adder.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-16
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 16 \textperiodcentered\ Arithmetic]{Arithmetic}
+\subtitle{Lecture 16: half and full adders, multi-bit adders, and two's complement}
+
+% ---------- Helpers for this lecture --------------------------
+% Wider input spacing than the course default, so input labels fit.
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.36cm},
+  or gate/.append style={logic gate input sep=0.36cm},
+  xor gate/.append style={logic gate input sep=0.36cm}}}
+\tikzset{
+  fa/.style={draw=wosm-text, line width=0.6pt, fill=wosm-bg, minimum width=1.1cm,
+    minimum height=0.9cm, font=\scriptsize},
+}
+\newcommand*\junction[1]{\fill[wosm-text] #1 circle (1.5pt);}
+
+% A column addition: \colsum{<carries>}{<x>}{<y>}{<sum>}, digits separated by &.
+\newcommand*\colsum[4]{%
+  \begin{tabular}{@{}r@{\quad}*{5}{c@{\,}}@{}}
+    {\scriptsize\color{wosm-brick}carries} & #1 \\
+    $x$ & #2 \\
+    $+\;y$ & #3 \\
+    \midrule
+    & #4 \\
+  \end{tabular}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Adding bits}
+
+\begin{frame}{Adding two bits}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{tabular}{@{}cc|cc|c@{}}
+        $x$ & $y$ & sum & carry & $x + y$ \\
+        \midrule
+        0 & 0 & 0 & 0 & 00 \\
+        0 & 1 & 1 & 0 & 01 \\
+        1 & 0 & 1 & 0 & 01 \\
+        1 & 1 & 0 & 1 & 10 \\
+      \end{tabular}\par\smallskip
+      \wosmlabel{Half adder (Table 6.3)}
+    \column{0.52\textwidth}
+      \begin{itemize}
+        \item $1 + 1 = 2 = 10_2$: the sum needs a second bit, the \emph{carry}.
+        \item sum $= x \oplus y$, \quad carry $= x\, y$.
+      \end{itemize}
+      \medskip
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[xor gate, inputs=nn] (x) at (2,0.7) {};
+        \node[and gate, inputs=nn] (a) at (2,-0.7) {};
+        \coordinate (j1) at ($(x.input 1)+(-0.9,0)$);
+        \coordinate (j2) at ($(a.input 2)+(-0.6,0)$);
+        \draw[wire] (x.input 1) -- ++(-1.4,0) node[left] {$x$};
+        \draw[wire] (a.input 2) -- ++(-1.4,0) node[left] {$y$};
+        \draw[wire] (j1) |- (a.input 1);
+        \draw[wire] (j2) |- (x.input 2);
+        \junction{(j1)} \junction{(j2)}
+        \draw[wire] (x.output) -- ++(0.4,0) node[right] {sum};
+        \draw[wire] (a.output) -- ++(0.4,0) node[right] {carry};
+      \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Why half is not enough}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.4\textwidth}
+      \centering
+      \large
+      \colsum{ & 1 & 1 & 0 & }{ & 0 & 1 & 1 & 0}{ & 0 & 1 & 1 & 1}{ & 1 & 1 & 0 & 1}
+      \par\medskip
+      \normalsize
+      \wosmlabel{$6 + 7 = 13$, by hand}
+    \column{0.56\textwidth}
+      \begin{itemize}
+        \item Adding numbers by hand, column by column from the right, each column
+          adds \alert{three} bits: $x_i$, $y_i$ and the carry from the column on its
+          right.
+        \item A half adder has no input for that carry, so a row of half adders
+          cannot add multi-bit numbers.
+        \item We need an adder of three bits: the \emph{full adder}.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The full adder}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.4\textwidth}
+      \centering
+      \begin{tabular}{@{}ccc|cc@{}}
+        $c_i$ & $x_i$ & $y_i$ & $s_i$ & $c_{i+1}$ \\
+        \midrule
+        0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 1 & 1 & 0 \\
+        0 & 1 & 0 & 1 & 0 \\
+        0 & 1 & 1 & 0 & 1 \\
+        1 & 0 & 0 & 1 & 0 \\
+        1 & 0 & 1 & 0 & 1 \\
+        1 & 1 & 0 & 0 & 1 \\
+        1 & 1 & 1 & 1 & 1 \\
+      \end{tabular}\par\smallskip
+      \wosmlabel{Full adder (Table 6.4): $c_i + x_i + y_i = [c_{i+1}\, s_i]$}
+    \column{0.56\textwidth}
+      \begin{itemize}
+        \item The sum bit is 1 when an odd number of inputs are 1:
+          \[ s_i = x_i \oplus y_i \oplus c_i. \]
+        \item The carry is 1 when at least two inputs are 1:
+          \[ c_{i+1} = x_i\, y_i + (x_i \oplus y_i)\, c_i
+             = x_i y_i + x_i c_i + y_i c_i. \]
+        \item Check the second form with a K-map \unitref{5}; the first is the
+          book's circuit, on the next slide.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Two half adders and an OR}
+  \begin{center}
+    \begin{tikzpicture}[gates]
+      \node[xor gate, inputs=nn] (x1) at (1.8,1.3) {};
+      \node[and gate, inputs=nn] (a1) at (1.8,0.05) {};
+      \node[xor gate, inputs=nn] (x2) at (5.2,1.12) {};
+      \node[and gate, inputs=nn] (a2) at (5.2,-0.95) {};
+      \node[or gate, inputs=nn] (o) at (7.9,-0.45) {};
+      \coordinate (jx) at ($(x1.input 1)+(-0.8,0)$);
+      \coordinate (jy) at ($(x1.input 2)+(-0.5,0)$);
+      \draw[wire] (x1.input 1) -- ++(-1.3,0) node[left] {$x_i$};
+      \draw[wire] (x1.input 2) -- ++(-1.3,0) node[left] {$y_i$};
+      \draw[wire] (jx) |- (a1.input 1);
+      \draw[wire] (jy) |- (a1.input 2);
+      \junction{(jx)} \junction{(jy)}
+      \draw[wire] (x1.output) -- ++(1.2,0) coordinate (p) |- (x2.input 1);
+      \draw[wire] (p) |- (a2.input 1);
+      \junction{(p)}
+      \node[above, font=\scriptsize, text=wosm-muted] at ($(x1.output)+(0.6,0)$)
+        {$x_i \oplus y_i$};
+      \draw[wire] (a2.input 2) -- ++(-4.9,0) node[left] {$c_i$};
+      \coordinate (jc) at ($(a2.input 2)+(-1.0,0)$);
+      \draw[wire] (jc) |- (x2.input 2);
+      \junction{(jc)}
+      \draw[wire] (a1.output) -- ++(4.0,0) |- (o.input 1);
+      \draw[wire] (a2.output) -- ++(0.4,0) |- (o.input 2);
+      \draw[wire] (x2.output) -- ++(3.0,0) node[right] {$s_i$};
+      \draw[wire] (o.output) -- ++(0.4,0) node[right] {$c_{i+1}$};
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item The first half adder adds $x_i$ and $y_i$; the second adds the carry $c_i$
+      to their sum. A carry from either one makes $c_{i+1} = 1$.
+    \item Five gates: two XOR, two AND, one OR.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Multi-bit adders}
+
+\begin{frame}{The ripple-carry adder}
+  \begin{center}
+    \begin{tikzpicture}
+      \foreach \i/\x in {3/0, 2/2.3, 1/4.6, 0/6.9} {
+        \node[fa] (f\i) at (\x,0) {full adder};
+        \draw[arrow] ($(f\i.north)+(-0.25,0.5)$) node[above, font=\scriptsize]
+          {$x_\i$} -- ($(f\i.north)+(-0.25,0)$);
+        \draw[arrow] ($(f\i.north)+(0.25,0.5)$) node[above, font=\scriptsize]
+          {$y_\i$} -- ($(f\i.north)+(0.25,0)$);
+        \draw[arrow] (f\i.south) -- ++(0,-0.5) node[below, font=\scriptsize]
+          {$s_\i$};
+      }
+      \foreach \i/\j in {0/1, 1/2, 2/3}
+        {\draw[arrow] (f\i.west) -- node[above, font=\scriptsize] {$c_\j$} (f\j.east);}
+      \draw[arrow] ($(f0.east)+(0.6,0)$) node[right, font=\scriptsize] {$c_0 = 0$}
+        -- (f0.east);
+      \draw[arrow] (f3.west) -- ++(-0.6,0) node[left, font=\scriptsize]
+        {$c_4$ (carry out)};
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item One full adder per bit; each passes its carry to the next one on the left.
+      The first carry in is 0. This is the book's 4-bit adder.
+    \item The DX8 adds bytes, so it chains 8 full adders: an 8-bit adder.
+    \item The carry \emph{ripples} from bit 0 to bit $n-1$, as the clock edge did
+      through the ripple counter \unitref{13}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The adder at work}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \centering
+      \large
+      \colsum{0 & 1 & 1 & 0 & 0}{ & 0 & 1 & 1 & 0}{ & 0 & 1 & 1 & 1}
+        {0 & 1 & 1 & 0 & 1}\par\medskip
+      \normalsize
+      $6 + 7 = 13$: carry out $c_4 = 0$
+    \column{0.48\textwidth}
+      \centering
+      \large
+      \colsum{1 & 1 & 1 & 0 & 0}{ & 1 & 0 & 1 & 1}{ & 0 & 1 & 1 & 0}
+        {1 & 0 & 0 & 0 & 1}\par\medskip
+      \normalsize
+      $11 + 6 = 17$: carry out $c_4 = 1$
+  \end{columns}
+
+  \bigskip
+  \begin{itemize}
+    \item The carries row is $c_4 c_3 c_2 c_1 c_0$, with $c_0 = 0$.
+    \item 4 bits hold 0 to 15. $17$ does not fit: the adder gives $0001$ and
+      $c_4 = 1$. For unsigned numbers, a carry out means the result is too large.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{How long does it take?}
+  \begin{itemize}
+    \item $s_{n-1}$ is correct only once the carry has come all the way from bit 0:
+      the longest path goes through every full adder.
+    \item So the propagation delay \unitref{9} of a ripple-carry adder grows with $n$:
+      an 8-bit adder is about twice as slow as a 4-bit one.
+    \item In a clocked circuit, that delay is part of $t_{\mathrm{pd}}$ in the setup
+      constraint \unitref{14}.
+  \end{itemize}
+
+  \begin{remark}
+    Faster adders work out the carries in parallel (\emph{carry-lookahead}), at the
+    cost of more gates. For the DX8, the ripple-carry adder is enough.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Negative numbers}
+
+\begin{frame}{Two's complement}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.55\textwidth}
+      \begin{definition}[Two's complement]
+        In $n$-bit \emph{two's complement}, the bits $b_{n-1} \ldots b_1 b_0$ stand
+        for
+        \[ -b_{n-1}\, 2^{n-1} + b_{n-2}\, 2^{n-2} + \cdots + b_1\, 2 + b_0. \]
+      \end{definition}
+      \begin{itemize}
+        \item The leftmost bit counts $-2^{n-1}$ instead of $+2^{n-1}$: it is 1 for
+          every negative number.
+        \item $n$ bits hold $-2^{n-1}$ to $2^{n-1} - 1$: $-8$ to 7 in 4 bits,
+          $-128$ to 127 in a byte.
+      \end{itemize}
+    \column{0.41\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \draw[wosm-rule, line width=0.6pt] (0,0) circle (1.6);
+        \foreach \i/\p in {0/0000, 1/0001, 2/0010, 3/0011, 4/0100, 5/0101, 6/0110,
+            7/0111, 8/1000, 9/1001, 10/1010, 11/1011, 12/1100, 13/1101, 14/1110,
+            15/1111} {
+          \pgfmathtruncatemacro\v{\i < 8 ? \i : \i - 16}
+          \pgfmathsetmacro\a{90 - 22.5*\i}
+          \node[font=\tiny\ttfamily] at (\a:2.05) {\p};
+          \node[font=\scriptsize] at (\a:1.3) {$\v$};
+          \fill[wosm-text] (\a:1.6) circle (1pt);
+        }
+        \draw[wosm-brick, line width=1.2pt] (-78.75:1.45) -- (-78.75:1.75);
+      \end{tikzpicture}\par\smallskip
+      \wosmlabel{4-bit two's complement}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Negating: NOT $a$ + 1}
+  \begin{itemize}
+    \item $a + \mathrm{NOT}\,a = 11\ldots1$, which is $-1$ in two's complement. So
+      \[ -a = \mathrm{NOT}\,a + 1. \]
+    \item Example, 4 bits: $5 = 0101$, $\mathrm{NOT}\,5 = 1010$, plus 1:
+      $1011 = -8 + 2 + 1 = -5$.
+    \item And back: $\mathrm{NOT}\,1011 + 1 = 0100 + 1 = 0101 = 5$.
+    \item The exception: $-8 = 1000$ gives $0111 + 1 = 1000$ again. There is no $+8$
+      in 4 bits.
+  \end{itemize}
+
+  \begin{block}{The DX8's \texttt{neg}}
+    $\texttt{regOUT} \leftarrow \mathrm{NOT}\ \texttt{regA} + 1$ \unitref{15}. The book
+    builds it from a second 8-bit adder: $x = \mathrm{NOT}\,a$, $y = 0$, and carry in
+    $c_0 = 1$.
+  \end{block}
+\end{frame}
+
+\begin{frame}{One adder for both signs}
+  \begin{itemize}
+    \item Two's complement numbers add with the \alert{same} adder as unsigned ones:
+      only the reading of the bits changes.
+    \item $1101 + 1110$: unsigned, $13 + 14 = 27$, too large for 4 bits. In two's
+      complement, $-3 + (-2) = -5$: the adder gives $1011$, which is $-5$. The carry
+      out is simply dropped.
+    \item Subtraction for free: $a - b = a + \mathrm{NOT}\,b + 1$. Example:
+      $6 - 3 = 0110 + 1100 + 1 = 0011$, dropping the carry out.
+  \end{itemize}
+
+  \begin{remark}
+    The DX8 has no \texttt{sub} instruction: \texttt{neg} and then \texttt{add} do the
+    job.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Overflow}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \begin{itemize}
+        \item In two's complement, a result outside $-2^{n-1}$ to $2^{n-1} - 1$ comes
+          out with the wrong sign: $5 + 4 = 0101 + 0100 = 1001 = -7$.
+        \item It happens exactly when the carry into the leftmost bit differs from
+          the carry out of it:
+          \[ \text{overflow} = c_{n-1} \oplus c_n. \]
+        \item That is the XOR gate on the \emph{overflow} output of the book's 4-bit
+          adder.
+      \end{itemize}
+    \column{0.46\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}lccc@{}}
+        \toprule
+        Sum & $c_3$ & $c_4$ & overflow \\
+        \midrule
+        $5 + 4$ & 1 & 0 & 1 \\
+        $-3 + (-2)$ & 1 & 1 & 0 \\
+        $-8 + (-1)$ & 0 & 1 & 1 \\
+        $-5 + 6$ & 1 & 1 & 0 \\
+        \bottomrule
+      \end{tabular}\par\medskip
+      \wosmlabel{Carry out ($c_4$): too large as unsigned. Overflow: wrong as two's
+      complement.}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item Add $1001 + 0111$ with a 4-bit adder. What are the sum and the carry out?\par
+      \uncover<2->{\small $0000$, carry out 1: $9 + 7 = 16$.}
+    \item Write $-6$ as an 8-bit two's complement number.\par
+      \uncover<3->{\small $6 = 0000\,0110$, $\mathrm{NOT}\,6 + 1 = 1111\,1010$.}
+    \item Which number is $1110\,0100$ in 8-bit two's complement?\par
+      \uncover<4->{\small $-28$: $\mathrm{NOT}$ of it, plus 1, is $0001\,1100 = 28$.}
+    \item Does $0110 + 0011$ overflow in 4-bit two's complement?\par
+      \uncover<5->{\small Yes: $6 + 3 = 9 > 7$. The adder gives $1001 = -7$;
+        $c_3 = 1$, $c_4 = 0$.}
+    \item How many gates does the DX8's 8-bit adder need?\par
+      \uncover<6->{\small 8 full adders of 5 gates each: 40 gates.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Half adder: sum $= x \oplus y$, carry $= x y$. Full adder: it also adds a
+      carry in; two half adders and an OR.
+    \item A ripple-carry adder chains $n$ full adders; its delay grows with $n$.
+      A carry out means the unsigned result does not fit.
+    \item Two's complement: the leftmost bit counts $-2^{n-1}$; $n$ bits hold
+      $-2^{n-1}$ to $2^{n-1} - 1$.
+    \item $-a = \mathrm{NOT}\,a + 1$, and $a - b = a + \mathrm{NOT}\,b + 1$: the same
+      adder serves both signs.
+    \item Overflow $= c_{n-1} \oplus c_n$: the two's complement result has the wrong
+      sign.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~6.2 of the book.
+    \item In Logisim-evolution, build the half adder, the full adder, and a 4-bit
+      ripple-carry adder with carry out and overflow. Test it on the sums of this
+      lecture.
+    \item Extend it to 8 bits: that is the DX8's adder.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{17}}
+    Logic and comparison: bitwise operations and comparators.
+  \end{block}
+\end{frame}
+
+\end{document}

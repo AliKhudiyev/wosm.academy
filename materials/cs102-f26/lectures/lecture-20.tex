@@ -1,0 +1,305 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 20 -- Processor Design (Unit 20)
+%  Follows the introduction of Section 6.6 and Section 6.6.1 of
+%  A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-20
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 20 \textperiodcentered\ Processor Design]{Processor Design}
+\subtitle{Lecture 20: fetch, decode, execute and load; single-cycle, multi-cycle and
+  pipelined designs}
+
+% ---------- Helpers for this lecture --------------------------
+\tikzset{
+  stage/.style={draw=wosm-text, line width=0.5pt, fill=wosm-surface},
+}
+% One instruction on a time line, in clock cycles:
+% \fdel{<y>}{<start>}{<fetch>}{<decode>}{<execute>}{<load>}{<label>}
+\newcommand*\fdel[7]{%
+  \pgfmathsetmacro\xa{#2}\pgfmathsetmacro\xb{\xa+#3}%
+  \pgfmathsetmacro\xc{\xb+#4}\pgfmathsetmacro\xd{\xc+#5}%
+  \pgfmathsetmacro\xe{\xd+#6}%
+  \foreach \p/\q/\t in {\xa/\xb/F, \xb/\xc/D, \xc/\xd/E, \xd/\xe/L} {
+    \draw[stage] (\p,#1+0.2) rectangle (\q,#1-0.2);
+    \node[font=\tiny] at ({(\p+\q)/2},#1) {\t};
+  }
+  \node[left, font=\scriptsize] at (-0.15,#1) {#7};}
+% A time axis in clock cycles: \cycles{<y>}{<last cycle>}{<step of the labels>}
+\newcommand*\cycles[3]{%
+  \draw[wosm-muted, line width=0.4pt] (0,#1) -- (#2,#1);
+  \foreach \c in {0,#3,...,#2} {
+    \draw[wosm-muted, line width=0.4pt] (\c,#1) -- (\c,#1-0.08);
+    \node[below, font=\tiny, text=wosm-muted] at (\c,#1-0.05) {\c};
+  }}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{The four stages}
+
+\begin{frame}{Building the DX8}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      The parts we have: the RAM and the register file \unitref{19}, the ALU
+      \unitref{18}, and registers such as the IP, IR, regA, regB, regOUT and regFLAG
+      \unitref{15}.\par\medskip
+      Two more parts make it run:
+      \begin{itemize}
+        \item the \alert{stepper}, which turns on one output at a time, in a fixed
+          order, in step with the clock;
+        \item the \alert{controller}, which sets the control bits of every other part
+          for the current step.
+      \end{itemize}
+    \column{0.44\textwidth}
+      \begin{block}{The question for today}
+        Running one instruction takes several things, one after another: read it,
+        work out what it means, do it, and keep the result. How do we organise that
+        in time?
+      \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Fetch, decode, execute, load}
+  \begin{center}
+    \small
+    \begin{tabular}{@{}lp{0.76\textwidth}@{}}
+      \toprule
+      Stage & What happens \\
+      \midrule
+      \textbf{Fetch} & The controller sets RE of the RAM, and WE of the register file
+        and the IR: the instruction is read from memory into the CPU. \\
+      \textbf{Decode} & The instruction is examined: is it an ALU or a memory
+        instruction, and which part is responsible for it? \\
+      \textbf{Execute} & The instruction is carried out, in the ALU or elsewhere; the
+        results are kept for now in registers such as regOUT and regFLAG. \\
+      \textbf{Load} & The kept results are written back where they belong, to the
+        register file or the RAM, if needed. Then the cycle starts again. \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{remark}
+    Splitting the work into four stages makes the design easier and modular: we can
+    design and test one stage at a time.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{One instruction, four stages}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \wosmlabel{\texttt{add}: regOUT $\leftarrow$ regA $+$ regB}
+      \begin{enumerate}
+        \item \textbf{Fetch}: the instruction at the address in the IP comes in
+          from the RAM.
+        \item \textbf{Decode}: $b_{15} = 1$, so the ALU is responsible; the opcode
+          0001 goes to the ALU.
+        \item \textbf{Execute}: the ALU adds; the sum goes to regOUT, the flags to
+          regFLAG.
+        \item \textbf{Load}: regOUT and regFLAG go back to the register file.
+      \end{enumerate}
+    \column{0.48\textwidth}
+      \wosmlabel{\texttt{store}: $M[\texttt{memAddr}] \leftarrow$ regX}
+      \begin{enumerate}
+        \item \textbf{Fetch}: the same as for every instruction.
+        \item \textbf{Decode}: $b_{15} = 0$ and opcode 0001: a \texttt{store}.
+        \item \textbf{Execute}: there is nothing for the ALU to do.
+        \item \textbf{Load}: the register's content is written into the RAM; the
+          book's DX8 gives the RAM its address through the IP.
+      \end{enumerate}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Three ways to run the stages}
+
+\begin{frame}{Single-cycle and multi-cycle}
+  \begin{center}
+    \begin{tikzpicture}[x=0.4cm, y=0.82cm]
+      \node[anchor=west, font=\scriptsize] at (0,1.0) {\textbf{Single-cycle}: one
+        long clock cycle per instruction};
+      \foreach \i in {1,2,3} {
+        \fdel{0.3}{8*(\i-1)}{2}{2}{2}{2}{}
+        \node[font=\tiny, text=wosm-muted] at (8*\i-4,0.7) {instr.~\i};
+      }
+      \foreach \c in {0,8,16,24} {\draw[wosm-brick, line width=0.6pt] (\c,0.6) --
+        (\c,0.0);}
+      \cycles{-0.05}{24}{4}
+      \node[anchor=west, font=\scriptsize] at (0,-0.85) {\textbf{Multi-cycle}: short
+        cycles, as many as each stage needs};
+      \fdel{-1.5}{0}{2}{2}{2}{2}{instr.~1}
+      \fdel{-2.1}{8}{1}{1}{2}{1}{instr.~2}
+      \fdel{-2.7}{13}{2}{2}{1}{2}{instr.~3}
+      \cycles{-3.1}{24}{4}
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item Single-cycle: the period must fit the slowest instruction. If that takes
+      100\,ns, \emph{every} instruction takes 100\,ns, even one that could finish
+      sooner.
+    \item Multi-cycle: here the three instructions take 8, 5 and 7 short cycles: 20
+      instead of 24. But each instruction still waits for the one before it.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Pipelined}
+  \begin{center}
+    \begin{tikzpicture}[x=0.4cm]
+      \node[anchor=west, font=\scriptsize] at (0,0.7) {\textbf{Multi-cycle}, 2 cycles
+        per stage: 24 cycles for 3 instructions};
+      \foreach \i in {1,2,3} {
+        \fdel{0.05}{8*(\i-1)}{2}{2}{2}{2}{}
+        \node[font=\tiny, text=wosm-muted] at (8*\i-4,0.42) {instr.~\i};
+      }
+      \cycles{-0.25}{24}{2}
+      \node[anchor=west, font=\scriptsize] at (0,-1.05) {\textbf{Pipelined}: 12 cycles
+        for the same 3};
+      \fdel{-1.6}{0}{2}{2}{2}{2}{instr.~1}
+      \fdel{-2.1}{2}{2}{2}{2}{2}{instr.~2}
+      \fdel{-2.6}{4}{2}{2}{2}{2}{instr.~3}
+      \cycles{-3.0}{24}{2}
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item When instruction 1 moves on to decode, the fetch stage is idle. A pipelined
+      CPU fetches instruction 2 at once: the stages work on different instructions
+      at the same time.
+    \item Each instruction still takes 8 cycles; but one finishes every 2 cycles.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Latency and throughput}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \begin{definition}[Latency and throughput]
+        \emph{Latency}: the time a CPU takes to finish one instruction.
+        \emph{Throughput}: how many instructions it finishes per unit of time.
+      \end{definition}
+      \begin{itemize}
+        \item Single-cycle to multi-cycle: shorter latency, for instructions that
+          need fewer cycles.
+        \item Multi-cycle to pipelined: the same latency, more throughput.
+      \end{itemize}
+    \column{0.46\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}lcc@{}}
+        \toprule
+        & Multi-cycle & Pipelined \\
+        \midrule
+        Latency & 8 & 8 \\
+        3 instructions & 24 & 12 \\
+        Per cycle & $\frac{3}{24} = 0.125$ & $\frac{3}{12} = 0.25$ \\
+        $n$ instructions & $8n$ & $2(n + 3)$ \\
+        \bottomrule
+      \end{tabular}\par\medskip
+      \wosmlabel{4 stages of 2 cycles each. For long programs the pipeline finishes
+      one instruction every 2 cycles: 4 times the throughput.}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The catch}
+  \begin{itemize}
+    \item A pipeline needs registers between its stages, so that each stage can hold
+      its own instruction: the ``register in the middle of a long path'' of
+      \unitref{14}.
+    \item An instruction may need a result that the instruction just before it has
+      not written back yet.
+    \item After a jump, the instructions already fetched behind it may be the wrong
+      ones.
+    \item Handling these cases is what makes pipelined CPUs the hardest of the three
+      to design.
+  \end{itemize}
+
+  \begin{remark}
+    These problems are called \emph{hazards}. They are beyond this module: the DX8 is
+    not pipelined, so it never meets them.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{The DX8's choice}
+  \begin{center}
+    \begin{tabular}{@{}lll@{}}
+      \toprule
+      Design & To build & Performance \\
+      \midrule
+      Single-cycle & simplest & lowest \\
+      Multi-cycle & moderate & moderate \\
+      Pipelined & hardest & highest \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item The book chooses \alert{multi-cycle} for the DX8: a trade-off between
+      performance and simplicity.
+    \item Each stage gets at most 2 clock cycles, or \emph{steps}: fetch is steps 1
+      and 2, decode 3 and 4, execute 5 and 6, load 7 and 8. Then back to step 1.
+    \item The stepper counts the steps \unitref{21}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item In a single-cycle CPU, the slowest instruction takes 100\,ns. What is the
+      fastest clock, and how long does the quickest instruction take?\par
+      \uncover<2->{\small 10\,MHz; 100\,ns, like every other instruction.}
+    \item The DX8 takes 8 cycles per instruction. With a 1\,MHz clock, how many
+      instructions does it finish per second?\par
+      \uncover<3->{\small $10^6 / 8 = 125\,000$.}
+    \item 4 stages of 2 cycles each. How many cycles do 10 instructions take,
+      multi-cycle and pipelined?\par
+      \uncover<4->{\small $8 \cdot 10 = 80$, and $2 \cdot (10 + 3) = 26$.}
+    \item Does pipelining make one instruction finish sooner?\par
+      \uncover<5->{\small No: its latency stays 8 cycles. More instructions finish per
+        second.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item Every instruction goes through four stages: fetch, decode, execute and
+      load.
+    \item Single-cycle: all four in one long clock cycle, set by the slowest
+      instruction.
+    \item Multi-cycle: shorter cycles; each stage takes the cycles it needs, one
+      instruction at a time.
+    \item Pipelined: the stages overlap, working on different instructions; the
+      same latency, more throughput.
+    \item The DX8 is multi-cycle: 8 steps per instruction, 2 for each stage.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read the beginning of Section~6.6 and Section~6.6.1 of the book.
+    \item Draw the time line of 5 instructions on the multi-cycle DX8 and on a
+      pipelined DX8, and count the cycles.
+    \item Read Sections~6.6.2 and 6.6.3.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{21}}
+    The stepper, the data path and the controller.
+  \end{block}
+\end{frame}
+
+\end{document}

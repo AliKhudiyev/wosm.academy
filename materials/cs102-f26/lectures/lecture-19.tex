@@ -1,0 +1,348 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 19 -- Memory (Unit 19)
+%  Follows Section 6.5, and the register file of Section 6.6.2, of
+%  A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-19
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 19 \textperiodcentered\ Memory]{Memory}
+\subtitle{Lecture 19: registers, addressing, byte-addressable RAM and the register
+  file}
+
+% ---------- Helpers for this lecture --------------------------
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.3cm}}}
+\tikzset{
+  blk/.style={draw=wosm-text, line width=0.6pt, fill=wosm-bg, align=center,
+    font=\scriptsize, minimum width=1.3cm, minimum height=0.6cm, inner sep=2pt},
+  bus/.style={draw=wosm-text, line width=1.4pt},
+}
+\newcommand*\junction[1]{\fill[wosm-text] #1 circle (1.5pt);}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Registers}
+
+\begin{frame}{An 8-bit register}
+  \begin{center}
+    \begin{tikzpicture}[scale=0.72, every node/.append style={transform shape}]
+      \foreach \i in {0,...,7} {
+        \pgfmathsetmacro\x{(7-\i)*1.9}
+        \pic (f\i) at (\x,0) {dff};
+        \draw[wire] (f\i-d) -- ++(-0.18,0) -- ++(0,0.8) node[above, font=\scriptsize]
+          {$d_\i$};
+        \draw[wire] (f\i-q) -- ++(0.18,0) -- ++(0,0.8) node[above, font=\scriptsize]
+          {$q_\i$};
+        \draw[wire] (f\i-clk) -- ++(-0.18,0) -- ++(0,-0.6) coordinate (c\i);
+      }
+      \draw[wire] (c0) -- (c7) -- ++(-0.8,0) node[left] {clk};
+      \foreach \i in {0,...,6} {\junction{(c\i)}}
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item Eight D flip-flops that share one clock: at each rising edge they store the
+      8 bits $d_7 \ldots d_0$ together. This is the book's 8-bit register.
+    \item To store only when told, put a 2-to-1 multiplexer in front of each $D$
+      \unitref{12}: it passes $q_i$ back (keep) or $d_i$ (load). Its select is the
+      \emph{write enable}.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Addressing}
+
+\begin{frame}{One memory cell}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \pic (m) at (0,0) {mux};
+        \pic (f) at (1.6,-0.27) {dff};
+        \draw[wire] (m-out) -- (f-d);
+        \draw[wire] (f-q) -- ++(0.35,0) coordinate (o) -- ++(0.5,0) node[right]
+          {$q_i$};
+        \draw[wire] (o) |- (-0.75,1.0) |- (m-in0);
+        \junction{(o)}
+        \draw[wire] (m-in1) -- ++(-1.1,0) node[left] {bit\_in};
+        \node[and gate, inputs=nn, logic gate input sep=0.45cm] (a) at (-1.0,-1.45) {};
+        \draw[wire] (a.output) -| (m-sel);
+        \draw[wire] (a.input 1) -- ++(-0.4,0) node[left] {WE};
+        \draw[wire] (a.input 2) -- ++(-0.4,0) node[left] {$\mathrm{sel}_i$};
+        \draw[wire] (f-clk) -- ++(-0.25,0) -- ++(0,-1.4) node[below] {clk};
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      \begin{itemize}
+        \item One flip-flop with a multiplexer in front: input 0 feeds $q_i$ back,
+          input 1 takes the new bit.
+        \item It loads only when the memory is told to write (WE $= 1$) \emph{and}
+          this is the cell the address names ($\mathrm{sel}_i = 1$).
+        \item Every other cell keeps its value at the clock edge.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Four bits, one address}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.6\textwidth}
+      \centering
+      \begin{tikzpicture}[gates, scale=0.82, every node/.append style={transform shape}]
+        \node[blk, minimum height=3.4cm, minimum width=0.9cm] (dec) at (0,0)
+          {2-to-4\\ decoder};
+        \draw[wire] (dec.west) -- ++(-0.4,0) node[left] {addr};
+        \foreach \i in {0,...,3} {
+          \pgfmathsetmacro\y{1.35-0.9*\i}
+          \node[and gate, inputs=nn, scale=0.7] (a\i) at (1.75,\y) {};
+          \node[blk, minimum width=1.0cm] (c\i) at (3.6,\y) {cell \i};
+          \draw[wire] (dec.east |- a\i.input 2) -- (a\i.input 2);
+          \draw[wire] (a\i.output) -- (c\i.west |- a\i.output);
+          \draw[wire] (c\i.east) -- ++(0.35,0) coordinate (r\i);
+        }
+        \draw[wire] (1.05,2.1) node[above, font=\scriptsize] {WE} -- (1.05,0 |- a3.input 1);
+        \foreach \i in {0,...,3} {\draw[wire] (1.05,0 |- a\i.input 1) -- (a\i.input 1);}
+        \foreach \i in {0,1,2} {\junction{(1.05,0 |- a\i.input 1)}}
+        \draw[wire] (2.75,2.1) node[above, font=\scriptsize] {bit\_in} --
+          (2.75,0 |- c3.north west);
+        \foreach \i in {0,...,3} {
+          \draw[wire] (2.75,0 |- c\i.north west) ++(0,-0.1) -- ++(0.35,0);
+        }
+        \pic (m) at (5.4,0.0) {mux4};
+        \foreach \i in {0,...,3} {
+          \pgfmathsetmacro\xx{4.25+0.15*\i}
+          \draw[wire] (r\i) -- (\xx,0 |- r\i) |- (m-in\i);
+        }
+        \draw[wire] (m-sel) -- ++(0,-0.35) node[below, font=\scriptsize] {addr};
+        \node[and gate, inputs=nn, scale=0.7] (re) at (6.55,-0.12) {};
+        \draw[wire] (m-out) -- (re.input 1 -| m-out) -- (re.input 1);
+        \draw[wire] (re.input 2) -- ++(-0.3,0) |- ++(0,-0.6) node[below,
+          font=\scriptsize] {RE};
+        \draw[wire] (re.output) -- ++(0.3,0) node[right, font=\scriptsize] {bit\_out};
+      \end{tikzpicture}
+    \column{0.36\textwidth}
+      \begin{itemize}
+        \item The book's 4-bit memory: cells 00 to 11, one bit each.
+        \item \alert{Write}: the decoder \unitref{8} turns the address into one
+          select line; with WE $= 1$ only that cell loads bit\_in.
+        \item \alert{Read}: a 4-to-1 multiplexer \unitref{7} picks the addressed
+          cell; with RE $= 1$ its bit appears at bit\_out.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Write enable and read enable}
+  \begin{itemize}
+    \item Every memory access names an \emph{address} and says what to do with it:
+      \begin{itemize}
+        \item \textbf{WE} (write enable): at the next clock edge, store the input at
+          that address;
+        \item \textbf{RE} (read enable): put the content of that address on the
+          output.
+      \end{itemize}
+      They are also called \emph{load} and \emph{enable} bits.
+    \item The book also routes bit\_in to the addressed cell with a demultiplexer
+      \unitref{7}. Since only that cell loads, the effect is the same.
+    \item Reading takes no clock edge: the output follows the address, through the
+      multiplexer. Writing waits for the edge, like every flip-flop.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Byte-addressable RAM}
+
+\begin{frame}{From bits to bytes}
+  \begin{itemize}
+    \item Put an 8-bit register in place of each flip-flop: the same circuit now
+      stores 4 bytes. The multiplexers simply carry 8 bits instead of one.
+    \item The book calls it a \alert{2x8 RAM}: 2 address bits, and 8 bits at each
+      address. Each address names a byte: the memory is \emph{byte-addressable}
+      \unitref{15}.
+  \end{itemize}
+
+  \begin{center}
+    \begin{tabular}{@{}lccc@{}}
+      \toprule
+      RAM & Address bits & Bytes & Built from \\
+      \midrule
+      2x8 & 2 & 4   & four 8-bit registers \\
+      4x8 & 4 & 16  & four 2x8 RAMs \\
+      6x8 & 6 & 64  & four 4x8 RAMs \\
+      8x8 & 8 & 256 & four 6x8 RAMs \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Four smaller RAMs make a bigger one}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.56\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \foreach \i in {0,...,3} {
+          \node[blk, minimum width=1.6cm] (u\i) at (2.4,1.35-0.9*\i) {6x8 RAM \i};
+        }
+        \draw[wosm-text, line width=0.6pt, fill=wosm-bg]
+          (0.4,1.0) -- (1.0,1.5) -- (1.0,-2.4) -- (0.4,-1.9) -- cycle;
+        \node[font=\tiny, rotate=90] at (0.7,-0.45) {1-to-4 DMX};
+        \draw[wire] (0.4,-0.45) -- ++(-0.5,0) node[left, font=\scriptsize] {WE};
+        \foreach \i in {0,...,3} {\draw[wire] (1.0,0 |- u\i.west) -- (u\i.west);}
+        \draw[wire] (0.7,-2.15) -- ++(0,-0.4) node[below, font=\tiny] {addr[7:6]};
+        \draw[wosm-text, line width=0.6pt, fill=wosm-bg]
+          (3.8,1.5) -- (4.4,1.0) -- (4.4,-1.9) -- (3.8,-2.4) -- cycle;
+        \node[font=\tiny, rotate=90] at (4.1,-0.45) {4-to-1 MUX};
+        \foreach \i in {0,...,3} {\draw[bus] (u\i.east) -- (3.8,0 |- u\i.east);}
+        \draw[bus] (4.4,-0.45) -- ++(0.5,0) node[right, font=\scriptsize] {data\_out};
+        \draw[wire] (4.1,-2.15) -- ++(0,-0.4) node[below, font=\tiny] {addr[7:6]};
+        \node[font=\scriptsize, text=wosm-muted, align=center] at (2.4,2.15)
+          {addr[5:0], data\_in, RE\\ go to all four};
+      \end{tikzpicture}
+    \column{0.4\textwidth}
+      \begin{itemize}
+        \item The two top address bits choose one of four smaller RAMs: they steer WE
+          to it, and pick its output.
+        \item The rest of the address goes on down, into the chosen one.
+        \item Repeat: each step adds 2 address bits and makes the memory 4 times
+          bigger. The 8x8 RAM is the DX8's 256 bytes.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Random access}
+  \begin{itemize}
+    \item \emph{Random access}: any address can be read or written in the same time,
+      in any order. Compare a tape, which must wind to the place it needs.
+    \item The DX8's RAM holds $256 \times 8 = 2048$ bits: 2048 flip-flops, each with
+      its multiplexer.
+    \item Memory built from flip-flops is \alert{volatile}: when the power goes off,
+      its contents are lost.
+  \end{itemize}
+
+  \begin{example}
+    Address \texttt{0xC5} $= 11\,000101$ in the 8x8 RAM: the top bits 11 choose 6x8
+    RAM 3, and inside it the address is $000101 = 5$.
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{The register file}
+
+\begin{frame}{The register file}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \centering
+      \begin{tikzpicture}[scale=0.92, every node/.append style={transform shape}]
+        \foreach \i in {0,1} {
+          \node[blk, minimum width=1.6cm] (u\i) at (2.2,0.5-1.0*\i)
+            {2x8 RAM: R\the\numexpr4*\i\relax--R\the\numexpr4*\i+3\relax};
+        }
+        \pic (d) at (0.5,0) {demux};
+        \draw[wire] (d-in) -- ++(-0.5,0) node[left, font=\scriptsize] {WE};
+        \draw[wire] (d-out0) -- (u0.west |- d-out0);
+        \draw[wire] (d-out1) -- (u1.west |- d-out1);
+        \draw[wire] (d-sel) -- ++(0,-0.75) node[below, font=\tiny] {addr[2]};
+        \pic (m) at (3.9,0) {mux};
+        \draw[bus] (u0.east) -- (m-in0 -| u0.east) -- (m-in0);
+        \draw[bus] (u1.east) -- (m-in1 -| u1.east) -- (m-in1);
+        \draw[bus] (m-out) -- ++(0.4,0) node[right, font=\scriptsize] {data\_out};
+        \draw[wire] (m-sel) -- ++(0,-0.75) node[below, font=\tiny] {addr[2]};
+        \node[font=\scriptsize, text=wosm-muted, align=center] at (2.2,1.45)
+          {addr[1:0], data\_in, RE to both};
+      \end{tikzpicture}
+    \column{0.48\textwidth}
+      \begin{itemize}
+        \item The CPU's own small memory: 8 registers of 8 bits, R0 to R7, chosen by a
+          3-bit address. In sync with the clock, like the RAM.
+        \item The book builds it as a \alert{3x8 RAM}, the same way: two 2x8 RAMs,
+          with the third address bit choosing between them.
+        \item An instruction names its register in $b_{10:8}$ \unitref{15}: that is
+          the register file's address.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Memory in the DX8}
+  \begin{center}
+    \begin{tabular}{@{}llll@{}}
+      \toprule
+       & Size & Address & Holds \\
+      \midrule
+      RAM (8x8) & 256 bytes & 8 bits, from the IP & program and data \\
+      Register file (3x8) & 8 bytes & 3 bits, from the instruction & R0 to R7 \\
+      regA, regB, regOUT, \ldots & 1 byte each & none & one value each \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item Who sets WE and RE, and when? The controller, step by step through every
+      instruction \unitref{21}.
+    \item For example, the RAM is written only while a \texttt{store} instruction is
+      in its last stage.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item How many flip-flops are in a 4x8 RAM?\par
+      \uncover<2->{\small 16 bytes of 8 bits: 128.}
+    \item How many address bits does a byte-addressable memory of 1024 bytes need?\par
+      \uncover<3->{\small 10, since $2^{10} = 1024$.}
+    \item In the 4-bit memory, addr $= 10$, WE $= 1$, RE $= 0$, bit\_in $= 1$. What
+      happens at the clock edge, and what is bit\_out?\par
+      \uncover<4->{\small Cell 2 stores 1; the others keep their values. bit\_out
+        $= 0$, since RE $= 0$.}
+    \item Which 6x8 RAM of the 8x8 RAM holds address \texttt{0x47}, and at which
+      address inside it?\par
+      \uncover<5->{\small $0x47 = 01\,000111$: RAM 1, address 7.}
+    \item How many 2x8 RAMs does the 8x8 RAM contain?\par
+      \uncover<6->{\small $4 \cdot 4 \cdot 4 = 64$ (and $64 \cdot 4 = 256$ bytes).}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item A register is $n$ flip-flops on one clock; a multiplexer in front of each
+      $D$ lets it keep its value unless written.
+    \item An addressed memory: a decoder and WE choose the one cell that loads; a
+      multiplexer and RE choose the one that is read.
+    \item With bytes in place of bits, $2^n$ addresses give a byte-addressable
+      $n$x8 RAM. Four smaller RAMs and two more address bits make a RAM four times
+      bigger.
+    \item The DX8 has a 256-byte RAM (8x8) and a register file of 8 registers (3x8),
+      built the same way.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~6.5 of the book, and the register file in Section~6.6.2.
+    \item In Logisim-evolution, build the 4-bit memory, then the 2x8 RAM. Build the
+      register file (3x8) from two 2x8 RAMs.
+    \item Read the beginning of Section~6.6 and Section~6.6.1.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{20}}
+    Processor design: fetch, decode, execute and load; single-cycle, multi-cycle and
+    pipelined designs.
+  \end{block}
+\end{frame}
+
+\end{document}

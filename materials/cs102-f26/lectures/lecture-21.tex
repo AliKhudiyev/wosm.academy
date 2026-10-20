@@ -1,0 +1,355 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 21 -- The Stepper, the Data Path and the Controller (Unit 21)
+%  Follows Sections 6.6.2 and 6.6.3 of
+%  A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-21
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 21 \textperiodcentered\ Stepper, Data Path, Controller]{The Stepper,
+  the Data Path and the Controller}
+\subtitle{Lecture 21: how the DX8 runs an instruction, step by step}
+
+% ---------- Helpers for this lecture --------------------------
+\tikzset{
+  part/.style={draw=wosm-text, line width=0.6pt, fill=wosm-bg, align=center,
+    font=\scriptsize, minimum width=1.5cm, minimum height=0.75cm, inner sep=2pt},
+  group/.style={draw=wosm-muted, line width=0.5pt, dashed},
+  grouplabel/.style={font=\scriptsize, text=wosm-muted},
+  hot/.style={draw=wosm-brick, line width=1.5pt},
+}
+\tikzset{gates/.append style={
+  and gate/.append style={logic gate input sep=0.3cm}}}
+
+% The DX8 of the book's Figures 6.8 to 6.11. The argument makes some paths hot,
+% e.g. \datapath{ip-ram/.style=hot, st-ctl/.style=hot}.
+\newcommand*\datapath[1]{%
+  \begin{tikzpicture}[x=0.92cm, y=0.92cm,
+      ip-ram/.style={}, ram-rf/.style={}, rf-ir/.style={}, rf-ab/.style={},
+      ra-alu/.style={}, rb-alu/.style={}, ir-alu/.style={}, st-ctl/.style={},
+      ctl-alu/.style={}, alu-out/.style={}, alu-flag/.style={}, out-rf/.style={},
+      flag-rf/.style={}, ir-ctl/.style={}, ctl-ip/.style={}, #1]
+    % groups
+    \draw[group] (1.65,-1.85) rectangle (3.55,1.75);
+    \node[grouplabel, anchor=north] at (2.6,-1.85) {memory unit};
+    \draw[group] (4.0,-2.85) rectangle (11.45,2.4);
+    \node[grouplabel, anchor=south east] at (11.45,-2.85) {CPU};
+    % parts
+    \node[part, minimum width=1.4cm] (in) at (0,0) {input unit\\ + buttons};
+    \node[part, minimum width=1.4cm, minimum height=0.8cm] (ram) at (2.6,1.0) {RAM};
+    \node[part, minimum width=1.4cm] (ip) at (2.6,-1.05) {instruction\\ pointer (IP)};
+    \node[part, minimum height=0.8cm] (rf) at (5.3,1.0) {register file\\ R0--R7};
+    \node[part] (ir) at (5.3,-0.3) {instruction\\ register (IR)};
+    \node[part, minimum width=0.9cm, minimum height=0.5cm] (ra) at (7.2,1.55) {regA};
+    \node[part, minimum width=0.9cm, minimum height=0.5cm] (rb) at (8.4,1.55) {regB};
+    \node[part, minimum width=2.2cm, minimum height=0.9cm] (alu) at (7.8,0.1) {ALU};
+    \node[part, minimum width=1.2cm, minimum height=0.45cm] (out) at (7.6,-1.0) {regOUT};
+    \node[part, minimum width=1.2cm, minimum height=0.45cm] (flag) at (7.6,-1.7) {regFLAG};
+    \node[part, minimum width=1.4cm] (st) at (10.4,1.55) {stepper};
+    \node[part, minimum width=1.4cm] (ctl) at (10.4,0.1) {controller};
+    % input
+    \draw[wire] (in.east) -- (1.1,0);
+    \draw[arrow] (1.1,0) |- (ram.west);
+    \draw[arrow] (1.1,0) |- (ip.west);
+    \fill[wosm-text] (1.1,0) circle (1.5pt);
+    % paths
+    \draw[arrow, ip-ram] (ip) -- (ram);
+    \draw[arrow, {Stealth[length=5pt]}-{Stealth[length=5pt]}, ram-rf]
+      (ram.east |- 0,1.15) -- (rf.west |- 0,1.15);
+    \draw[arrow, rf-ir] (rf) -- (ir);
+    \draw[wire, rf-ab] (rf.east) -- ++(0.25,0) |- (8.4,2.1);
+    \draw[arrow, rf-ab] (7.2,2.1) -- (ra);
+    \draw[arrow, rf-ab] (8.4,2.1) -- (rb);
+    \fill[wosm-text] (7.2,2.1) circle (1.5pt);
+    \draw[arrow, ra-alu] (ra) -- (ra |- alu.north);
+    \draw[arrow, rb-alu] (rb) -- (rb |- alu.north);
+    \draw[arrow, ir-alu] (ir.east) -- (ir.east -| alu.west);
+    \draw[arrow, st-ctl] (st) -- (ctl);
+    \draw[arrow, ctl-alu] (ctl) -- (alu);
+    \draw[arrow, alu-out] (alu.south -| out) -- (out);
+    \draw[arrow, alu-flag] (8.7,-0.39) |- (flag.east);
+    \draw[wire, flag-rf] (flag.west) -| (4.25,-1.0);
+    \draw[arrow, out-rf] (out.west) -| (4.25,0.85) -- (rf.west |- 0,0.85);
+    \fill[wosm-text] (4.25,-1.0) circle (1.5pt);
+    \draw[arrow, ir-ctl] (ir.south) |- (10.1,-2.35) -- (10.1,0 |- ctl.south);
+    \draw[arrow, ctl-ip] (10.75,0 |- ctl.south) |- (2.6,-2.6) -- (ip.south);
+  \end{tikzpicture}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{The stepper}
+
+\begin{frame}{The stepper}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[part, minimum width=1.8cm, minimum height=1.5cm] (c) at (0,0)
+          {3-bit\\ synchronous\\ up counter};
+        \node[part, minimum width=1.1cm, minimum height=3.0cm] (d) at (2.4,0)
+          {3-to-8\\ decoder};
+        \foreach \i/\y in {2/0.4, 1/0, 0/-0.4} {
+          \draw[arrow] (c.east |- 0,\y) -- node[above, font=\tiny] {$y_\i$}
+            (d.west |- 0,\y);
+        }
+        \foreach \k in {1,...,8} {
+          \pgfmathsetmacro\y{1.225-0.35*(\k-1)}
+          \draw[arrow] (d.east |- 0,\y) -- ++(0.5,0) node[right, font=\tiny] {$s_\k$};
+        }
+        \draw[arrow] ($(c.west)+(-0.6,0.35)$) node[left, font=\scriptsize] {clk} --
+          ($(c.west)+(0,0.35)$);
+        \draw[arrow] ($(c.west)+(-0.6,-0.35)$) node[left, font=\scriptsize] {reset} --
+          ($(c.west)+(0,-0.35)$);
+      \end{tikzpicture}\par\smallskip
+      \wosmlabel{After the book's Figure 6.5}
+    \column{0.46\textwidth}
+      \begin{itemize}
+        \item The stepper turns on one output at a time, in a fixed order, at each
+          clock edge: its outputs are \emph{one-hot} \unitref{8}.
+        \item Built from parts we know: a 3-bit synchronous up counter
+          \unitref{13} and a 3-to-8 decoder \unitref{8}.
+        \item Its one input besides the clock is \emph{reset}: the counter goes to
+          000, so the stepper goes to step 1.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Steps and stages}
+  \begin{center}
+    \begin{tikzpicture}[x=0.5cm]
+      \foreach \t in {0,2,...,16} {\timingedge{\t}{8}}
+      \timingwave{0}{clk}{1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0}
+      \timingwave{1}{$s_1$}{1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1}
+      \timingwave{2}{$s_2$}{0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+      \timingwave{3}{$s_3$}{0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0}
+      \timingwave{4}{$s_4$}{0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0}
+      \timingwave{5}{$s_5$}{0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0}
+      \timingwave{6}{$s_6$}{0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0}
+      \timingwave{7}{$s_7$}{0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0}
+      \timingwave{8}{$s_8$}{0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0}
+      \foreach \x/\t in {2/fetch, 6/decode, 10/execute, 14/load} {
+        \node[font=\scriptsize, text=wosm-brick] at (\x,0.75) {\t};
+      }
+      \foreach \x in {4,8,12} {\draw[wosm-brick, line width=0.4pt] (\x,0.95) --
+        (\x,0.55);}
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item Two steps per stage. After $s_8$ comes $s_1$ again, and the next
+      instruction.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{The data path}
+
+\begin{frame}{Which wires are hot?}
+  \begin{itemize}
+    \item The \emph{data path} is the set of wires along which data moves between
+      the parts of the CPU and the memory.
+    \item In each stage, only some of them carry data that matters. The book draws
+      them in orange for each stage (Figures 6.8 to 6.11); here they are in red.
+    \item To make data go from part A to part B, the controller \alert{read-enables}
+      A, \alert{write-enables} B, and sets the select bits of the multiplexers on the
+      way.
+  \end{itemize}
+
+  \begin{remark}
+    Every stage below also uses the stepper's output, so that the controller knows
+    which step it is in.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Fetch}
+  \begin{center}
+    \datapath{ip-ram/.style=hot, ram-rf/.style=hot, st-ctl/.style=hot,
+      ctl-ip/.style=hot}
+  \end{center}
+  \begin{itemize}
+    \item The IP gives the RAM its address; the instruction comes from the RAM into
+      the CPU. The controller also drives the IP.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Decode}
+  \begin{center}
+    \datapath{rf-ab/.style=hot, rf-ir/.style=hot, ir-alu/.style=hot,
+      ctl-alu/.style=hot, ir-ctl/.style=hot, st-ctl/.style=hot}
+  \end{center}
+  \begin{itemize}
+    \item The instruction is in the IR. Its arguments go to regA and regB, its
+      operation, 4 bits, to the ALU; the controller reads it too.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Execute}
+  \begin{center}
+    \datapath{ra-alu/.style=hot, rb-alu/.style=hot, ir-alu/.style=hot,
+      ctl-alu/.style=hot, alu-out/.style=hot, alu-flag/.style=hot,
+      ir-ctl/.style=hot, st-ctl/.style=hot}
+  \end{center}
+  \begin{itemize}
+    \item For an ALU instruction: regA and regB into the ALU, which computes what the
+      IR asks for. The result goes to regOUT, the flags to regFLAG.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Load}
+  \begin{center}
+    \datapath{out-rf/.style=hot, flag-rf/.style=hot, ram-rf/.style=hot,
+      ip-ram/.style=hot, ctl-ip/.style=hot, st-ctl/.style=hot}
+  \end{center}
+  \begin{itemize}
+    \item regOUT and regFLAG go to the register file; or a register goes to the RAM,
+      at an address given through the IP. The controller drives the IP.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{The controller}
+
+\begin{frame}{What the controller does}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.49\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \node[part, minimum width=1.8cm, minimum height=2.4cm] (c) {controller};
+        \foreach \t/\y in {{steps $s_1 \ldots s_8$}/0.8, {$b_{15}$ (ALU or not)}/0.27,
+            {opcode $b_{14:11}$}/-0.27, {flags}/-0.8} {
+          \draw[arrow] ($(c.west)+(-0.5,\y)$) node[left, font=\scriptsize] {\t} --
+            ($(c.west)+(0,\y)$);
+        }
+        \foreach \t/\y in {{read enables}/0.8, {write enables}/0.27,
+            {select bits}/-0.27, {setIP, \ldots}/-0.8} {
+          \draw[arrow] ($(c.east)+(0,\y)$) -- ++(0.5,0) node[right, font=\scriptsize]
+            {\t};
+        }
+      \end{tikzpicture}
+    \column{0.47\textwidth}
+      \begin{itemize}
+        \item Inputs: which step it is (from the stepper), the instruction (from the
+          IR), and the ALU's flags.
+        \item Outputs: the enable and select bits of every other part, for this step
+          of this instruction.
+        \item It is \alert{combinational}: AND and OR gates, as in Lectures 6 to 8.
+          The sequence in time comes from the stepper.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Recognising the instruction}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{tikzpicture}[gates]
+        \node[and gate, inputs={iiiin}] (g) at (0,0) {};
+        \foreach \i/\b in {1/15, 2/14, 3/13, 4/12, 5/11} {
+          \draw[wire] (g.input \i) -- ++(-0.5,0) node[left, font=\scriptsize]
+            {$b_{\b}$};
+        }
+        \draw[wire] (g.output) -- ++(0.4,0) node[right, font=\scriptsize]
+          {\texttt{store}};
+      \end{tikzpicture}\par\smallskip
+      \wosmlabel{1 exactly for 0\,0001}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item One AND gate per instruction: its inputs are $b_{15}$ and the opcode,
+          with a bubble on every bit that must be 0. It is a decoder \unitref{8},
+          one output at a time.
+        \item The book's controller recognises \texttt{move}, \texttt{arg1},
+          \texttt{arg2}, \texttt{store} and the four jumps this way.
+        \item The ALU instructions need no such gate: their opcode goes straight to
+          the ALU's multiplexer \unitref{18}.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Some control signals}
+  \begin{center}
+    \begin{tabular}{@{}ll@{}}
+      \toprule
+      Signal & In the book's controller (Figure 6.12) \\
+      \midrule
+      exec & $s_5 + s_6$: the execute stage \\
+      load & $s_7 + s_8$: the load stage \\
+      RAM\_WE & \texttt{store} $\cdot$ load: the RAM is written only in a
+        \texttt{store}'s load stage \\
+      load\_aluOUT & $b_{15} \cdot$ load: an ALU result goes back in the load stage \\
+      setIP & \texttt{jmp} $+$ \texttt{jmpgt}$\cdot$gt $+$ \texttt{jmplt}$\cdot$lt
+        $+$ \texttt{jmpeq}$\cdot$eq \\
+      regFileWE & 1 in step $s_1$ (and others): the instruction comes from the RAM \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item setIP is 1 when the IP must take the jump address \texttt{val}: always for
+      \texttt{jmp}, and for a conditional jump only if its flag is set \unitref{15}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item In step $s_6$, which stage is the DX8 in? Which step follows $s_8$?\par
+      \uncover<2->{\small Execute. Then $s_1$: the counter wraps around
+        \unitref{13}.}
+    \item Draw the AND gate that recognises \texttt{arg1} (0\,0011).\par
+      \uncover<3->{\small Inputs $\overline{b_{15}}$, $\overline{b_{14}}$,
+        $\overline{b_{13}}$, $b_{12}$, $b_{11}$.}
+    \item When is RAM\_WE $= 1$?\par
+      \uncover<4->{\small In steps $s_7$ and $s_8$ of a \texttt{store}
+        instruction, and never otherwise.}
+    \item The IR holds a \texttt{jmpeq} and eq $= 0$. What is setIP?\par
+      \uncover<5->{\small 0: no jump, the program goes on to the next instruction.}
+    \item Which paths are hot while an \texttt{add} is executed?\par
+      \uncover<6->{\small regA, regB, the IR and the controller into the ALU; the
+        ALU into regOUT and regFLAG; the IR into the controller.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item The stepper, a 3-bit counter and a 3-to-8 decoder, gives one-hot steps
+      $s_1$ to $s_8$: two for each of fetch, decode, execute and load.
+    \item The data path: the wires along which data moves. Each stage uses a
+      different set of them.
+    \item The controller is combinational. From the step, the instruction and the
+      flags, it sets the read enables, write enables and select bits.
+    \item Each instruction is recognised by one AND gate on $b_{15}$ and the opcode.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Sections~6.6.2 and 6.6.3 of the book.
+    \item In Logisim-evolution, build the stepper from your counter and a decoder, and
+      watch $s_1$ to $s_8$ in a timing diagram.
+    \item Build the instruction-recognising AND gates and the setIP logic of the
+      controller.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{22}}
+    Putting it all together: building and programming the DX8 computer.
+  \end{block}
+\end{frame}
+
+\end{document}

@@ -37,6 +37,10 @@ Each course page shows its .tex file; `npm run pdfs` recompiles the PDFs offered
       Sedgewick & Wayne title “Computer Science -- An Interdisciplinary Approach” → “Computer Science: An
       Interdisciplinary Approach”
 
+### Course materials (`materials/`, not part of the site)
+- [ ] CS102-F26 Lecture 23 (`materials/cs102-f26/lectures/lecture-23.tex`, slide “The final exam”): exam date and time,
+      length, format, and which support materials are provided
+
 ### Programme (`src/content/programmes/`, page `/programme/`)
 - [ ] Approve the programme copy: summaries, “later modules build on earlier ones”, and the credits note (“They are not
       formally transferable credits.”)

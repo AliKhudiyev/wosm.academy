@@ -1,0 +1,269 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 23 -- Course Review and Exam (Unit 23)
+%  Reviews Units 1 to 22, by learning outcome of the module description.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-23
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 23 \textperiodcentered\ Course Review]{Course Review}
+\subtitle{Lecture 23: from switches to a computer, and the exam}
+
+% ---------- Helpers for this lecture --------------------------
+\tikzset{
+  layer/.style={draw=wosm-text, line width=0.6pt, fill=wosm-bg, align=center,
+    font=\scriptsize, text width=5.6cm, minimum height=0.48cm, inner sep=2pt},
+}
+% A missing fact, to be filled in by the module leader.
+\newcommand*\todo[1]{\textcolor{wosm-brick}{\texttt{TODO(owner):} #1}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{The whole journey}
+
+\begin{frame}{From switches to a computer}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[node distance=0.12cm]
+        \node[layer] (l1) {bits, numbers and Boolean algebra \unitref{1--5}};
+        \node[layer, above=of l1] (l2) {logic gates \unitref{6}};
+        \node[layer, above=of l2] (l3) {combinational circuits \unitref{7--9}};
+        \node[layer, above=of l3] (l4) {state machines and memory \unitref{10--12}};
+        \node[layer, above=of l4] (l5) {counters and timing \unitref{13--14}};
+        \node[layer, above=of l5] (l6) {ISA, ALU and memory \unitref{15--19}};
+        \node[layer, above=of l6] (l7) {the processor \unitref{20--21}};
+        \node[layer, above=of l7, fill=wosm-surface] (l8) {the DX8 computer
+          \unitref{22}};
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      \begin{itemize}
+        \item Each layer is built only from the one below it.
+        \item The first half of the module: the foundations of digital design. The
+          second half: putting them together into a working 8-bit computer.
+        \item The six learning outcomes of the module follow the same order: the next
+          slides take them one at a time.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Review by learning outcome}
+
+\begin{frame}{LO1: numbers}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \wosmlabel{You should be able to}
+      \begin{itemize}
+        \item tell additive from positional numeral systems;
+        \item convert between decimal, binary, octal and hexadecimal;
+        \item group binary digits in threes (octal) or fours (hexadecimal).
+      \end{itemize}
+      \wosmlabel{Units 1 and 2}
+    \column{0.46\textwidth}
+      \begin{block}{Practice}
+        \begin{enumerate}
+          \item Write \texttt{0x2F} in binary and in decimal.\par
+            \uncover<2->{\small $0010\,1111 = 47$.}
+          \item Write 156 in octal.\par
+            \uncover<3->{\small $156 = 2 \cdot 64 + 3 \cdot 8 + 4$: $234_8$.}
+        \end{enumerate}
+      \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{LO2: Boolean algebra}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \wosmlabel{You should be able to}
+      \begin{itemize}
+        \item use the laws and theorems of Boolean algebra, De Morgan's among them;
+        \item write the canonical sum of products and product of sums of a truth
+          table;
+        \item simplify a function of up to four variables with a Karnaugh map.
+      \end{itemize}
+      \wosmlabel{Units 3, 4 and 5}
+    \column{0.46\textwidth}
+      \begin{block}{Practice}
+        \begin{enumerate}
+          \item Simplify $x y + x y' + x' y$.\par
+            \uncover<2->{\small $x(y + y') + x' y = x + x' y = x + y$.}
+          \item Simplify $f(x, y, z) = \sum m(1, 3, 5, 6, 7)$ with a K-map.\par
+            \uncover<3->{\small $f = z + x y$.}
+        \end{enumerate}
+      \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{LO3: combinational circuits}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \wosmlabel{You should be able to}
+      \begin{itemize}
+        \item build any function from a universal gate set, NAND alone included;
+        \item design multiplexers, decoders, encoders, adders and comparators;
+        \item find propagation and contamination delays, and spot glitches.
+      \end{itemize}
+      \wosmlabel{Units 6 to 9, 16 and 17}
+    \column{0.46\textwidth}
+      \begin{block}{Practice}
+        \begin{enumerate}
+          \item Build $x + y$ from NAND gates only.\par
+            \uncover<2->{\small $x + y = (x'\, y')'$: NAND the outputs of
+              NAND$(x, x)$ and NAND$(y, y)$.}
+          \item How many select bits does a 32-to-1 multiplexer need?\par
+            \uncover<3->{\small 5, since $2^5 = 32$.}
+          \item What is $-100$ as an 8-bit two's complement number?\par
+            \uncover<4->{\small $1001\,1100$.}
+        \end{enumerate}
+      \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{LO4: sequential circuits}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \wosmlabel{You should be able to}
+      \begin{itemize}
+        \item model a problem as a Moore or a Mealy machine, and simplify it;
+        \item explain the SR and D latches and the D, T and JK flip-flops;
+        \item build registers and counters;
+        \item apply the setup and hold time constraints.
+      \end{itemize}
+      \wosmlabel{Units 10 to 14}
+    \column{0.46\textwidth}
+      \begin{block}{Practice}
+        \begin{enumerate}
+          \item A 4-bit up counter starts at 0. What does it show after 20 rising
+            edges?\par
+            \uncover<2->{\small $20 \bmod 16 = 4$: $0100$.}
+          \item $t_{\mathrm{clk2q}} = 50$\,ps, $t_{\mathrm{pd}} = 400$\,ps,
+            $t_{\mathrm{setup}} = 50$\,ps. What is the fastest clock?\par
+            \uncover<3->{\small $t_{\mathrm{clk}} \ge 500$\,ps: 2\,GHz.}
+        \end{enumerate}
+      \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{LO5: architecture, ALU and memory}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \wosmlabel{You should be able to}
+      \begin{itemize}
+        \item explain the Von Neumann architecture and what an ISA is;
+        \item encode and decode DX8 instructions;
+        \item design an ALU, a register file and byte-addressable RAM from basic
+          parts.
+      \end{itemize}
+      \wosmlabel{Units 15 to 19}
+    \column{0.46\textwidth}
+      \begin{block}{Practice}
+        \begin{enumerate}
+          \item Write $M[\texttt{0x33}] \leftarrow \mathrm{R6}$ (a \texttt{store})
+            in hexadecimal.\par
+            \uncover<2->{\small $0\,0001\,110$, $0011\,0011$: \texttt{0x0E33}.}
+          \item How many address bits does a byte-addressable RAM of 64 bytes
+            need?\par
+            \uncover<3->{\small 6.}
+        \end{enumerate}
+      \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{LO6: the processor}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \wosmlabel{You should be able to}
+      \begin{itemize}
+        \item explain fetch, decode, execute and load;
+        \item compare single-cycle, multi-cycle and pipelined designs;
+        \item build the DX8 in a circuit simulator, and program it.
+      \end{itemize}
+      \wosmlabel{Units 20 to 22}
+    \column{0.46\textwidth}
+      \begin{block}{Practice}
+        \begin{enumerate}
+          \item 4 stages of 2 cycles each. How many cycles do 20 instructions take,
+            multi-cycle and pipelined?\par
+            \uncover<2->{\small 160, and $2 \cdot (20 + 3) = 46$.}
+          \item In which step does the DX8 copy the result of an \texttt{add} into
+            a register?\par
+            \uncover<3->{\small $s_7$, in the load stage.}
+        \end{enumerate}
+      \end{block}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{The exam}
+
+\begin{frame}{How the module is assessed}
+  \begin{center}
+    \begin{tabular}{@{}llll@{}}
+      \toprule
+      Component & Weight & Due & Outcomes \\
+      \midrule
+      Quizzes & 20\% & throughout & LO1 to LO5 \\
+      Circuit-design project: the DX8 computer & 40\% & throughout & LO3 to LO6 \\
+      Final exam & 40\% & end of module & LO1 to LO6 \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item The final exam covers every learning outcome: every unit of the module.
+    \item Any support materials that are permitted will be provided during the exam.
+      No other aids or resources are allowed.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The final exam}
+  \begin{itemize}
+    \item Date and time: \todo{exam date and time}
+    \item Length: \todo{length of the exam}
+    \item Format and kinds of questions: \todo{exam format}
+    \item Support materials provided: \todo{which materials are provided}
+  \end{itemize}
+
+  \begin{block}{How to prepare}
+    Work through the exercise sheets and the ``Try it'' slides of every lecture
+    again, rebuild the key circuits in Logisim-evolution, and practise encoding and
+    tracing DX8 programs by hand.
+  \end{block}
+\end{frame}
+
+% =============================================================
+\section{Where next}
+
+\begin{frame}{Where next}
+  \begin{itemize}
+    \item You have built a computer from switches that are on or off, one layer of
+      abstraction at a time.
+    \item \emph{Digital Design and Computer Architecture II} (CS221-F27, Semester 3)
+      continues with real instruction set architectures, memory systems, input and
+      output, and processor performance.
+    \item Keep your DX8: extend it, program it, and check its timing.
+  \end{itemize}
+
+  \begin{remark}
+    The book's epilogue says that it kept many explanations short, even hand-wavy, to
+    stay under 100 pages, and it asks sharp readers for feedback. Finding those gaps
+    yourself is the next step in learning.
+  \end{remark}
+\end{frame}
+
+\end{document}

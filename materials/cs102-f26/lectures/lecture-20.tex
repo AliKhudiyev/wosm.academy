@@ -118,8 +118,8 @@
         \item \textbf{Fetch}: the same as for every instruction.
         \item \textbf{Decode}: $b_{15} = 0$ and opcode 0001: a \texttt{store}.
         \item \textbf{Execute}: there is nothing for the ALU to do.
-        \item \textbf{Load}: the register's content is written into the RAM; the
-          book's DX8 gives the RAM its address through the IP.
+        \item \textbf{Load}: the register's content is written into the RAM, at
+          the address \texttt{memAddr} given in the instruction.
       \end{enumerate}
   \end{columns}
 \end{frame}

@@ -1,0 +1,359 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 22 -- Building and Programming the DX8 (Unit 22)
+%  Follows Section 6.6.4 and the Epilogue of
+%  A Student's Computer Architecture Book I, and the DX8 circuit of its
+%  Figure 6.13 (chapter_6.circ of the DX8 course material).
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-22
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 22 \textperiodcentered\ Building and Programming the DX8]{Building and
+  Programming the DX8}
+\subtitle{Lecture 22: putting it all together}
+
+% ---------- Helpers for this lecture --------------------------
+\tikzset{
+  part/.style={draw=wosm-text, line width=0.6pt, fill=wosm-bg, align=center,
+    font=\scriptsize, minimum width=1.5cm, minimum height=0.75cm, inner sep=2pt},
+  group/.style={draw=wosm-muted, line width=0.5pt, dashed},
+  grouplabel/.style={font=\scriptsize, text=wosm-muted},
+  hot/.style={draw=wosm-brick, line width=1.5pt},
+}
+
+% The DX8 as drawn in Lecture 21 (the book's Figures 6.8 to 6.11).
+\newcommand*\datapath[1]{%
+  \begin{tikzpicture}[x=0.92cm, y=0.92cm,
+      ip-ram/.style={}, ram-rf/.style={}, rf-ir/.style={}, rf-ab/.style={},
+      ra-alu/.style={}, rb-alu/.style={}, ir-alu/.style={}, st-ctl/.style={},
+      ctl-alu/.style={}, alu-out/.style={}, alu-flag/.style={}, out-rf/.style={},
+      flag-rf/.style={}, ir-ctl/.style={}, ctl-ip/.style={}, #1]
+    % groups
+    \draw[group] (1.65,-1.85) rectangle (3.55,1.75);
+    \node[grouplabel, anchor=north] at (2.6,-1.85) {memory unit};
+    \draw[group] (4.0,-2.85) rectangle (11.45,2.4);
+    \node[grouplabel, anchor=south east] at (11.45,-2.85) {CPU};
+    % parts
+    \node[part, minimum width=1.4cm] (in) at (0,0) {input unit\\ + buttons};
+    \node[part, minimum width=1.4cm, minimum height=0.8cm] (ram) at (2.6,1.0) {RAM};
+    \node[part, minimum width=1.4cm] (ip) at (2.6,-1.05) {instruction\\ pointer (IP)};
+    \node[part, minimum height=0.8cm] (rf) at (5.3,1.0) {register file\\ R0--R7};
+    \node[part] (ir) at (5.3,-0.3) {instruction\\ register (IR)};
+    \node[part, minimum width=0.9cm, minimum height=0.5cm] (ra) at (7.2,1.55) {regA};
+    \node[part, minimum width=0.9cm, minimum height=0.5cm] (rb) at (8.4,1.55) {regB};
+    \node[part, minimum width=2.2cm, minimum height=0.9cm] (alu) at (7.8,0.1) {ALU};
+    \node[part, minimum width=1.2cm, minimum height=0.45cm] (out) at (7.6,-1.0) {regOUT};
+    \node[part, minimum width=1.2cm, minimum height=0.45cm] (flag) at (7.6,-1.7) {regFLAG};
+    \node[part, minimum width=1.4cm] (st) at (10.4,1.55) {stepper};
+    \node[part, minimum width=1.4cm] (ctl) at (10.4,0.1) {controller};
+    % input
+    \draw[wire] (in.east) -- (1.1,0);
+    \draw[arrow] (1.1,0) |- (ram.west);
+    \draw[arrow] (1.1,0) |- (ip.west);
+    \fill[wosm-text] (1.1,0) circle (1.5pt);
+    % paths
+    \draw[arrow, ip-ram] (ip) -- (ram);
+    \draw[arrow, {Stealth[length=5pt]}-{Stealth[length=5pt]}, ram-rf]
+      (ram.east |- 0,1.15) -- (rf.west |- 0,1.15);
+    \draw[arrow, rf-ir] (rf) -- (ir);
+    \draw[wire, rf-ab] (rf.east) -- ++(0.25,0) |- (8.4,2.1);
+    \draw[arrow, rf-ab] (7.2,2.1) -- (ra);
+    \draw[arrow, rf-ab] (8.4,2.1) -- (rb);
+    \fill[wosm-text] (7.2,2.1) circle (1.5pt);
+    \draw[arrow, ra-alu] (ra) -- (ra |- alu.north);
+    \draw[arrow, rb-alu] (rb) -- (rb |- alu.north);
+    \draw[arrow, ir-alu] (ir.east) -- (ir.east -| alu.west);
+    \draw[arrow, st-ctl] (st) -- (ctl);
+    \draw[arrow, ctl-alu] (ctl) -- (alu);
+    \draw[arrow, alu-out] (alu.south -| out) -- (out);
+    \draw[arrow, alu-flag] (8.7,-0.39) |- (flag.east);
+    \draw[wire, flag-rf] (flag.west) -| (4.25,-1.0);
+    \draw[arrow, out-rf] (out.west) -| (4.25,0.85) -- (rf.west |- 0,0.85);
+    \fill[wosm-text] (4.25,-1.0) circle (1.5pt);
+    \draw[arrow, ir-ctl] (ir.south) |- (10.1,-2.35) -- (10.1,0 |- ctl.south);
+    \draw[arrow, ctl-ip] (10.75,0 |- ctl.south) |- (2.6,-2.6) -- (ip.south);
+  \end{tikzpicture}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{The whole DX8}
+
+\begin{frame}{All the parts, together}
+  \begin{center}
+    \datapath{}
+  \end{center}
+  \begin{itemize}
+    \item The book's Figure 6.13 connects everything of Units 15 to 21, with a few
+      more registers to hold the instruction, the ALU's inputs and its results.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{One instruction in eight steps}
+  \begin{center}
+    \small
+    \begin{tabular}{@{}cll@{}}
+      \toprule
+      Step & Stage & In the book's circuit \\
+      \midrule
+      $s_1$ & fetch   & the byte at address IP, $b_{15:8}$, is copied into R0 \\
+      $s_2$ & fetch   & the byte at IP $+ 1$, $b_{7:0}$, is copied into R1 \\
+      $s_3$ & decode  & R0 goes to the instruction register: $b_{15}$, opcode, register \\
+      $s_4$ & decode  & R1 goes to the argument register: \texttt{val} or the address \\
+      $s_5$ & execute & the ALU's result goes to regOUT, its flags to regFLAG \\
+      $s_6$ & execute & (nothing more to do) \\
+      $s_7$ & load    & results are written back: register file, regA, regB or RAM \\
+      $s_8$ & load    & the IP moves on to IP $+ 2$, or to \texttt{val} after a jump \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item regOUT and regFLAG are loaded at step $s_5$ of \emph{every} instruction, so
+      they are only temporary. A result that must last is written to a register in
+      step $s_7$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The load stage, instruction by instruction}
+  \begin{center}
+    \begin{tabular}{@{}lll@{}}
+      \toprule
+      Instruction & In step $s_7$ & In step $s_8$ \\
+      \midrule
+      ALU instruction & regOUT $\to$ the register in $b_{10:8}$ & IP $+ 2$ \\
+      \texttt{move} & \texttt{val} $\to$ the register in $b_{10:8}$ & IP $+ 2$ \\
+      \texttt{arg1}, \texttt{arg2} & the register in $b_{10:8}$ $\to$ regA, regB
+        & IP $+ 2$ \\
+      \texttt{store} & the register in $b_{10:8}$ $\to$ $M[\texttt{memAddr}]$
+        & IP $+ 2$ \\
+      \texttt{jmp} & & \texttt{val} \\
+      \texttt{jmpgt}, \ldots & & \texttt{val} if the flag is set, else IP $+ 2$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item An ALU instruction does use its register field: it names the register that
+      receives the result. \texttt{cmp} writes 0 there, since its answer is in the
+      flags.
+    \item Each instruction is 2 bytes long, so ``the next instruction'' (regIP $+ 1$
+      in Table 6.2) is 2 addresses further on.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Rules for DX8 programs}
+  \begin{itemize}
+    \item \textbf{Two bytes per instruction}: $b_{15:8}$ at an even address, $b_{7:0}$
+      at the next one.
+    \item \textbf{Start at 0}: reset sets the IP to 0 and the stepper to step 1.
+    \item \textbf{Leave R0 and R1 alone}: every fetch writes the instruction into
+      them. Keep your values in R2 to R7.
+    \item \textbf{Choose where results go}: an ALU instruction writes its result into
+      the register in $b_{10:8}$.
+    \item \textbf{The flags compare regA with regB}, as they are at step $s_5$ of the
+      instruction: a conditional jump tests the values put there by the last
+      \texttt{arg1} and \texttt{arg2}.
+    \item \textbf{There is no halt}: end with a jump to the jump itself.
+  \end{itemize}
+\end{frame}
+
+% =============================================================
+\section{Programming the DX8}
+
+\begin{frame}{Switches and buttons}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \begin{definition}[Button]
+        A (push) \emph{button} sends 1 as long as it is pressed; its output drops to
+        0 as soon as you lift your finger.
+      \end{definition}
+    \column{0.48\textwidth}
+      \begin{definition}[Switch]
+        A \emph{switch} sends 1 once you turn it on, and keeps sending 1 until you
+        turn it off again.
+      \end{definition}
+  \end{columns}
+
+  \medskip
+  The DX8's ``keyboard'' \unitref{15}:
+  \begin{itemize}
+    \item 8 \emph{data} switches and 8 \emph{address} switches;
+    \item a \emph{write} button, which stores the data at the address;
+    \item a \emph{reset} switch.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Typing in a program}
+  \begin{enumerate}
+    \item Turn \alert{on} the reset switch.
+    \item Set the data switches to the next byte of the program.
+    \item Set the address switches to its address.
+    \item Push the write button (as if you turned a switch on and off at once).
+    \item Repeat 2 to 4 until every byte of the program and its data is in the RAM.
+    \item Turn \alert{off} the reset switch: the DX8 starts running from address 0.
+  \end{enumerate}
+
+  \begin{remark}
+    The program is just bytes in the RAM, typed in like data: the Von Neumann idea
+    \unitref{15}, at work.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{A program: $3 \times 4$ by repeated addition}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.49\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}lll@{}}
+        \toprule
+        Addr. & Bytes & Instruction \\
+        \midrule
+        \texttt{00} & \texttt{12 00} & \texttt{move} R2, 0 \quad (the product) \\
+        \texttt{02} & \texttt{13 04} & \texttt{move} R3, 4 \\
+        \texttt{04} & \texttt{14 03} & \texttt{move} R4, 3 \quad (the counter) \\
+        \texttt{06} & \texttt{15 FF} & \texttt{move} R5, $-1$ \\
+        \texttt{08} & \texttt{16 00} & \texttt{move} R6, 0 \\
+        \texttt{0A} & \texttt{1A 00} & \texttt{arg1} R2 \quad $\leftarrow$ loop \\
+        \texttt{0C} & \texttt{23 00} & \texttt{arg2} R3 \\
+        \texttt{0E} & \texttt{8A 00} & \texttt{add} $\to$ R2 \quad (R2 $\leftarrow$ R2 $+$ 4) \\
+        \texttt{10} & \texttt{1C 00} & \texttt{arg1} R4 \\
+        \texttt{12} & \texttt{25 00} & \texttt{arg2} R5 \\
+        \bottomrule
+      \end{tabular}
+    \column{0.49\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}lll@{}}
+        \toprule
+        Addr. & Bytes & Instruction \\
+        \midrule
+        \texttt{14} & \texttt{8C 00} & \texttt{add} $\to$ R4 \quad (R4 $\leftarrow$ R4 $-$ 1) \\
+        \texttt{16} & \texttt{1C 00} & \texttt{arg1} R4 \\
+        \texttt{18} & \texttt{26 00} & \texttt{arg2} R6 \\
+        \texttt{1A} & \texttt{87 00} & \texttt{cmp} $\to$ R7 \quad (R4 vs 0) \\
+        \texttt{1C} & \texttt{30 0A} & \texttt{jmpgt} \texttt{0A} \\
+        \texttt{1E} & \texttt{1A 00} & \texttt{arg1} R2 \\
+        \texttt{20} & \texttt{26 00} & \texttt{arg2} R6 \\
+        \texttt{22} & \texttt{8F 00} & \texttt{add} $\to$ R7 \quad (R2 $+$ 0) \\
+        \texttt{24} & \texttt{28 24} & \texttt{jmp} \texttt{24} \quad (stop) \\
+        \bottomrule
+      \end{tabular}
+  \end{columns}
+
+  \medskip
+  \small Addresses and bytes in hexadecimal. $-1$ is \texttt{FF} in two's complement
+  \unitref{16}, so adding it counts down.
+\end{frame}
+
+\begin{frame}{Running it}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.42\textwidth}
+      \centering
+      \begin{tabular}{@{}lccc@{}}
+        \toprule
+        After & R2 & R4 & jump? \\
+        \midrule
+        set-up & 0 & 3 & \\
+        pass 1 & 4 & 2 & yes \\
+        pass 2 & 8 & 1 & yes \\
+        pass 3 & 12 & 0 & no \\
+        \bottomrule
+      \end{tabular}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item Each pass adds 4 to R2 and takes 1 from R4. While $R4 > 0$,
+          \texttt{jmpgt} goes back to address \texttt{0A}.
+        \item At the end, regOUT shows 12 (\texttt{0000\,1100}), and the DX8 keeps
+          jumping to \texttt{24}.
+        \item 38 instructions of 8 cycles each run before the stop: 304 clock cycles.
+      \end{itemize}
+  \end{columns}
+
+  \begin{remark}
+    The DX8 has no multiplication instruction; loops of additions do the job. Real
+    processors often have a multiplier circuit for it.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{The project}
+
+\begin{frame}{The DX8 project}
+  \begin{itemize}
+    \item The circuit-design project of this module: build the DX8 computer, or an
+      extension of it, in Logisim-evolution, and run your own programs on it. It
+      counts for 40\% of the module.
+    \item Build it from your own parts of Units 6 to 21, and test each one before
+      you connect it.
+    \item Ideas for an extension: a \texttt{sub} instruction in one of the 12 unused
+      opcodes; a \texttt{halt}; an output display for regOUT; a \texttt{load} of a
+      byte from the RAM into a register.
+  \end{itemize}
+
+  \begin{remark}
+    The book's epilogue admits that the DX8 was built without the setup and hold
+    checks of Unit 14. Doing them for your DX8 is a good extension too.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item In which step does the IP change, and by how much?\par
+      \uncover<2->{\small In $s_8$: by 2, or to \texttt{val} after a jump.}
+    \item Write \texttt{move} R5, \texttt{0x0A} as two bytes.\par
+      \uncover<3->{\small \texttt{15 0A}: $0\,0010\,101$, then $0000\,1010$.}
+    \item Which one byte of the program would you change to compute $3 \times 5$?\par
+      \uncover<4->{\small The byte at address \texttt{03}: \texttt{04} becomes
+        \texttt{05}.}
+    \item Why may a program not keep a value in R1?\par
+      \uncover<5->{\small Every fetch writes the second byte of the instruction into
+        R1.}
+    \item How many clock cycles does a program of 10 instructions take on the DX8,
+      without jumps?\par
+      \uncover<6->{\small $10 \cdot 8 = 80$.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item The DX8 runs every instruction in 8 steps: two bytes are fetched into R0 and
+      R1, decoded into the instruction and argument registers, executed by the ALU,
+      and written back; then the IP moves on.
+    \item Results last only if written back: an ALU instruction writes into the
+      register in $b_{10:8}$.
+    \item Programs start at address 0, use R2 to R7, and end with a jump to itself.
+    \item To program the DX8: reset on, type each byte with the data and address
+      switches and the write button, reset off.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the last lecture}
+  \begin{itemize}
+    \item Read Section~6.6.4 and the Epilogue of the book.
+    \item Put your DX8 together in Logisim-evolution, type in the $3 \times 4$
+      program, and check that regOUT shows 12.
+    \item Write a program of your own: for example, the larger of two numbers, or
+      $1 + 2 + \cdots + 10$.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{23}}
+    Course review, and the exam.
+  \end{block}
+\end{frame}
+
+\end{document}

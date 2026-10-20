@@ -343,7 +343,7 @@
         & 0 & 0010 & 011 & 0010\,1010 & \hexnum{132A} \\
       \texttt{store}: $M[\hexnum{F0}] \leftarrow \mathrm{R5}$
         & 0 & 0001 & 101 & 1111\,0000 & \hexnum{0DF0} \\
-      \texttt{add} & 1 & 0001 & 000 & 0000\,0000 & \hexnum{8800} \\
+      \texttt{add}, result to R4 & 1 & 0001 & 100 & 0000\,0000 & \hexnum{8C00} \\
       \bottomrule
     \end{tabular}
   \end{center}
@@ -351,8 +351,9 @@
   \begin{itemize}
     \item Group the 16 bits in fours and write each group in hexadecimal
       \unitref{2}: \texttt{0001\,0011\,0010\,1010} is \hexnum{132A}.
-    \item \texttt{add} does not use its register or its second byte; we write those
-      bits as 0.
+    \item \texttt{add} does not use its second byte; we write those bits as 0. In the
+      book's DX8 circuit, its register field names the register that receives the
+      result \unitref{22}.
   \end{itemize}
 \end{frame}
 
@@ -365,12 +366,12 @@
         \toprule
          & Instruction & Meaning & Hex \\
         \midrule
-        1 & \texttt{load} & $\mathrm{R0} \leftarrow M[\hexnum{10}]$ & \hexnum{0010} \\
-        2 & \texttt{load} & $\mathrm{R1} \leftarrow M[\hexnum{11}]$ & \hexnum{0111} \\
-        3 & \texttt{arg1} & $\texttt{regA} \leftarrow \mathrm{R0}$ & \hexnum{1800} \\
-        4 & \texttt{arg2} & $\texttt{regB} \leftarrow \mathrm{R1}$ & \hexnum{2100} \\
+        1 & \texttt{load} & $\mathrm{R2} \leftarrow M[\hexnum{10}]$ & \hexnum{0210} \\
+        2 & \texttt{load} & $\mathrm{R3} \leftarrow M[\hexnum{11}]$ & \hexnum{0311} \\
+        3 & \texttt{arg1} & $\texttt{regA} \leftarrow \mathrm{R2}$ & \hexnum{1A00} \\
+        4 & \texttt{arg2} & $\texttt{regB} \leftarrow \mathrm{R3}$ & \hexnum{2300} \\
         5 & \texttt{add}  & $\texttt{regOUT} \leftarrow \texttt{regA} + \texttt{regB}$
-          & \hexnum{8800} \\
+          & \hexnum{8C00} \\
         \bottomrule
       \end{tabular}
     \column{0.38\textwidth}
@@ -393,8 +394,8 @@
     \item Write $M[\hexnum{80}] \leftarrow \mathrm{R7}$ (a \texttt{store}) in
       hexadecimal.\par
       \uncover<3->{\small 0\,0001\,111\,1000\,0000: \hexnum{0F80}.}
-    \item Which instruction is \hexnum{2805}?\par
-      \uncover<4->{\small 0\,0101\,000\,0000\,0101: \texttt{jmp} to address 5.}
+    \item Which instruction is \hexnum{2806}?\par
+      \uncover<4->{\small 0\,0101\,000\,0000\,0110: \texttt{jmp} to address 6.}
     \item $\texttt{regA} = 1001\,0111$. What do \texttt{rotl}, \texttt{shiftr} and
       \texttt{not} give?\par
       \uncover<5->{\small 0010\,1111, 0100\,1011 and 0110\,1000.}

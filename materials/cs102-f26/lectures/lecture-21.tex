@@ -216,8 +216,9 @@
       ip-ram/.style=hot, ctl-ip/.style=hot, st-ctl/.style=hot}
   \end{center}
   \begin{itemize}
-    \item regOUT and regFLAG go to the register file; or a register goes to the RAM,
-      at an address given through the IP. The controller drives the IP.
+    \item regOUT goes to the register file; or a register goes to the RAM, at the
+      address in the instruction. The controller moves the IP on to the next
+      instruction.
   \end{itemize}
 \end{frame}
 

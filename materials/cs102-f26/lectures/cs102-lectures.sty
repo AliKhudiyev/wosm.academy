@@ -8,14 +8,14 @@
 %    \makeatother
 %
 %    \documentclass[10pt]{wosm-slides}
-%    \usepackage{cs102-lectures}[2026/10/19]
+%    \usepackage{cs102-lectures}[2026/10/20]
 %
 %  When you add a helper, update the date below and ask for that date in
 %  the lectures that use it: an older copy of this file then gives a clear
 %  "version ... is available" warning instead of undefined-key errors.
 % =============================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{cs102-lectures}[2026/10/19 CS102-F26 lecture settings]
+\ProvidesPackage{cs102-lectures}[2026/10/20 CS102-F26 lecture settings]
 
 \RequirePackage{array}
 
@@ -86,6 +86,54 @@
     \coordinate (-out1) at (0.35,-0.3);
   },
 }
+
+% ---------- Latches and flip-flops ---------------------------
+% \pic (l) at (<x>,<y>) {dlatch};  D latch: (l-d), (l-e), (l-q)
+% \pic (f) at (<x>,<y>) {dff};     D flip-flop, rising edge: (f-d), (f-clk),
+%                                  (f-q), and (f-r) at the bottom for a reset
+\tikzset{
+  dlatch/.pic={
+    \draw[wosm-text, line width=0.6pt] (-0.5,-0.55) rectangle (0.5,0.55);
+    \node[font=\scriptsize, anchor=west] at (-0.5,0.27) {D};
+    \node[font=\scriptsize, anchor=west] at (-0.5,-0.27) {E};
+    \node[font=\scriptsize, anchor=east] at (0.5,0.27) {Q};
+    \coordinate (-d) at (-0.5,0.27);
+    \coordinate (-e) at (-0.5,-0.27);
+    \coordinate (-q) at (0.5,0.27);
+  },
+  dff/.pic={
+    \draw[wosm-text, line width=0.6pt] (-0.5,-0.55) rectangle (0.5,0.55);
+    \draw[wosm-text, line width=0.6pt] (-0.5,-0.15) -- (-0.36,-0.27) -- (-0.5,-0.39);
+    \node[font=\scriptsize, anchor=west] at (-0.5,0.27) {D};
+    \node[font=\scriptsize, anchor=east] at (0.5,0.27) {Q};
+    \coordinate (-d) at (-0.5,0.27);
+    \coordinate (-clk) at (-0.5,-0.27);
+    \coordinate (-q) at (0.5,0.27);
+    \coordinate (-r) at (0,-0.55);
+  },
+}
+
+% ---------- Timing diagrams -----------------------------------
+% Inside a tikzpicture whose x unit is the width of one time step:
+%   \timingwave{<row>}{<label>}{<0 or 1 for each step, from t = 0>}
+%   \timingmark{<time>}{<rows>}{<label>}   a dashed line across all rows
+%   \timingedge{<time>}{<rows>}            a faint line, e.g. at a clock edge
+% Rows count from 0 at the top.
+\newcommand*\timingwave[3]{%
+  \pgfmathsetmacro\timing@y{-#1*0.52}
+  \node[left, font=\scriptsize] at (-0.1,\timing@y+0.14) {#2};
+  \foreach \v [count=\i from 0, remember=\v as \pv (initially X)] in {#3} {
+    \draw[wosm-text, line width=0.9pt]
+      (\i,\timing@y+\v*0.28) -- (\i+1,\timing@y+\v*0.28);
+    \if\pv X\else
+      \draw[wosm-text, line width=0.9pt]
+        (\i,\timing@y+\pv*0.28) -- (\i,\timing@y+\v*0.28);
+    \fi}}
+\newcommand*\timingmark[3]{%
+  \draw[wosm-brick, dashed, line width=0.5pt] (#1,0.45) -- (#1,{-#2*0.52+0.22});
+  \node[above, font=\scriptsize, text=wosm-brick] at (#1,0.4) {#3};}
+\newcommand*\timingedge[2]{%
+  \draw[wosm-rule, line width=0.6pt] (#1,0.4) -- (#1,{-#2*0.52+0.22});}
 
 % ---------- Karnaugh maps -------------------------------------
 % \begin{kmap}{<rows>}{<columns>}{<row variables>}{<column variables>}

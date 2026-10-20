@@ -36,6 +36,9 @@ committed. Files whose name starts with `_` are skipped.
 | CS102-F26 | `lecture-07.tex` — Multiplexers and Demultiplexers | 7 | Chapter 4 intro, Sections 4.1.1, 4.1.2 |
 | CS102-F26 | `lecture-08.tex` — Encoders and Decoders | 8 | Sections 4.1.3, 4.1.4 |
 | CS102-F26 | `lecture-09.tex` — Timing | 9 | Section 4.2 |
+| CS102-F26 | `lecture-10.tex` — Finite State Machines | 10 | Chapter 5 intro, Section 5.1 |
+| CS102-F26 | `lecture-11.tex` — The Clock and Latches | 11 | Sections 5.2, 5.3, 5.3.1, 5.3.2 |
+| CS102-F26 | `lecture-12.tex` — Flip-Flops | 12 | Sections 5.3.3–5.3.5 |
 
 CS102-F26 lectures start like this (the `\input@path` lets the files also compile with the classes in
 `templates/latex/` or one folder up):
@@ -46,14 +49,16 @@ CS102-F26 lectures start like this (the `\input@path` lets the files also compil
 \makeatother
 
 \documentclass[10pt]{wosm-slides}
-\usepackage{cs102-lectures}[2026/10/19]
+\usepackage{cs102-lectures}[2026/10/20]
 ```
 
 `cs102-lectures.sty` (in `cs102-f26/lectures/`) sets the course, author and semester, and also
-has helpers for logic gates (`gates` TikZ style), multiplexers (`mux`, `mux4` and `demux` pics) and Karnaugh maps
-(`kmap` environment).
+has helpers for logic gates (`gates` TikZ style), multiplexers (`mux`, `mux4` and `demux` pics), Karnaugh maps
+(`kmap` environment), latches and flip-flops (`dlatch` and `dff` pics) and timing diagrams (`\timingwave`,
+`\timingmark`, `\timingedge`). When you add a helper, bump the date in its `\ProvidesPackage` line and in the
+lectures that use it.
 
 If a lecture stops compiling with errors such as `I do not know the key '/tikz/pics/mux'`, LaTeX has found an older
-copy of `cs102-lectures.sty`. Lectures ask for the version they need (`\usepackage{cs102-lectures}[2026/10/19]`), so
+copy of `cs102-lectures.sty`. Lectures ask for the version they need (`\usepackage{cs102-lectures}[2026/10/20]`), so
 the log then also says `You have requested ... version`. Replace the old copy, or delete it so the one next to the
 lectures is used.

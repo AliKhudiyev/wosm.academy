@@ -1,0 +1,335 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 14 -- Timing of Sequential Circuits (Unit 14)
+%  Follows Section 5.5 (5.5.1 and 5.5.2) of
+%  A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-14
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 14 \textperiodcentered\ Timing of Sequential Circuits]{Timing of
+  Sequential Circuits}
+\subtitle{Lecture 14: setup time, hold time and how fast the clock can go}
+
+% ---------- Helpers for this lecture --------------------------
+\tikzset{
+  sig/.style={draw=wosm-text, line width=0.9pt},
+  dim/.style={draw=wosm-text, line width=0.5pt,
+    {Stealth[length=3pt]}-{Stealth[length=3pt]}},
+  span/.style={draw=wosm-text, line width=0.6pt, fill=wosm-surface,
+    minimum height=0.42cm, inner sep=0pt, font=\scriptsize},
+  logic/.style={draw=wosm-text, line width=0.6pt, minimum width=2cm,
+    minimum height=1.1cm, font=\scriptsize, align=center},
+}
+% \spanbox{<from>}{<to>}{<y>}{<label>}: one stretch of time on a timeline.
+\newcommand*\spanbox[4]{%
+  \node[span, minimum width={(#2-#1)*1.1cm}, anchor=west] at (#1,#3) {#4};}
+
+% Two flip-flops with logic in between, as in Figures 5.14 and 5.15.
+% \twoflops{<label inside the logic block>}
+\newcommand*\twoflops[1]{%
+  \begin{tikzpicture}[gates]
+    \pic (s) at (0,0) {dff};
+    \pic (t) at (5,0) {dff};
+    \node[logic] (c) at (2.5,0.27) {#1};
+    \node[above, font=\scriptsize] at (0,0.55) {source};
+    \node[above, font=\scriptsize] at (5,0.55) {target};
+    \draw[wire] (s-d) -- ++(-0.5,0) node[left] {$d$};
+    \draw[wire] (s-q) -- (c.west);
+    \draw[wire] (c.east) -- (t-d);
+    \draw[wire] (t-q) -- ++(0.5,0) node[right] {$q$};
+    \draw[wire] (-1.2,-1.05) node[left] {clk} -| ($(t-clk)+(-0.3,0)$) -- (t-clk);
+    \draw[wire] ($(s-clk)+(-0.3,-0.78)$) |- (s-clk);
+    \fill[wosm-text] ($(s-clk)+(-0.3,-0.78)$) circle (1.5pt);
+    \node[font=\scriptsize, text=wosm-brick, anchor=north] at ($(s-clk)+(-0.3,-0.82)$)
+      {launch};
+    \node[font=\scriptsize, text=wosm-brick, anchor=north] at ($(t-clk)+(-0.3,-0.82)$)
+      {capture};
+  \end{tikzpicture}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Trouble at the edge}
+
+\begin{frame}{What if $D$ changes at the edge?}
+  \begin{itemize}
+    \item In the master--slave flip-flop \unitref{12}, the rising edge closes the
+      master and opens the slave. But what if $D$ changes at that very moment?
+  \end{itemize}
+
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \wosmlabel{$D$ changes just after the edge}\par\smallskip
+      The master is enabled by $\mathrm{clk}'$, which comes through a NOT gate. For
+      a moment after the edge, $\mathrm{clk}'$ is still 1 while clk is already 1:
+      \alert{both} latches are transparent, and the new $D$ runs straight through
+      to $Q$.
+    \column{0.48\textwidth}
+      \wosmlabel{$D$ changes just before the edge}\par\smallskip
+      The master closes while its gates are still settling on the new $D$. $Q_m$
+      can end up 0 or 1, or swing between them for a while: the flip-flop is
+      \alert{metastable}, as the SR latch was in Lecture 11.
+  \end{columns}
+
+  \medskip
+  \begin{itemize}
+    \item The book's simulations (Figures 5.11 and 5.12) show both: $Q$ takes the
+      wrong value, or oscillates.
+    \item The cure: keep $D$ steady for a short while around every rising edge.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Setup time and hold time}
+  \begin{center}
+    \begin{tikzpicture}[x=0.85cm]
+      \fill[wosm-accent!15] (3,-1.12) rectangle (5,-0.53);
+      \draw[wosm-rule, line width=0.6pt] (4,0.5) -- (4,-2.4);
+      \node[left, font=\scriptsize] at (-0.1,0.17) {clk};
+      \draw[sig] (0,0) -- (4,0) -- (4,0.35) -- (9,0.35);
+      \node[left, font=\scriptsize] at (-0.1,-0.83) {$D$};
+      \draw[sig] (0,-0.65) -- (1.4,-0.65) -- (1.6,-1) -- (6.4,-1) -- (6.6,-0.65)
+        -- (9,-0.65);
+      \draw[sig] (0,-1) -- (1.4,-1) -- (1.6,-0.65) -- (6.4,-0.65) -- (6.6,-1)
+        -- (9,-1);
+      \node[font=\scriptsize] at (2.3,-0.83) {$d$};
+      \node[left, font=\scriptsize] at (-0.1,-2.03) {$Q$};
+      \draw[sig] (0,-1.85) -- (4.7,-1.85) -- (4.9,-2.2) -- (9,-2.2);
+      \draw[sig] (0,-2.2) -- (4.7,-2.2) -- (4.9,-1.85) -- (9,-1.85);
+      \node[font=\scriptsize] at (6.9,-2.03) {$d$};
+      \draw[dim] (3,-1.3) -- node[below, font=\scriptsize] {$t_{\mathrm{setup}}$}
+        (4,-1.3);
+      \draw[dim] (4,-1.3) -- node[below, font=\scriptsize] {$t_{\mathrm{hold}}$}
+        (5,-1.3);
+      \draw[dim] (4,-2.45) -- node[below, font=\scriptsize] {$t_{\mathrm{clk2q}}$}
+        (4.8,-2.45);
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{definition}[Timing of a flip-flop]
+    \emph{Setup time} $t_{\mathrm{setup}}$: how long $D$ must be stable \emph{before}
+    the clock edge. \emph{Hold time} $t_{\mathrm{hold}}$: how long it must stay
+    stable \emph{after} it. \emph{Clock-to-Q delay} $t_{\mathrm{clk2q}}$: how long
+    after the edge the new value appears at $Q$.
+  \end{definition}
+\end{frame}
+
+% =============================================================
+\section{Setup time constraint}
+
+\begin{frame}{From one flip-flop to the next}
+  \begin{center}
+    \twoflops{combinational\\ logic\\ $t_{\mathrm{pd}}$, $t_{\mathrm{cd}}$}
+  \end{center}
+
+  \begin{itemize}
+    \item The basic pattern of every synchronous circuit: a value leaves the
+      \emph{source} flip-flop at one clock edge, passes through combinational logic,
+      and is stored by the \emph{target} flip-flop at the next edge.
+    \item $t_{\mathrm{pd}}$ and $t_{\mathrm{cd}}$ are the logic's propagation and
+      contamination delays \unitref{9}: its longest and its shortest path.
+    \item The edge reaches the source at time $T_{\mathrm{launch}}$ and the target at
+      $T_{\mathrm{capture}}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The setup time constraint}
+  \begin{center}
+    \begin{tikzpicture}[x=1.1cm]
+      \foreach \t in {1,7} {\draw[wosm-rule, line width=0.6pt] (\t,0.4) -- (\t,-1);}
+      \timingwave{0}{clk}{0,1,1,1,0,0,0,1}
+      \spanbox{1}{1.8}{-0.75}{$t_{\mathrm{clk2q}}$}
+      \spanbox{1.8}{5.2}{-0.75}{$t_{\mathrm{pd}}$}
+      \spanbox{6}{7}{-0.75}{$t_{\mathrm{setup}}$}
+      \node[font=\scriptsize, text=wosm-muted] at (5.6,-0.75) {slack};
+      \node[below, font=\scriptsize, text=wosm-brick] at (1,-1) {$T_{\mathrm{launch}}$};
+      \node[below, font=\scriptsize, text=wosm-brick] at (7,-1)
+        {$T_{\mathrm{capture}} + t_{\mathrm{clk}}$};
+      \draw[dim] (1,0.55) -- node[above, font=\scriptsize] {$t_{\mathrm{clk}}$} (7,0.55);
+    \end{tikzpicture}
+  \end{center}
+
+  The new value must be at the target's $D$ at least $t_{\mathrm{setup}}$ before the
+  \emph{next} edge, even along the longest path:
+  \[
+    T_{\mathrm{launch}} + t_{\mathrm{clk2q}} + t_{\mathrm{pd}} + t_{\mathrm{setup}}
+    \;\le\; T_{\mathrm{capture}} + t_{\mathrm{clk}}.
+  \]
+  When the clock reaches both flip-flops at the same time
+  ($T_{\mathrm{launch}} = T_{\mathrm{capture}}$):
+  \[
+    t_{\mathrm{clk}} \;\ge\; t_{\mathrm{clk2q}} + t_{\mathrm{pd}} + t_{\mathrm{setup}}.
+  \]
+\end{frame}
+
+\begin{frame}{How fast can the clock go?}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \begin{example}
+        $t_{\mathrm{clk2q}} = 30$\,ps, $t_{\mathrm{pd}} = 420$\,ps,
+        $t_{\mathrm{setup}} = 50$\,ps.\par\smallskip
+        $t_{\mathrm{clk}} \ge 30 + 420 + 50 = 500$\,ps, so the clock can run at
+        up to $1 / 500\,\mathrm{ps} = 2$\,GHz.
+      \end{example}
+    \column{0.48\textwidth}
+      \begin{itemize}
+        \item The slowest path between any two flip-flops sets the clock period of
+          the whole circuit.
+        \item Too slow? Run the clock slower, make the logic on that path faster,
+          or put another register in the middle of it: the idea behind pipelining
+          \unitref{20}.
+      \end{itemize}
+  \end{columns}
+
+  \begin{remark}
+    The synchronous counter of Lecture 13: the longest path runs from $y_0$
+    through the chain of AND gates to the last $T$ input. The more bits, the
+    longer the chain, the slower the clock.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Hold time constraint}
+
+\begin{frame}{The hold time constraint}
+  \begin{center}
+    \begin{tikzpicture}[x=1.1cm]
+      \draw[wosm-rule, line width=0.6pt] (1,0.4) -- (1,-1.55);
+      \timingwave{0}{clk}{0,1,1,1,0,0,0}
+      \node[left, font=\scriptsize] at (-0.1,-0.75) {source $\to$ target};
+      \spanbox{1}{1.8}{-0.75}{$t_{\mathrm{clk2q}}$}
+      \spanbox{1.8}{2.7}{-0.75}{$t_{\mathrm{cd}}$}
+      \node[left, font=\scriptsize] at (-0.1,-1.3) {target};
+      \spanbox{1}{2.3}{-1.3}{$t_{\mathrm{hold}}$}
+      \draw[wosm-brick, dashed, line width=0.5pt] (2.7,-0.5) -- (2.7,-1.55);
+      \node[right, font=\scriptsize, text=wosm-brick] at (2.75,-1.3)
+        {new value arrives};
+      \node[below, font=\scriptsize, text=wosm-brick] at (1,-1.55)
+        {$T_{\mathrm{launch}} = T_{\mathrm{capture}}$};
+    \end{tikzpicture}
+  \end{center}
+
+  The same edge that the target is still capturing also launches the next value from
+  the source. Along the \emph{shortest} path, it must not arrive before the target's
+  hold time is over:
+  \[
+    T_{\mathrm{launch}} + t_{\mathrm{clk2q}} + t_{\mathrm{cd}}
+    \;\ge\; T_{\mathrm{capture}} + t_{\mathrm{hold}},
+    \qquad\text{or, with no skew,}\qquad
+    t_{\mathrm{clk2q}} + t_{\mathrm{cd}} \;\ge\; t_{\mathrm{hold}}.
+  \]
+\end{frame}
+
+\begin{frame}{Fixing a hold violation}
+  \begin{itemize}
+    \item $t_{\mathrm{clk}}$ does not appear in the hold constraint. A circuit that
+      violates it fails at \alert{every} clock speed: slowing the clock does not
+      help.
+    \item The fix is to make the shortest path slower: add buffers (or other gates
+      that keep the value) on it.
+    \item Two flip-flops wired directly, with no logic between them, have
+      $t_{\mathrm{cd}} = 0$: they need $t_{\mathrm{clk2q}} \ge t_{\mathrm{hold}}$.
+  \end{itemize}
+
+  \begin{example}
+    $t_{\mathrm{clk2q}} = 30$\,ps, $t_{\mathrm{cd}} = 20$\,ps,
+    $t_{\mathrm{hold}} = 60$\,ps. Then $30 + 20 = 50 < 60$: the hold time is
+    violated by 10\,ps. Adding at least 10\,ps of delay to the shortest path fixes
+    it, as long as the longest path still meets the setup constraint.
+  \end{example}
+\end{frame}
+
+% =============================================================
+\section{Clock skew}
+
+\begin{frame}{When the clock arrives late}
+  \begin{itemize}
+    \item The clock is a signal on a wire too: it can reach the target later than
+      the source. The difference is the \emph{clock skew},
+      $t_{\mathrm{skew}} = T_{\mathrm{capture}} - T_{\mathrm{launch}}$.
+    \item Put it into the two constraints of the book:
+  \end{itemize}
+  \begin{align*}
+    \text{setup:}\quad & t_{\mathrm{clk}} \;\ge\; t_{\mathrm{clk2q}} + t_{\mathrm{pd}}
+      + t_{\mathrm{setup}} - t_{\mathrm{skew}} \\
+    \text{hold:}\quad & t_{\mathrm{clk2q}} + t_{\mathrm{cd}} \;\ge\;
+      t_{\mathrm{hold}} + t_{\mathrm{skew}}
+  \end{align*}
+  \begin{itemize}
+    \item A late capture edge gives the longest path more time, but the shortest
+      path must now wait even longer. Skew helps one constraint and hurts the other.
+  \end{itemize}
+
+  \begin{remark}
+    The book builds the DX8 without doing these checks, and its epilogue leaves them
+    to the reader. You now know how.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item $t_{\mathrm{clk2q}} = 40$\,ps, $t_{\mathrm{pd}} = 160$\,ps,
+      $t_{\mathrm{setup}} = 50$\,ps. What is the fastest clock?\par
+      \uncover<2->{\small $t_{\mathrm{clk}} \ge 250$\,ps: 4\,GHz.}
+    \item The same circuit has $t_{\mathrm{cd}} = 15$\,ps and
+      $t_{\mathrm{hold}} = 70$\,ps. Does it work at 1\,GHz?\par
+      \uncover<3->{\small No: $40 + 15 = 55 < 70$. It fails at any clock speed;
+        add at least 15\,ps to the shortest path.}
+    \item Now the clock reaches the target 20\,ps after the source. Redo both
+      checks.\par
+      \uncover<4->{\small Setup: $t_{\mathrm{clk}} \ge 230$\,ps (about 4.35\,GHz).
+        Hold: $55 \ge 70 + 20$ fails by 35\,ps.}
+    \item Two flip-flops wired directly, $t_{\mathrm{clk2q}} = 30$\,ps,
+      $t_{\mathrm{hold}} = 20$\,ps. Is that safe? And with 15\,ps of skew?\par
+      \uncover<5->{\small Without skew, yes: $30 \ge 20$. With it, no:
+        $30 < 20 + 15$.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item A flip-flop needs $D$ stable from $t_{\mathrm{setup}}$ before the clock
+      edge until $t_{\mathrm{hold}}$ after it; otherwise it can store the wrong value
+      or go metastable. Its new value appears $t_{\mathrm{clk2q}}$ after the edge.
+    \item Setup: the longest path must fit in one period,
+      $t_{\mathrm{clk}} \ge t_{\mathrm{clk2q}} + t_{\mathrm{pd}} + t_{\mathrm{setup}}$.
+      This sets the fastest clock.
+    \item Hold: the shortest path must not be too quick,
+      $t_{\mathrm{clk2q}} + t_{\mathrm{cd}} \ge t_{\mathrm{hold}}$, at any clock
+      speed.
+    \item Clock skew loosens the setup constraint and tightens the hold constraint.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~5.5 of the book.
+    \item For the 3-bit synchronous counter of Lecture 13, list every path from a
+      flip-flop output to a flip-flop input. Which one is the longest, and which the
+      shortest?
+    \item Read the beginning of Chapter~6 and Section~6.1.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{15}}
+    Instruction set architecture: the Von Neumann architecture, and the DX8's
+    instruction format and instruction set.
+  \end{block}
+\end{frame}
+
+\end{document}

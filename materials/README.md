@@ -39,6 +39,9 @@ committed. Files whose name starts with `_` are skipped.
 | CS102-F26 | `lecture-10.tex` — Finite State Machines | 10 | Chapter 5 intro, Section 5.1 |
 | CS102-F26 | `lecture-11.tex` — The Clock and Latches | 11 | Sections 5.2, 5.3, 5.3.1, 5.3.2 |
 | CS102-F26 | `lecture-12.tex` — Flip-Flops | 12 | Sections 5.3.3–5.3.5 |
+| CS102-F26 | `lecture-13.tex` — Counters | 13 | Section 5.4 |
+| CS102-F26 | `lecture-14.tex` — Timing of Sequential Circuits | 14 | Section 5.5 |
+| CS102-F26 | `lecture-15.tex` — Instruction Set Architecture | 15 | Chapter 6 intro, Section 6.1 |
 
 CS102-F26 lectures start like this (the `\input@path` lets the files also compile with the classes in
 `templates/latex/` or one folder up):

@@ -1,0 +1,413 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 13 -- Counters (Unit 13)
+%  Follows Section 5.4 (5.4.1 and 5.4.2) of
+%  A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-13
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 13 \textperiodcentered\ Counters]{Counters}
+\subtitle{Lecture 13: the synchronous up counter and the asynchronous ripple counter}
+
+% ---------- Helpers for this lecture --------------------------
+% \pic (f) at (<x>,<y>) {tff};  T flip-flop with a reset, as in the book:
+% (f-t), (f-clk), (f-q), and (f-r) at the bottom.
+\tikzset{
+  tff/.pic={
+    \draw[wosm-text, line width=0.6pt] (-0.5,-0.55) rectangle (0.5,0.55);
+    \draw[wosm-text, line width=0.6pt] (-0.5,-0.15) -- (-0.36,-0.27) -- (-0.5,-0.39);
+    \node[font=\scriptsize, anchor=west] at (-0.5,0.27) {T};
+    \node[font=\scriptsize, anchor=east] at (0.5,0.27) {Q};
+    \node[font=\tiny, anchor=south] at (0,-0.55) {R};
+    \coordinate (-t) at (-0.5,0.27);
+    \coordinate (-clk) at (-0.5,-0.27);
+    \coordinate (-q) at (0.5,0.27);
+    \coordinate (-r) at (0,-0.55);
+  },
+  fsm/.style={st, minimum size=0.72cm, inner sep=1pt, font=\scriptsize},
+}
+\newcommand*\junction[1]{\fill[wosm-text] #1 circle (1.5pt);}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Counting}
+
+\begin{frame}{What a counter is}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \begin{definition}[Counter]
+        An $n$-bit \emph{counter} outputs an $n$-bit binary number and, at each
+        clock edge, adds 1 to it (an \emph{up counter}) or takes 1 away (a
+        \emph{down counter}).
+      \end{definition}
+      \begin{itemize}
+        \item 0\ldots\ 1\ldots\ 2\ldots\ 3\ldots: the state is the number
+          shown so far.
+        \item Between rising edges the output holds, as in every flip-flop.
+      \end{itemize}
+    \column{0.44\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}c|c|cc@{}}
+        clk & $Q_t$ & $Q^{\mathrm{up}}_{t+1}$ & $Q^{\mathrm{down}}_{t+1}$ \\
+        \midrule
+        $\uparrow$ & 000 & 001 & 111 \\
+        $\uparrow$ & 001 & 010 & 000 \\
+        $\uparrow$ & 010 & 011 & 001 \\
+        $\uparrow$ & 011 & 100 & 010 \\
+        $\uparrow$ & 100 & 101 & 011 \\
+        $\uparrow$ & 101 & 110 & 100 \\
+        $\uparrow$ & 110 & 111 & 101 \\
+        $\uparrow$ & 111 & 000 & 110 \\
+        \midrule
+        0, 1, $\downarrow$ & $q$ & $q$ & $q$ \\
+      \end{tabular}\par\smallskip
+      \wosmlabel{A 3-bit up and down counter (Table 5.15)}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Wrapping around}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.6\textwidth}
+      \begin{itemize}
+        \item After 111 (7), the up counter goes back to 000. After 000, the down
+          counter goes to 111.
+        \item So a 3-bit up counter that starts at 0 shows $k \bmod 8$ after
+          $k$ edges; an $n$-bit one counts modulo $2^n$.
+        \item As a state machine \unitref{10}: 8 states in a ring, one step per
+          clock edge, no other input. The output is the state.
+      \end{itemize}
+    \column{0.36\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \foreach \i/\b in {0/000, 1/001, 2/010, 3/011, 4/100, 5/101, 6/110, 7/111}
+          {\node[fsm] (s\i) at ({90-45*\i}:1.45) {\b};}
+        \foreach \i [evaluate=\i as \j using {int(mod(\i+1,8))}] in {0,...,7}
+          {\draw[arrow] (s\i) -- (s\j);}
+      \end{tikzpicture}
+  \end{columns}
+
+  \begin{remark}[Not a bug]
+    The wrap-around is a feature. The DX8's stepper \unitref{21} is a 3-bit counter
+    with a decoder: it goes through steps 1 to 8, then starts again at step 1.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Synchronous up counter}
+
+\begin{frame}{Which bits flip?}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.4\textwidth}
+      \centering
+      \begin{tabular}{@{}ccc|ccc@{}}
+        $y_2$ & $y_1$ & $y_0$ & $T_2$ & $T_1$ & $T_0$ \\
+        \midrule
+        0 & 0 & 0 & 0 & 0 & 1 \\
+        0 & 0 & 1 & 0 & 1 & 1 \\
+        0 & 1 & 0 & 0 & 0 & 1 \\
+        0 & 1 & 1 & 1 & 1 & 1 \\
+        1 & 0 & 0 & 0 & 0 & 1 \\
+        1 & 0 & 1 & 0 & 1 & 1 \\
+        1 & 1 & 0 & 0 & 0 & 1 \\
+        1 & 1 & 1 & 1 & 1 & 1 \\
+      \end{tabular}\par\smallskip
+      \wosmlabel{$T_i = 1$: bit $i$ flips at the next edge}
+    \column{0.54\textwidth}
+      \begin{itemize}
+        \item Adding 1 in binary: bit $i$ flips exactly when all the bits below it
+          are 1 (the carry reaches it).
+        \item A T flip-flop flips when $T = 1$ \unitref{12}. So use one per bit,
+          with
+          \[ T_0 = 1, \qquad T_1 = y_0, \qquad T_2 = y_0\, y_1. \]
+        \item In general, $T_i = y_0\, y_1 \cdots y_{i-1}$.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The circuit}
+  \begin{center}
+    \begin{tikzpicture}[gates]
+      \foreach \i/\x in {0/0, 1/2.8, 2/5.8} {\pic (f\i) at (\x,0) {tff};}
+      \foreach \i in {0,1,2} {
+        \draw[wire] (f\i-q) -- ++(0.3,0) coordinate (y\i) -- ++(0,1.25)
+          node[above] {$y_\i$};
+      }
+      % T inputs
+      \draw[wire] (f0-t) -- ++(-0.4,0) node[left] {1};
+      \draw[wire] ($(y0)+(0,0.7)$) -| ($(f1-t)+(-0.3,0)$) -- (f1-t);
+      \node[and gate, scale=0.8] (a) at (4.6,0.6) {};
+      \draw[wire] ($(f1-t)+(-0.3,0.7)$) -| ($(a.input 1)+(-0.2,0)$) -- (a.input 1);
+      \draw[wire] (y1 |- a.input 2) -- (a.input 2);
+      \draw[wire] (a.output) -- ++(0.12,0) |- (f2-t);
+      \junction{($(y0)+(0,0.7)$)}
+      \junction{($(f1-t)+(-0.3,0.7)$)}
+      \junction{(y1 |- a.input 2)}
+      % clock
+      \draw[wire] (-1.2,-0.95) node[left] {clk} -| ($(f2-clk)+(-0.25,0)$) -- (f2-clk);
+      \foreach \i in {0,1} {
+        \draw[wire] ($(f\i-clk)+(-0.25,-0.68)$) |- (f\i-clk);
+        \junction{($(f\i-clk)+(-0.25,-0.68)$)}
+      }
+      % reset
+      \draw[wire] (-1.2,-1.3) node[left] {$R$} -| (f2-r);
+      \foreach \i in {0,1} {
+        \draw[wire] (f\i-r) -- (f\i-r |- 0,-1.3);
+        \junction{(f\i-r |- 0,-1.3)}
+      }
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item One clock for all three flip-flops: they all change at the same edges,
+      \alert{in sync} with the clock. Hence \emph{synchronous} counter.
+    \item $R$ is the asynchronous reset of Lecture 12: $R = 1$ sets the count to 000.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{In time}
+  \begin{center}
+    \begin{tikzpicture}[x=0.55cm]
+      \foreach \t in {1,3,...,15} {\timingedge{\t}{3}}
+      \timingwave{0}{clk}{0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1}
+      \timingwave{1}{$y_0$}{0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0}
+      \timingwave{2}{$y_1$}{0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0}
+      \timingwave{3}{$y_2$}{0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0}
+      \node[left, font=\scriptsize] at (-0.1,-1.94) {count};
+      \foreach \x/\v in {0.5/0, 2/1, 4/2, 6/3, 8/4, 10/5, 12/6, 14/7, 15.5/0}
+        {\node[font=\scriptsize, text=wosm-brick] at (\x,-1.94) {\v};}
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item All the bits that flip, flip together, right after a rising edge.
+    \item $y_0$ has half the frequency of the clock, $y_1$ a quarter, $y_2$ an eighth:
+      bit $i$ divides the clock frequency by $2^{i+1}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{More bits}
+  \begin{itemize}
+    \item A 4-bit counter adds $T_3 = y_0\, y_1\, y_2$; an 8-bit one goes on to
+      $T_7 = y_0\, y_1 \cdots y_6$.
+    \item Each $T_i$ is the one before it, ANDed with one more bit:
+      $T_{i} = T_{i-1}\, y_{i-1}$. A chain of AND gates.
+    \item With D flip-flops instead, feed each one $D_i = y_i \oplus T_i$: that is
+      $Q^{+} = T \oplus Q$ again \unitref{12}.
+  \end{itemize}
+
+  \begin{remark}[The longest path]
+    After an edge, the new $y_0$ has to pass through the whole AND chain before
+    $T_{n-1}$ is ready for the next edge. Lecture 14 turns this into a limit on the
+    clock period.
+  \end{remark}
+\end{frame}
+
+% =============================================================
+\section{Asynchronous ripple counter}
+
+\begin{frame}{Clocked by the bit before}
+  \begin{center}
+    \begin{tikzpicture}[gates]
+      \foreach \i/\x in {0/0, 1/2.8, 2/5.6} {\pic (f\i) at (\x,0) {tff};}
+      \foreach \i in {0,1,2} {
+        \draw[wire] (f\i-t) -- ++(-0.35,0) node[left, font=\scriptsize] {1};
+        \draw[wire] (f\i-q) -- ++(0.3,0) coordinate (y\i) -- ++(0,1.0)
+          node[above] {$y_\i$};
+      }
+      \foreach \i/\j in {0/1, 1/2} {
+        \node[not gate, scale=0.7] (n\j) at ($(f\j-clk)+(-0.85,0)$) {};
+        \draw[wire] (y\i) |- (n\j.input);
+        \draw[wire] (n\j.output) -- (f\j-clk);
+        \junction{(y\i)}
+      }
+      \draw[wire] (-1.2,-0.95) node[left] {clk} -| ($(f0-clk)+(-0.25,0)$) -- (f0-clk);
+      \draw[wire] (-1.2,-1.3) node[left] {$R$} -| (f2-r);
+      \foreach \i in {0,1} {
+        \draw[wire] (f\i-r) -- (f\i-r |- 0,-1.3);
+        \junction{(f\i-r |- 0,-1.3)}
+      }
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item Every $T$ is 1: each flip-flop flips at each rising edge of \emph{its own}
+      clock. Only the first one gets the real clock; flip-flop $i$ gets
+      $\overline{y_{i-1}}$.
+    \item $\overline{y_{i-1}}$ rises exactly when $y_{i-1}$ falls from 1 to 0: when
+      a carry moves up into bit $i$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Step by step}
+  \begin{center}
+    \begin{tabular}{@{}l|ccccccccc@{}}
+              & $t = 0$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+      \midrule
+      $\mathrm{clk}_0 = \mathrm{clk}$
+              &  & $\uparrow$ & $\uparrow$ & $\uparrow$ & $\uparrow$ & $\uparrow$
+              & $\uparrow$ & $\uparrow$ & $\uparrow$ \\
+      $y_0$   & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 1 & 0 \\
+      $\mathrm{clk}_1 = \overline{y_0}$
+              & 1 & 0 & $\uparrow$ & 0 & $\uparrow$ & 0 & $\uparrow$ & 0 & $\uparrow$ \\
+      $y_1$   & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 & 0 \\
+      $\mathrm{clk}_2 = \overline{y_1}$
+              & 1 & 1 & 0 & 0 & $\uparrow$ & 1 & 0 & 0 & $\uparrow$ \\
+      $y_2$   & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 0 \\
+      \midrule
+      $y_2 y_1 y_0$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 0 \\
+    \end{tabular}\par\smallskip
+    \wosmlabel{Analysis of the 3-bit ripple counter (Table 5.16); $\uparrow$: a rising
+    edge}
+  \end{center}
+
+  \begin{itemize}
+    \item $y_0$ flips at every clock edge, $y_1$ at every second one, $y_2$ at every
+      fourth.
+    \item Each stage clocks the next one: the clock edge \emph{ripples} through the
+      flip-flops. Hence \emph{ripple counter}; and since they do not change at the
+      same time, \emph{asynchronous}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The ripple}
+  \begin{center}
+    \begin{tikzpicture}[x=0.135cm]
+      \foreach \t in {4,12,...,60} {\timingedge{\t}{3}}
+      \timingwave{0}{clk}{0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0}
+      \timingwave{1}{$y_0$}{0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0}
+      \timingwave{2}{$y_1$}{0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0}
+      \timingwave{3}{$y_2$}{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0}
+      \node[left, font=\scriptsize] at (-0.1,-1.94) {count};
+      \foreach \x/\v in {2.5/0, 9/1, 17.5/2, 25/3, 34/4, 41/5, 49.5/6, 57/7, 64.5/0}
+        {\node[font=\scriptsize, text=wosm-brick] at (\x,-1.94) {\v};}
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item Real flip-flops take a little time to change their output (drawn here much
+      larger than it is). In a ripple counter these delays add up: $y_1$ changes one
+      delay after $y_0$, $y_2$ one delay after $y_1$.
+    \item With $n$ flip-flops, the count is correct only $n$ delays after the edge.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{From 3 to 4, slowly}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.5\textwidth}
+      \centering
+      \begin{tikzpicture}[x=0.95cm]
+        \foreach \t in {1} {\timingedge{\t}{3}}
+        \timingwave{0}{clk}{0,1,1,1,1,0}
+        \timingwave{1}{$y_0$}{1,1,0,0,0,0}
+        \timingwave{2}{$y_1$}{1,1,1,0,0,0}
+        \timingwave{3}{$y_2$}{0,0,0,0,1,1}
+        \node[left, font=\scriptsize] at (-0.1,-1.94) {count};
+        \foreach \x/\v in {1/3, 2.5/2, 3.5/0, 5/4}
+          {\node[font=\scriptsize, text=wosm-brick] at (\x,-1.94) {\v};}
+        \foreach \t in {2,3,4} {\draw[wosm-rule, dashed, line width=0.4pt]
+          (\t,0.4) -- (\t,-1.8);}
+      \end{tikzpicture}
+    \column{0.46\textwidth}
+      \begin{itemize}
+        \item 011 $\to$ 010: $y_0$ falls.
+        \item 010 $\to$ 000: that clocks $y_1$, which falls.
+        \item 000 $\to$ 100: that clocks $y_2$, which rises.
+        \item For a moment the counter shows 2, then 0, before 4. A circuit that
+          reads it too early gets a wrong number, like the glitches of
+          \unitref{9}.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Synchronous or ripple?}
+  \begin{center}
+    \begin{tabular}{@{}lll@{}}
+      \toprule
+       & Synchronous & Ripple \\
+      \midrule
+      Clock of flip-flop $i$ & clk, for all & clk for the first, then
+        $\overline{y_{i-1}}$ \\
+      $T$ inputs & $T_i = y_0 \cdots y_{i-1}$ & all 1 \\
+      Extra gates & a chain of AND gates & NOT gates only \\
+      Outputs change & together & one after another \\
+      Correct after an edge & one flip-flop delay & $n$ delays \\
+      Wrong values on the way & no & yes \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{remark}
+    The ripple counter is the smaller circuit; the synchronous counter is the one
+    the rest of a synchronous design can trust at every clock edge. The DX8's
+    stepper uses the synchronous one.
+  \end{remark}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item A 3-bit up counter starts at 000. What does it show after 13 rising
+      edges?\par
+      \uncover<2->{\small 101: $13 \bmod 8 = 5$.}
+    \item Which $T$ inputs make a 4-bit synchronous up counter?\par
+      \uncover<3->{\small $T_0 = 1$, $T_1 = y_0$, $T_2 = y_0 y_1$,
+        $T_3 = y_0 y_1 y_2$.}
+    \item Make the synchronous counter count down.\par
+      \uncover<4->{\small Bit $i$ flips when all the bits below it are 0:
+        $T_0 = 1$, $T_1 = \overline{y_0}$, $T_2 = \overline{y_0}\,\overline{y_1}$.}
+    \item Make the ripple counter count down.\par
+      \uncover<5->{\small Clock flip-flop $i$ with $y_{i-1}$ instead of
+        $\overline{y_{i-1}}$: 000, 111, 110, \ldots}
+    \item In a 4-bit ripple counter, each flip-flop and its NOT gate take 10\,ns.
+      What happens on the step from 0111 to 1000?\par
+      \uncover<6->{\small 0111, 0110, 0100, 0000, 1000: correct after 40\,ns.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item An $n$-bit counter adds (or takes away) 1 at each clock edge and wraps
+      around: it counts modulo $2^n$.
+    \item When counting up, bit $i$ flips exactly when all the bits below it are 1.
+    \item Synchronous counter: one clock for all, $T_i = y_0 \cdots y_{i-1}$; all
+      bits change together.
+    \item Ripple counter: every $T = 1$, each flip-flop clocked by
+      $\overline{y_{i-1}}$; fewer gates, but the delays add up and wrong values
+      appear on the way.
+    \item Bit $i$ of a counter divides the clock frequency by $2^{i+1}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read Section~5.4 of the book.
+    \item In Logisim-evolution, build both 3-bit counters from your T flip-flops
+      of Lecture 12, with a reset, and check that they count from 0 to 7.
+    \item Put a 3-to-8 decoder \unitref{8} after the synchronous counter: one output
+      at a time is 1, in turn. That is the DX8's stepper \unitref{21}.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{14}}
+    Timing of sequential circuits: the setup and hold time constraints.
+  \end{block}
+\end{frame}
+
+\end{document}

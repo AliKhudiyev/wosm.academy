@@ -1,0 +1,438 @@
+% =============================================================
+%  CS102-F26 Digital Design and Computer Architecture I
+%  Lecture 15 -- Instruction Set Architecture (Unit 15)
+%  Follows the introduction of Chapter 6 and Section 6.1 of
+%  A Student's Computer Architecture Book I.
+%
+%  Build the slides and the print handout:  npm run materials -- lecture-15
+% =============================================================
+\makeatletter
+\def\input@path{{templates/latex/}{../}}
+\makeatother
+
+\documentclass[10pt]{wosm-slides}
+\usepackage{cs102-lectures}[2026/10/20]
+
+\title[Lecture 15 \textperiodcentered\ Instruction Set Architecture]{Instruction Set
+  Architecture}
+\subtitle{Lecture 15: the Von Neumann architecture and the DX8's instructions}
+
+% ---------- Helpers for this lecture --------------------------
+\tikzset{
+  part/.style={draw=wosm-text, line width=0.6pt, fill=wosm-bg, align=center,
+    font=\scriptsize, minimum width=1.5cm, minimum height=0.75cm, inner sep=2pt},
+  group/.style={draw=wosm-muted, line width=0.5pt, dashed},
+  grouplabel/.style={font=\scriptsize, text=wosm-muted},
+}
+% Bits of an instruction: \bitrow{<y>}{<16 bits, from b15 down to b0>}
+\newcommand*\bitrow[2]{%
+  \foreach \b [count=\i from 0] in {#2}
+    {\node[font=\small] at (\i*0.55+0.275,#1) {\b};}}
+% Field boundaries of the DX8 instruction format.
+\newcommand*\fields[2]{% <y top>, <y bottom>
+  \draw[wosm-text, line width=0.6pt] (0,#1) rectangle (8.8,#2);
+  \foreach \x in {1,...,15} {\draw[wosm-rule, line width=0.4pt] (\x*0.55,#1) --
+    (\x*0.55,#2);}
+  \foreach \x in {0.55,2.75,4.4} {\draw[wosm-text, line width=1pt] (\x,#1) --
+    (\x,#2);}}
+\newcommand*\hexnum[1]{\texttt{0x#1}}
+
+% =============================================================
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+% =============================================================
+\section{Let's build a computer}
+
+\begin{frame}{From circuits to a computer}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.56\textwidth}
+      \begin{itemize}
+        \item We now have the parts: combinational circuits \unitref{6--9} and
+          memory \unitref{11--14}. From here on we build a whole 8-bit computer,
+          the \alert{DX8} (Dummy x8).
+        \item Before building anything, we decide what the machine must be able
+          to do.
+      \end{itemize}
+      \begin{definition}[Instruction set architecture]
+        The \emph{ISA} of a computer is the list of its basic operations, the
+        \emph{instructions}, and of how each one is written in binary for the
+        machine.
+      \end{definition}
+    \column{0.38\textwidth}
+      \centering
+      \begin{tikzpicture}[node distance=0.55cm]
+        \node[part, minimum width=3.6cm] (isa) {ISA\\ \textit{what} it can do};
+        \node[part, minimum width=3.6cm, below=of isa] (micro)
+          {microarchitecture\\ \textit{how} each instruction\\ runs, step by step};
+        \node[part, minimum width=3.6cm, below=of micro] (gates)
+          {gates and wires\\ the physical computer};
+        \draw[arrow] (isa) -- (micro);
+        \draw[arrow] (micro) -- (gates);
+      \end{tikzpicture}\par\smallskip
+      \wosmlabel{Three levels of design}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{Von Neumann architecture}
+
+\begin{frame}{The Von Neumann architecture}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.46\textwidth}
+      \centering
+      \begin{tikzpicture}
+        \fill[wosm-surface] (-1.75,-2.3) rectangle (1.75,1.75);
+        \draw[wosm-text, line width=0.6pt] (-1.75,-2.3) rectangle (1.75,1.75);
+        \draw[wosm-text, line width=0.6pt, fill=wosm-bg] (-1.45,-0.75) rectangle
+          (1.45,1.5);
+        \node[font=\scriptsize] at (0,1.22) {CPU};
+        \node[part, minimum width=2.4cm] (cu) at (0,0.6) {control unit};
+        \node[part, minimum width=2.4cm] (alu) at (0,-0.25) {arithmetic/logic unit};
+        \node[part, minimum width=2.9cm] (mem) at (0,-1.8) {memory unit};
+        \node[part, minimum width=1.1cm] (in) at (-2.6,0.4) {input\\ device};
+        \node[part, minimum width=1.1cm] (out) at (2.6,0.4) {output\\ device};
+        \draw[arrow] (in) -- (-1.45,0.4);
+        \draw[arrow] (1.45,0.4) -- (out);
+        \draw[arrow] (-0.25,-0.75) -- (mem.north -| -0.25,0);
+        \draw[arrow] (mem.north -| 0.25,0) -- (0.25,-0.75);
+      \end{tikzpicture}\par\smallskip
+      \wosmlabel{After the book's Figure 6.1}
+    \column{0.5\textwidth}
+      \begin{itemize}
+        \item The \alert{CPU}: a \emph{control unit} that orchestrates the other
+          parts, and an \emph{ALU} that crunches the numbers.
+        \item One \alert{memory} that holds the program \emph{and} the data, mixed
+          together.
+        \item Input and output devices, connected to the CPU and memory.
+      \end{itemize}
+      \begin{remark}
+        It names the parts and how they connect, not how to build them or which
+        instructions to offer: that is ours to choose.
+      \end{remark}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{The DX8}
+  \begin{center}
+    \begin{tikzpicture}[x=0.92cm, y=0.92cm]
+      % groups
+      \draw[group] (1.65,-1.85) rectangle (3.55,1.75);
+      \node[grouplabel, anchor=north] at (2.6,-1.85) {memory unit};
+      \draw[group] (4.0,-2.2) rectangle (11.45,2.4);
+      \node[grouplabel, anchor=south east] at (11.45,-2.2) {CPU};
+      % parts
+      \node[part, minimum width=1.4cm] (in) at (0,0) {input unit\\ + buttons};
+      \node[part, minimum width=1.4cm, minimum height=0.8cm] (ram) at (2.6,1.0) {RAM};
+      \node[part, minimum width=1.4cm] (ip) at (2.6,-1.05) {instruction\\ pointer (IP)};
+      \node[part, minimum height=0.8cm] (rf) at (5.3,1.0) {register file\\ R0--R7};
+      \node[part] (ir) at (5.3,-0.3) {instruction\\ register (IR)};
+      \node[part, minimum width=0.9cm, minimum height=0.5cm] (ra) at (7.2,1.55) {regA};
+      \node[part, minimum width=0.9cm, minimum height=0.5cm] (rb) at (8.4,1.55) {regB};
+      \node[part, minimum width=2.2cm, minimum height=0.9cm] (alu) at (7.8,0.1) {ALU};
+      \node[part, minimum width=1.2cm, minimum height=0.45cm] (out) at (7.6,-1.0) {regOUT};
+      \node[part, minimum width=1.2cm, minimum height=0.45cm] (flag) at (7.6,-1.7) {regFLAG};
+      \node[part, minimum width=1.4cm] (st) at (10.4,1.55) {stepper};
+      \node[part, minimum width=1.4cm] (ctl) at (10.4,0.1) {controller};
+      % data
+      \draw[wire] (in.east) -- (1.1,0);
+      \draw[arrow] (1.1,0) |- (ram.west);
+      \draw[arrow] (1.1,0) |- (ip.west);
+      \fill[wosm-text] (1.1,0) circle (1.5pt);
+      \draw[arrow] (ip) -- (ram);
+      \draw[arrow, {Stealth[length=5pt]}-{Stealth[length=5pt]}] (ram.east |- 0,1.15)
+        -- (rf.west |- 0,1.15);
+      \draw[arrow] (rf) -- (ir);
+      \draw[wire] (rf.east) -- ++(0.25,0) |- (8.4,2.1);
+      \draw[arrow] (7.2,2.1) -- (ra);
+      \draw[arrow] (8.4,2.1) -- (rb);
+      \fill[wosm-text] (7.2,2.1) circle (1.5pt);
+      \draw[arrow] (ra) -- (ra |- alu.north);
+      \draw[arrow] (rb) -- (rb |- alu.north);
+      \draw[arrow] (ir.east) -- (ir.east -| alu.west);
+      \draw[arrow] (st) -- (ctl);
+      \draw[arrow] (ctl) -- (alu);
+      \draw[arrow] (alu.south -| out) -- (out);
+      \draw[arrow] (8.7,-0.39) |- (flag.east);
+      \draw[wire] (flag.west) -| (4.25,-1.0);
+      \draw[arrow] (out.west) -| (4.25,0.85) -- (rf.west |- 0,0.85);
+      \fill[wosm-text] (4.25,-1.0) circle (1.5pt);
+    \end{tikzpicture}\par\smallskip
+    \wosmlabel{Simplified from the book's Figure 6.2; the controller's control lines are not drawn}
+  \end{center}
+\end{frame}
+
+\begin{frame}{The parts of the DX8}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.48\textwidth}
+      \wosmlabel{CPU}
+      \begin{itemize}
+        \item The \alert{register file}: eight 8-bit registers, R0 to R7
+          \unitref{19}.
+        \item The \alert{ALU}: arithmetic ($a + b$, is $a < b$?) and logic
+          ($a$ AND $b$, NOT $a$) \unitref{16--18}. It reads regA and regB and
+          writes regOUT and regFLAG.
+        \item The \alert{controller} and the \alert{stepper}, which run each
+          instruction step by step \unitref{20--21}.
+      \end{itemize}
+    \column{0.48\textwidth}
+      \wosmlabel{Memory and input}
+      \begin{itemize}
+        \item The \alert{RAM}: 256 bytes, each read or written by giving its 8-bit
+          address \unitref{19}.
+        \item The \alert{IP} holds the address of the next instruction.
+        \item The input unit: 8 switches for the data, 8 for the address, a
+          \emph{write} button that puts the data at that address, and a
+          \emph{reset} switch.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+% =============================================================
+\section{The instruction format}
+
+\begin{frame}{Sixteen bits per instruction}
+  \begin{center}
+    \begin{tikzpicture}
+      \foreach \i in {0,...,15} {\pgfmathtruncatemacro\b{15-\i}
+        \node[font=\tiny, text=wosm-muted] at (\i*0.55+0.275,0.62) {$b_{\b}$};}
+      \fields{0.4}{-0.15}
+      \fill[wosm-surface] (0.02,0.38) rectangle (0.53,-0.13);
+      \fill[wosm-surface] (2.77,0.38) rectangle (4.38,-0.13);
+      \fields{0.4}{-0.15}
+      \bitrow{0.125}{1/0, , , , , , , , , , , , , , , }
+      \node[font=\scriptsize, align=center, anchor=north] at (0.275,-0.25)
+        {ALU or\\ not};
+      \node[font=\scriptsize, align=center, anchor=north] at (1.65,-0.25)
+        {opcode};
+      \node[font=\scriptsize, align=center, anchor=north] at (3.575,-0.25)
+        {first argument:\\ a register};
+      \node[font=\scriptsize, align=center, anchor=north] at (6.6,-0.25)
+        {second argument: a value\\ or a memory address};
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{itemize}
+    \item $b_{15}$: 1 for an ALU instruction (add, AND, \ldots), 0 for the others
+      (moving data and jumps).
+    \item $b_{14:11}$: the \emph{operation code} or \emph{opcode}, which says which
+      instruction it is.
+    \item $b_{10:8}$: always a register of the register file: 3 bits, R0 to R7.
+    \item $b_{7:0}$, the second byte: an 8-bit value, or an 8-bit memory address,
+      depending on the instruction.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Why 256 bytes}
+  \begin{itemize}
+    \item A memory address fits in the second byte: 8 bits, so
+      $2^8 = 256$ addresses.
+    \item The memory is \alert{byte-addressable}: each address names a whole byte.
+      (If each address named a single bit, it would be \emph{bit-addressable}.)
+    \item So the DX8 has $256$ bytes of RAM, for the program and the data together.
+      An instruction takes 2 of them.
+  \end{itemize}
+
+  \begin{block}{An 8-bit computer}
+    Bytes in memory, operations on byte-long numbers, and 8-bit wide wires between
+    the parts: only 8 bits travel at a time. Hence the name: Dummy x8, or DX8.
+  \end{block}
+\end{frame}
+
+% =============================================================
+\section{The DX8 instruction set}
+
+\begin{frame}{Moving data}
+  \begin{center}
+    \begin{tabular}{@{}llll@{}}
+      \toprule
+      Instruction & $b_{15}$ & Opcode & Meaning \\
+      \midrule
+      \texttt{load \$regX \$memAddr}  & 0 & 0000 & $\texttt{regX} \leftarrow M[\texttt{memAddr}]$ \\
+      \texttt{store \$regX \$memAddr} & 0 & 0001 & $M[\texttt{memAddr}] \leftarrow \texttt{regX}$ \\
+      \texttt{move \$regX \$val}      & 0 & 0010 & $\texttt{regX} \leftarrow \texttt{val}$ \\
+      \texttt{arg1 \$regX}            & 0 & 0011 & $\texttt{regA} \leftarrow \texttt{regX}$ \\
+      \texttt{arg2 \$regX}            & 0 & 0100 & $\texttt{regB} \leftarrow \texttt{regX}$ \\
+      \bottomrule
+    \end{tabular}\par\smallskip
+    \wosmlabel{From Table 6.2. $M[a]$: the byte at address $a$ of the RAM}
+  \end{center}
+
+  \begin{itemize}
+    \item \texttt{load} and \texttt{store} move a byte between a register and the RAM;
+      \texttt{move} puts a value given in the instruction into a register.
+    \item \texttt{arg1} and \texttt{arg2} copy registers into regA and regB, the two
+      inputs of the ALU.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Computing}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.56\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}lll@{}}
+        \toprule
+        Instr. & Code & Meaning \\
+        \midrule
+        \texttt{cmp}    & 1 0000 & $\texttt{regOUT} \leftarrow \mathrm{CMP}$ regA regB \\
+        \texttt{add}    & 1 0001 & $\texttt{regOUT} \leftarrow \texttt{regA} + \texttt{regB}$ \\
+        \texttt{neg}    & 1 0010 & $\texttt{regOUT} \leftarrow \mathrm{NOT}\ \texttt{regA} + 1$ \\
+        \texttt{and}    & 1 0011 & $\texttt{regOUT} \leftarrow \texttt{regA}$ AND $\texttt{regB}$ \\
+        \texttt{or}     & 1 0100 & $\texttt{regOUT} \leftarrow \texttt{regA}$ OR $\texttt{regB}$ \\
+        \texttt{xor}    & 1 0101 & $\texttt{regOUT} \leftarrow \texttt{regA}$ XOR $\texttt{regB}$ \\
+        \texttt{not}    & 1 0110 & $\texttt{regOUT} \leftarrow \mathrm{NOT}\ \texttt{regA}$ \\
+        \texttt{rotl}   & 1 0111 & $\texttt{regOUT} \leftarrow \texttt{regA[6:0]\_regA[7]}$ \\
+        \texttt{rotr}   & 1 1000 & $\texttt{regOUT} \leftarrow \texttt{regA[0]\_regA[7:1]}$ \\
+        \texttt{shiftl} & 1 1001 & $\texttt{regOUT} \leftarrow \texttt{regA[6:0]\_0}$ \\
+        \texttt{shiftr} & 1 1010 & $\texttt{regOUT} \leftarrow \texttt{0\_regA[7:1]}$ \\
+        \bottomrule
+      \end{tabular}
+    \column{0.4\textwidth}
+      \begin{itemize}
+        \item The ALU instructions ($b_{15} = 1$) take no arguments: they work on
+          regA and regB and put the result in regOUT.
+        \item \texttt{neg} gives $-\texttt{regA}$ in two's complement
+          \unitref{16}.
+        \item \texttt{\_} joins bit fields: \texttt{rotl} moves every bit one place
+          to the left, and bit 7 comes back in at bit 0.
+        \item \texttt{cmp}: the comparator's gt, lt and eq outputs \unitref{17}
+          are the flags that the jumps test; the DX8 keeps them in regFLAG.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Jumping}
+  \begin{center}
+    \begin{tabular}{@{}llll@{}}
+      \toprule
+      Instruction & $b_{15}$ & Opcode & Meaning \\
+      \midrule
+      \texttt{jmp \$val}   & 0 & 0101 & $\texttt{regIP} \leftarrow \texttt{val}$ \\
+      \texttt{jmpgt \$val} & 0 & 0110 & $\texttt{regIP} \leftarrow \texttt{val}$
+        if the gt flag is set, otherwise $\texttt{regIP} + 1$ \\
+      \texttt{jmplt \$val} & 0 & 0111 & $\texttt{regIP} \leftarrow \texttt{val}$
+        if the lt flag is set, otherwise $\texttt{regIP} + 1$ \\
+      \texttt{jmpeq \$val} & 0 & 1000 & $\texttt{regIP} \leftarrow \texttt{val}$
+        if the eq flag is set, otherwise $\texttt{regIP} + 1$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item regIP, the instruction pointer, says where the next instruction is. Without
+      jumps, a program runs from one instruction to the next, in order.
+    \item \texttt{jmp} always goes to address \texttt{val}. The other three go there
+      only if the last \texttt{cmp} set their flag: that is how a program makes a
+      decision, or repeats a part of itself.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Writing instructions in binary}
+  \begin{center}
+    \begin{tabular}{@{}lccccc@{}}
+      \toprule
+      Instruction & $b_{15}$ & $b_{14:11}$ & $b_{10:8}$ & $b_{7:0}$ & Hex \\
+      \midrule
+      \texttt{move}: $\mathrm{R3} \leftarrow 42$
+        & 0 & 0010 & 011 & 0010\,1010 & \hexnum{132A} \\
+      \texttt{store}: $M[\hexnum{F0}] \leftarrow \mathrm{R5}$
+        & 0 & 0001 & 101 & 1111\,0000 & \hexnum{0DF0} \\
+      \texttt{add} & 1 & 0001 & 000 & 0000\,0000 & \hexnum{8800} \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{itemize}
+    \item Group the 16 bits in fours and write each group in hexadecimal
+      \unitref{2}: \texttt{0001\,0011\,0010\,1010} is \hexnum{132A}.
+    \item \texttt{add} does not use its register or its second byte; we write those
+      bits as 0.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{A tiny program}
+  \begin{columns}[c, totalwidth=\textwidth]
+    \column{0.58\textwidth}
+      \centering
+      \small
+      \begin{tabular}{@{}rlll@{}}
+        \toprule
+         & Instruction & Meaning & Hex \\
+        \midrule
+        1 & \texttt{load} & $\mathrm{R0} \leftarrow M[\hexnum{10}]$ & \hexnum{0010} \\
+        2 & \texttt{load} & $\mathrm{R1} \leftarrow M[\hexnum{11}]$ & \hexnum{0111} \\
+        3 & \texttt{arg1} & $\texttt{regA} \leftarrow \mathrm{R0}$ & \hexnum{1800} \\
+        4 & \texttt{arg2} & $\texttt{regB} \leftarrow \mathrm{R1}$ & \hexnum{2100} \\
+        5 & \texttt{add}  & $\texttt{regOUT} \leftarrow \texttt{regA} + \texttt{regB}$
+          & \hexnum{8800} \\
+        \bottomrule
+      \end{tabular}
+    \column{0.38\textwidth}
+      \begin{itemize}
+        \item After these five instructions, regOUT holds
+          $M[\hexnum{10}] + M[\hexnum{11}]$.
+        \item The program is 10 bytes in the same RAM as the 2 bytes it adds: the
+          Von Neumann idea.
+        \item On the DX8 you type such bytes in with the data and address switches
+          and the write button \unitref{22}.
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Try it}
+  \begin{enumerate}
+    \item $b_{15}$ and the opcode together have 5 bits. How many more instructions
+      would fit?\par
+      \uncover<2->{\small $2^5 = 32$ codes, 20 used: 12 more (5 ALU, 7 others).}
+    \item Write $M[\hexnum{80}] \leftarrow \mathrm{R7}$ (a \texttt{store}) in
+      hexadecimal.\par
+      \uncover<3->{\small 0\,0001\,111\,1000\,0000: \hexnum{0F80}.}
+    \item Which instruction is \hexnum{2805}?\par
+      \uncover<4->{\small 0\,0101\,000\,0000\,0101: \texttt{jmp} to address 5.}
+    \item $\texttt{regA} = 1001\,0111$. What do \texttt{rotl}, \texttt{shiftr} and
+      \texttt{not} give?\par
+      \uncover<5->{\small 0010\,1111, 0100\,1011 and 0110\,1000.}
+    \item A program has 100 instructions. How many bytes of RAM are left for its
+      data?\par
+      \uncover<6->{\small $256 - 2 \cdot 100 = 56$.}
+  \end{enumerate}
+\end{frame}
+
+% =============================================================
+\section{Summary}
+
+\begin{frame}{Summary}
+  \begin{itemize}
+    \item The ISA lists what a computer can do and how each instruction is written
+      in binary; the microarchitecture and the gates come after it.
+    \item Von Neumann architecture: a CPU (control unit and ALU), one memory for the
+      program and the data, and input and output.
+    \item A DX8 instruction is 16 bits: ALU or not, a 4-bit opcode, a register
+      (R0--R7), and a byte that is a value or an address.
+    \item 8-bit addresses: 256 bytes of byte-addressable RAM.
+    \item 20 instructions: moving data, computing in the ALU (regA and regB to
+      regOUT), and jumps (regIP).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Before the next lecture}
+  \begin{itemize}
+    \item Read the beginning of Chapter~6 and Section~6.1 of the book.
+    \item Write the five instructions that compute $M[\hexnum{20}]$ AND $M[\hexnum{21}]$
+      into regOUT, and give each one in hexadecimal.
+    \item Revise binary addition and numeral systems \unitref{2}.
+  \end{itemize}
+
+  \begin{block}{Next lecture \unitref{16}}
+    Arithmetic: the half adder, the full adder, multi-bit adders, and two's
+    complement.
+  \end{block}
+\end{frame}
+
+\end{document}
